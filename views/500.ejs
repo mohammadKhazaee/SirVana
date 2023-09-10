@@ -1,0 +1,16 @@
+<%- include('./includes/head.ejs') %>
+
+<%- include('./includes/navbar.ejs', {path: path, isLoggedIn: isLoggedIn, csrfToken: csrfToken,
+    requestCount: requestCount, adminName: adminName}) %>
+
+<body>
+    <h1>Error accord!</h1>
+    <p>we'll try to fix this problem soon, thanks for waiting a bit.</p>
+
+
+<%- include('./includes/footer.ejs') %>
+<!-- SCRIPTS AND END OF BODY -->
+<%- include('./includes/end.ejs') %> 
+</body>
+</html>
+    

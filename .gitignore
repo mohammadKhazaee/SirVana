@@ -1,0 +1,8 @@
+node_modules
+.env
+sass
+public/bower_components
+*copy.json
+.bowerrc
+test.js
+*.orig

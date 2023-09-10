@@ -1,0 +1,38 @@
+{
+	"name": "sirvana",
+	"version": "1.0.0",
+	"description": "an administration panel",
+	"main": "app.js",
+	"scripts": {
+		"start": "node app.js",
+		"compile:sass": "node-sass sass/style.scss public/css/style.css -w",
+		"start-dev": "nodemon app.js"
+	},
+	"author": "mohammad khazaee",
+	"license": "MIT",
+	"dependencies": {
+		"bcryptjs": "^2.4.3",
+		"body-parser": "^1.19.0",
+		"compression": "^1.7.4",
+		"connect-flash": "^0.1.1",
+		"connect-livereload": "^0.6.1",
+		"connect-mongodb-session": "^2.4.0",
+		"csurf": "^1.11.0",
+		"dotenv": "^8.2.0",
+		"ejs": "^3.1.3",
+		"express": "^4.17.1",
+		"express-session": "^1.17.1",
+		"express-validator": "^6.6.1",
+		"fuse.js": "^6.4.1",
+		"helmet": "^7.0.0",
+		"livereload": "^0.9.1",
+		"moment": "^2.27.0",
+		"mongoose": "^5.9.25",
+		"multer": "^1.4.2",
+		"nodemailer": "^6.4.11",
+		"uuid": "^8.3.0"
+	},
+	"devDependencies": {
+		"nodemon": "^2.0.4"
+	}
+}

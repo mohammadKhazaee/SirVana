@@ -14,57 +14,7 @@
 
 	<body>
 		<div class="container">
-			<div class="navbar" dir="ltr">
-				<div class="left-box">
-					<div class="logo">
-						<a href="site.-index.html" class="white-one">Sir</a>
-						<a href="site.-index.html" class="ice-one">Vana</a>
-					</div>
-				</div>
-
-				<div class="right-box">
-					<div class="tournoment-button">
-						<div class="nav-text">
-							<a href="teams-index.html">تیم ها</a>
-						</div>
-						<div class="icon">
-							<a href="#">
-								<i class="bx bxs-award"></i>
-							</a>
-						</div>
-					</div>
-					<div class="tournoment-button">
-						<div class="nav-text">
-							<a href="#">تورنومنت ها</a>
-						</div>
-						<div class="icon">
-							<a href="#">
-								<i class="bx bxs-award"></i>
-							</a>
-						</div>
-					</div>
-					<div class="signup-button">
-						<div class="nav-text">
-							<a href="signup-index.html">ثبت نام</a>
-						</div>
-						<div class="icon">
-							<a href="signup-index.html">
-								<i class="bx bxs-log-in-circle"></i>
-							</a>
-						</div>
-					</div>
-					<div class="login-button">
-						<div class="nav-text">
-							<a href="login-index.html">ورود</a>
-						</div>
-						<div class="icon">
-							<a href="login-index.html">
-								<i class="bx bxs-user-circle"></i>
-							</a>
-						</div>
-					</div>
-				</div>
-			</div>
+			<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName}) %>
 
 			<!-- --- -->
 			<div class="container2">

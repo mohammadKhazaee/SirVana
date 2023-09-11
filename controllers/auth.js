@@ -47,7 +47,7 @@ exports.postSignup = async (req, res, next) => {
 	const email = req.body.email
 	const password = req.body.password
 
-	console.log('sign up shodi')
+	// console.log('sign up shodi')
 	try {
 		const hashedpass = bcrypt.hashSync(password, 12)
 		const user = new User({
@@ -58,6 +58,17 @@ exports.postSignup = async (req, res, next) => {
 		})
 		await user.save()
 		res.redirect('/auth/')
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
+}
+
+exports.postLogout = async (req, res, next) => {
+	// console.log('logout shodi')
+	try {
+		await req.session.destroy()
+		res.redirect('/')
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)

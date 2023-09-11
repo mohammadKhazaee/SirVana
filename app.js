@@ -85,7 +85,7 @@ app.use(
 		resave: false,
 		saveUninitialized: false,
 		store: store,
-	}),
+	})
 )
 // CSRF protection for routes
 app.use(csrfProtection)
@@ -95,9 +95,10 @@ app.use(flash())
 app.use((req, res, next) => {
 	res.locals.errorMessage = getMessage(req, 'error')
 	res.locals.successMessage = getMessage(req, 'success')
-	res.locals.isLoggedIn = req.session.isLoggedIn
 	res.locals.csrfToken = req.csrfToken()
 	res.locals.prevAddress = req.headers.referer
+	res.locals.isLoggedIn = req.session.isLoggedIn
+	res.locals.userName = ''
 	next()
 })
 // Chain user from previous request to current request with session

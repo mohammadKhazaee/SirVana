@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="shortcut icon" type="image/png" href="img/shortcut icon.png" />
+
+		<!-- Site Icon -->
+		<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+
+		<!-- Css Links -->
+		<link rel="stylesheet" href="css/main.css" />
+		<link rel="stylesheet" type="text/css" href="css/site.css" />
+		<link rel="stylesheet" href="css/footer.css" />
+
+		<title>
+			<%= pageTitle %>
+		</title>
+	</head>
+
+	<body>
+		<div class="container" style="background-color: white;">
+			<!-- Navbar -->
+			<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName}) %>
+			<h1 style="direction: ltr;position: absolute;top: 20rem;left: 10rem;">Waiting for rahimi to write the AI down...</h1>
+		</div>
+	</body>
+</html>

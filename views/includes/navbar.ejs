@@ -1,0 +1,87 @@
+<div class="navbar" dir="ltr">
+    <div class="navbar__leftbox">
+        <div class="navbar__leftbox--logo">
+            <a href="/" class="navbar__leftbox--logo white-one">Sir</a>
+            <a href="/" class="navbar__leftbox--logo blue-one">Vana</a>
+        </div>
+        <div class="navbar__leftbox--search" id="show" dir="rtl">
+            <i class="bx bx-search-alt"></i>
+            <input dir="rtl" type="search" placeholder="جستجوی تیم ، بازیکن ، تورنومنت ..." />
+        </div>
+    </div>
+    <div class="navbar__rightbox">
+        <div class="navbar__rightbox--link">
+            <div id="hide" class="navbar__leftbox--search" dir="rtl">
+                <i id="hideI" class="bx bx-search-alt"></i>
+                <input id="hideInp" dir="rtl" type="search"
+                    placeholder="جستجوی تیم ، بازیکن ، تورنومنت .." />
+            </div>
+        </div>
+        <div class="navbar__rightbox--link">
+            <div class="nav-text">
+                <a href="/rahimi-ai">هوش مصنوعی (رحیمی)</a>
+            </div>
+            <div class="navbar__rightbox icon">
+                <a href="/rahimi-ai">
+                    <i id="first-icon" class="bx bxs-user-account"></i>
+                </a>
+            </div>
+        </div>
+        <div class="navbar__rightbox--link">
+            <div class="nav-text">
+                <a href="/teams">تیم ها</a>
+            </div>
+            <div class="navbar__rightbox icon">
+                <a href="/teams">
+                    <i id="first-icon" class="bx bxs-user-account"></i>
+                </a>
+            </div>
+        </div>
+        <div class="navbar__rightbox--link">
+            <div class="nav-text">
+                <a href="/tournaments">تورنومنت ها</a>
+            </div>
+            <div class="navbar__rightbox icon">
+                <a href="/tournaments">
+                    <i class="bx bxs-award"></i>
+                </a>
+            </div>
+        </div>
+        <% if(!isLoggedIn){ %>
+            <div class="navbar__rightbox--link">
+                <div class="nav-text">
+                    <a href="/auth">ورود | ثبت نام</a>
+                </div>
+                <div class="navbar__rightbox icon">
+                    <a href="/auth">
+                        <i class="bx bxs-log-in-circle"></i>
+                    </a>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="navbar__rightbox--link">
+                <div class="nav-text">
+                    <form action="/auth/logout" method="post">
+                        <a class="submitLogout">
+                            <%= userName %>
+                        </a>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    </form>
+                </div>
+                <div class="navbar__rightbox icon">
+                    <form action="/auth/logout" method="post">
+                        <a class="submitLogout">
+                            <i class="bx bxs-log-in-circle"></i>
+                        </a>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    </form>
+                </div>
+            </div>
+        <% } %>
+    </div>
+    <div class="hamburger">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </div>
+</div>

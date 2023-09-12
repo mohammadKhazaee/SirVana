@@ -2,45 +2,44 @@ const mongoose = require('mongoose')
 
 const Schema = mongoose.Schema
 
-const userSchema = new Schema(
+const teamSchema = new Schema(
 	{
 		name: {
 			type: String,
 			required: true,
 		},
-		email: {
+		nameTag: {
 			type: String,
 			required: true,
 		},
-		dotaId: {
-			type: String,
-			require: true,
-		},
-		password: {
+		description: {
 			type: String,
 			required: true,
 		},
-		lft: {
+		imageUrl: String,
+		leader: {
+			type: Schema.Types.ObjectId,
+			ref: 'User',
+		},
+		lfp: {
 			type: Boolean,
 			require: true,
 		},
-		teams: [
+		members: [
 			{
 				type: Schema.Types.ObjectId,
-				ref: 'Team',
+				ref: 'User',
 			},
 		],
+		avgMMR: Number,
 		tournaments: [
 			{
 				type: Schema.Types.ObjectId,
 				ref: 'Tournament',
 			},
 		],
-		roles: [String],
-		pos: [String],
-		mmr: Number,
 	},
 	{ timestamps: true }
 )
 
-module.exports = mongoose.model('User', userSchema)
+module.exports = mongoose.model('Team', teamSchema)

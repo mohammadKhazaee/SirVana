@@ -132,5 +132,5 @@ mongoose
 	.catch((err) => console.log(err))
 
 mongoose.connection.on('open', () => {
-	console.log('kiiiiiiiiiiiiiiif')
+	console.log('kiiiiiiiiiiiiiiif tu Rahimi')
 })

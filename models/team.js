@@ -18,20 +18,35 @@ const teamSchema = new Schema(
 		},
 		imageUrl: String,
 		leader: {
-			type: Schema.Types.ObjectId,
-			ref: 'User',
+			userId: {
+				type: Schema.Types.ObjectId,
+				ref: 'User',
+				require: true,
+			},
+			name: {
+				type: String,
+				required: true,
+			},
 		},
+		members: [
+			{
+				userId: {
+					type: Schema.Types.ObjectId,
+					ref: 'User',
+					require: true,
+				},
+				name: {
+					type: String,
+					required: true,
+				},
+			},
+		],
+		memberCount: Number,
+		avgMMR: Number,
 		lfp: {
 			type: Boolean,
 			require: true,
 		},
-		members: [
-			{
-				type: Schema.Types.ObjectId,
-				ref: 'User',
-			},
-		],
-		avgMMR: Number,
 		tournaments: [
 			{
 				type: Schema.Types.ObjectId,

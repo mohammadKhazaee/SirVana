@@ -1,6 +1,7 @@
 const express = require('express')
 
 const mainController = require('../controllers/main')
+const validator = require('../middlewares/validation')
 
 const Router = express.Router()
 
@@ -8,7 +9,10 @@ const Router = express.Router()
 Router.get('/', mainController.getIndex)
 
 // /teams => GET
-Router.get('/teams', mainController.getTeams)
+Router.get('/teams', validator.getTeam, mainController.getTeams)
+
+// /team => POST
+Router.post('/team', validator.postTeam, mainController.postTeam)
 
 // /tournament => GET
 Router.get('/tournaments', mainController.getTournaments)

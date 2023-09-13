@@ -38,6 +38,7 @@ const multerFilter = (req, file, cb) => {
 	if (
 		file.mimetype === 'image/png' ||
 		file.mimetype === 'image/jpg' ||
+		file.mimetype === 'image/avif' ||
 		file.mimetype === 'image/jpeg'
 	)
 		return cb(null, true)

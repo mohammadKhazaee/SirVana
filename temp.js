@@ -25,28 +25,32 @@ const farshadGithub = 'git@github.com:fshd1-front/Sirvana.git'
 const myEmail = 'm.khazaee.p@gmail.com'
 
 const prettierSetting = {
-	"workbench.colorTheme": "Default Dark+",
-	"workbench.iconTheme": "material-icon-theme",
-	"workbench.startupEditor": "none",
-	"html.format.indentHandlebars": true,
-	"html.format.indentInnerHtml": true,
-	"javascript.inlayHints.propertyDeclarationTypes.enabled": true,
-	"editor.formatOnSave": true,
-	"editor.formatOnPaste": true,
-	"editor.defaultFormatter": "esbenp.prettier-vscode",
-	"[javascript]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	'workbench.colorTheme': 'Default Dark+',
+	'workbench.iconTheme': 'material-icon-theme',
+	'workbench.startupEditor': 'none',
+	'html.format.indentHandlebars': true,
+	'html.format.indentInnerHtml': true,
+	'javascript.inlayHints.propertyDeclarationTypes.enabled': true,
+	'editor.formatOnSave': true,
+	'editor.formatOnPaste': true,
+	'editor.defaultFormatter': 'esbenp.prettier-vscode',
+	'[javascript]': {
+		'editor.defaultFormatter': 'esbenp.prettier-vscode',
 	},
-	"editor.fontWeight": "normal",
-	"prettier.tabWidth": 4,
-	"prettier.useTabs": true,
-	"explorer.confirmDelete": false,
-	"workbench.editor.untitled.hint": "hidden",
-	"terminal.integrated.tabs.enabled": false,
-	"tabnine.experimentalAutoImports": true,
-	"terminal.integrated.defaultProfile.windows": "Git Bash",
-	"[html]": {
-		"editor.defaultFormatter": "vscode.html-language-features"
+	'editor.fontWeight': 'normal',
+	'prettier.tabWidth': 4,
+	'prettier.useTabs': true,
+	'explorer.confirmDelete': false,
+	'workbench.editor.untitled.hint': 'hidden',
+	'terminal.integrated.tabs.enabled': false,
+	'tabnine.experimentalAutoImports': true,
+	'terminal.integrated.defaultProfile.windows': 'Git Bash',
+	'[html]': {
+		'editor.defaultFormatter': 'vscode.html-language-features',
 	},
-	"editor.indentSize": "tabSize"
+	'editor.indentSize': 'tabSize',
 }
+
+// select and populate examples
+// find().select('title price -_id')
+// .populate('userId', 'name')

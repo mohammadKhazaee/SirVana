@@ -1,4 +1,4 @@
-const { body } = require('express-validator')
+const { body, query } = require('express-validator')
 const bcrypt = require('bcryptjs')
 
 const User = require('../models/user')
@@ -71,5 +71,28 @@ module.exports.postResetPass = [
 			const user = User.findOne({ email: email })
 			if (!user) throwError(`Email doesnt exist!`, 404)
 			return true
+		}),
+]
+
+module.exports.postTeam = []
+
+module.exports.getTeam = [
+	query('sortType')
+		.trim()
+		.escape()
+		.custom((sortType, { req }) => {
+			if (sortType === 'name' || sortType === '') return true
+			else if (sortType === 'avgMMR' || sortType === 'memberCount') {
+				req.sortType = '-' + sortType
+				return true
+			}
+			throw 'Wrong sort type!'
+		}),
+	query('lfp')
+		.trim()
+		.escape()
+		.custom((lfp, { req }) => {
+			if (lfp === 'true' || lfp === 'false' || lfp === '') return true
+			throw 'Wrong checkbox input!'
 		}),
 ]

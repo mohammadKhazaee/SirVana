@@ -1,28 +1,33 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
-
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="shortcut icon" type="image/png" href="img/shortcut icon.png" />
+		<link
+			rel="shortcut icon"
+			type="image/png"
+			href="img/shortcut icon.png"
+		/>
 
 		<!-- Site Icon -->
-		<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+		<link
+			href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+			rel="stylesheet"
+		/>
 
 		<!-- Css Links -->
 		<link rel="stylesheet" href="css/main.css" />
 		<link rel="stylesheet" type="text/css" href="css/site.css" />
 		<link rel="stylesheet" href="css/footer.css" />
 
-		<title>
-			<%= pageTitle %>
-		</title>
+		<title><%= pageTitle %></title>
 	</head>
 
 	<body>
 		<div class="container">
 			<!-- Navbar -->
-			<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName}) %>
+			<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn,
+			userName: userName}) %>
 
 			<!-- slider2 -->
 			<div class="slideshow-container">
@@ -30,7 +35,9 @@
 					<img src="img/slider-pic1.jpg" />
 					<div class="shadowbox">
 						<!-- <div class="numbertext">3 / 1</div> -->
-						<div class="text">اعلام تاریخ پخش فصل سوم انیمیشن Dragon’s Blood</div>
+						<div class="text">
+							اعلام تاریخ پخش فصل سوم انیمیشن Dragon’s Blood
+						</div>
 					</div>
 				</div>
 
@@ -39,7 +46,8 @@
 					<div class="shadowbox">
 						<!-- <div class="numbertext">3 / 2</div> -->
 						<div class="text">
-							مسابقات The International 10 با قهرمانی Team Spirit پایان یافت
+							مسابقات The International 10 با قهرمانی Team Spirit
+							پایان یافت
 						</div>
 					</div>
 				</div>
@@ -47,7 +55,10 @@
 					<img src="img/slider-pic3.jpg" />
 					<div class="shadowbox">
 						<!-- <div class="numbertext">3 / 3</div> -->
-						<div class="text">تغییر زمان و مکان برگزاری مسابقات The International 10</div>
+						<div class="text">
+							تغییر زمان و مکان برگزاری مسابقات The International
+							10
+						</div>
 					</div>
 				</div>
 				<br />
@@ -80,33 +91,7 @@
 		</div>
 
 		<!-- Footer -->
-		<footer>
-			<div class="footerContainer">
-				<div class="socialIcons">
-					<a href="#"><i class="bx bxl-facebook-circle"></i></a>
-					<a href="#"><i class="bx bxl-instagram"></i></a>
-					<a href="#"><i class="bx bxl-twitter"></i></a>
-					<a href="#"><i class="bx bxl-telegram"></i></a>
-					<a href="#"><i class="bx bxl-youtube"></i></a>
-				</div>
-				<div class="footerNav">
-					<ul>
-						<li><a href="#">درباره ما</a></li>
-						<li><a href="#news">اخبار</a></li>
-						<li><a href="#">درباره ما</a></li>
-						<li><a href="#">تماس با ما</a></li>
-						<li><a href="#">تیم ما</a></li>
-					</ul>
-				</div>
-				<div class="footerBottom">
-					<p>
-						&copy;1402 ; تمامی حقوق برای
-						<span class="designer">تیم نوب سگان</span> محفوظ است. کپی به هرشکل غیرمجاز و
-						غیرقانونی است.
-					</p>
-				</div>
-			</div>
-		</footer>
+		<%- include('./includes/footer') %>
 
 		<!-- JavaScipt -->
 		<script src="js/burger.js"></script>
@@ -114,5 +99,4 @@
 		<script src="js/scroll.js"></script>
 		<script src="js/main.js"></script>
 	</body>
-
 </html>

@@ -9,13 +9,19 @@ const Router = express.Router()
 Router.get('/', mainController.getIndex)
 
 // /teams => GET
-Router.get('/teams', validator.getTeam, mainController.getTeams)
+Router.get('/teams', validator.getTeams, mainController.getTeams)
 
 // /team => POST
 Router.post('/team', validator.postTeam, mainController.postTeam)
 
-// /tournament => GET
-Router.get('/tournaments', mainController.getTournaments)
+// /tournaments => GET
+Router.get('/tournaments', validator.getTournaments, mainController.getTournaments)
+
+// /tournament => POST
+Router.post('/tournament', validator.postTournament, mainController.postTournament)
+
+// /searchResult => POST
+Router.post('/search-result', mainController.postSearchResult)
 
 // /rahimi-ai => GET
 Router.get('/rahimi-ai', mainController.getRahimi)

@@ -1,3 +1,5 @@
+const mongoose = require('mongoose')
+
 const Schema = mongoose.Schema
 
 const tournametSchema = new Schema(
@@ -7,17 +9,33 @@ const tournametSchema = new Schema(
 			required: true,
 		},
 		prize: {
-			type: String,
+			type: Number,
 			required: true,
 		},
 		description: String,
 		imageUrl: String,
 		startDate: { type: Date, require: true },
-		minMmr: Number,
-		maxMmr: Number,
+		bo3: {
+			type: Boolean,
+			require: true,
+		},
+		minMMR: {
+			type: String,
+			required: true,
+		},
+		maxMMR: {
+			type: String,
+			required: true,
+		},
 		organizer: {
-			type: Schema.Types.ObjectId,
-			ref: 'User',
+			userId: {
+				type: Schema.Types.ObjectId,
+				ref: 'User',
+			},
+			name: {
+				type: String,
+				required: true,
+			},
 		},
 		teams: [
 			{

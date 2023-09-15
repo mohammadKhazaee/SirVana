@@ -1,21 +1,17 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title><%= pageTitle %></title>
 		<link rel="shortcut icon" href="./img/shortcut icon.png" />
-
 		<!-- Site Icon -->
-		<link
-			href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
-			rel="stylesheet"
-		/>
-
+		<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet"/>
 		<!-- css links -->
 		<link rel="stylesheet" href="css/main.css" />
 		<link rel="stylesheet" href="css/tournoment.css" />
-		<link rel="stylesheet" href="css/footer-tournoment.css" />
-		<title>Tournoments</title>
+		<link rel="stylesheet" href="css/footer.css" />
 	</head>
 
 	<body>
@@ -25,7 +21,9 @@
 				<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn,
 				userName: userName}) %>
 
-				<!-- title of header -->
+		<!-- background -->
+		<div class="tournament-page">
+			<div class="dark-box">
 				<div class="header-title">
 					<p>تورنومنت بزرگ خود را بسازید.</p>
 					<span
@@ -34,203 +32,167 @@
 					>
 				</div>
 			</div>
+		</div>
+		<!--  -->
 
-			<!-- creat tournoment modal box -->
-			<div class="create-tour">
-				<div class="create-tour__content">
-					<span class="close-button">&times;</span>
-					<form action="">
-						<div class="right-box">
-							<div class="form-control">
-								<label for="name">اسم تورنومنت‌ :</label>
-								<input type="text" id="name" autofocus />
-							</div>
-							<div class="mmr-control">
-								<label>محدوده رنک :</label>
-								<label class="in" for="mmr-first">از</label>
-								<input
-									type="text"
-									list="ranks-first"
-									id="mmr-first"
-								/>
-								<datalist id="ranks-first">
-									<option>Herald</option>
-									<option>Guardian</option>
-									<option>Crusader</option>
-									<option>Archon</option>
-									<option>Legend</option>
-									<option>Ancient</option>
-									<option>Divine</option>
-									<option>Immortal</option>
-								</datalist>
-								<label class="in" for="mmr-last">تا</label>
-								<input type="text" list="ranks-last" />
-								<datalist id="ranks-last">
-									<option>Herald</option>
-									<option>Guardian</option>
-									<option>Crusader</option>
-									<option>Archon</option>
-									<option>Legend</option>
-									<option>Ancient</option>
-									<option>Divine</option>
-									<option>Immortal</option>
-								</datalist>
-							</div>
-							<div class="date">
-								<label for="date">تاریخ شروع :</label>
-								<input type="datetime-local" id="date" />
-							</div>
-							<div class="prize">
-								<label for="prize">جایزه :</label>
-								<input type="number" id="prize" />
+		<!-- creat tournoment modal box -->
+		<div class="create-tour">
+			<div class="create-tour__content">
+				<span class="close-button">&times;</span>
+				<form action="/tournament" method="post" class="team-form" enctype="multipart/form-data">
+					<div class="right-box">
+						<div class="form-acontrol">
+							<label for="name">اسم تورنومنت‌ :</label>
+							<input type="text" id="name" name="name" autofocus />
+						</div>
+						<div class="mmr-control">
+							<label>محدوده رنک :</label>
+							<label class="in" for="mmr-first">از</label>
+							<input type="text" name="minMMR" list="ranks-first" id="mmrfirst" autocomplete="off"/>
+							<datalist id="ranks-first">
+								<option>Herald</option>
+								<option>Guardian</option>
+								<option>Crusader</option>
+								<option>Archon</option>
+								<option>Legend</option>
+								<option>Ancient</option>
+								<option>Divine</option>
+								<option>Immortal</option>
+							</datalist>
+							<label class="in" for="mmrlast">تا</label>
+							<input type="text" name="maxMMR" list="ranks-last" id="mmrlast" autocomplete="off"/>
+							<datalist id="ranks-last">
+								<option>Herald</option>
+								<option>Guardian</option>
+								<option>Crusader</option>
+								<option>Archon</option>
+								<option>Legend</option>
+								<option>Ancient</option>
+								<option>Divine</option>
+								<option>Immortal</option>
+							</datalist>
+							<div class="check">
+								<div class="discheck">
+									<input type="checkbox" name="freeMMRBox" id="discheck" />
+									<label for="discheck" class="mg">
+										بدون رنک
+									</label>
+								</div>
+								<div class="bracket">
+									<label for="bo1">
+										<input type="radio" id="bo1" name="boRadio" value="false" checked />
+										<span>bo1</span>
+									</label>
+									<label for="bo3">
+										<input type="radio" id="bo3" name="boRadio" value="true" />
+										<span>bo3</span>
+									</label>
+								</div>
 							</div>
 						</div>
-						<div class="middle"></div>
-						<div class="left-box">
-							<div class="description">
-								<label for="desc">توضیحات تورنومنت :</label>
-								<textarea
-									name="desc"
-									id="desc"
-									cols="10"
-									rows="10"
-									required
-								></textarea>
-							</div>
-							<label>تصویر تورنومنت :</label>
-							<div class="image-upload">
-								<input type="file" id="file" multiple />
-								<a href="#"><i class="bx bx-plus"></i></a>
-							</div>
-							<button class="create" type="submit">ایجاد</button>
+						<div class="bracket"></div>
+						<div class="date">
+							<label for="date">تاریخ شروع :</label>
+							<input type="datetime-local" name="startDate" id="date" autocomplete="off"/>
 						</div>
+						<div class="prize">
+							<label for="prize">جایزه :</label>
+							<input type="number" name="prize" id="prize"/>
+						</div>
+					</div>
+					<div class="vert"></div>
+					<div class="left-box">
+						<div class="description">
+							<label for="desc">توضیحات تورنومنت :</label>
+							<textarea name="description" id="desc" cols="10" rows="10"></textarea>
+						</div>
+						<label>تصویر تورنومنت :</label>
+						<div class="image-upload">
+							<input type="file" name="image" id="file"/>
+							<a href="#"><i class="bx bx-plus"></i></a>
+						</div>
+						<input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+						<button class="create" type="submit">ایجاد</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<div class="tour-box">
+			<div class="shadow-box">
+				<!-- TEAMS FILTERS -->
+				<div class="top-box">
+					<form class="filters" action="/tournaments" method="get">
+						<div class="search">
+							<div class="navbar__leftbox--search" id="show" dir="rtl">
+								<i class="bx bx-search-alt"></i>
+								<input dir="rtl" name="search" type="search" value="<%= searchInput %>" placeholder="جستجوی تورنومنت ..." />
+							</div>
+						</div>
+						<label for="range" class="range-label">رنک تورنومنت :</label>
+						<div class="slider" dir="ltr">
+							<div id="output" class="output" <%= `style=margin-left:${marginLeft};` %>>
+								<img class="slider-medals" src="img/<%= rankIcon %>_medal.webp" alt="" />
+							</div>
+							<input type="range" name="rankFilter" min="0" max="100" value=<%= rankFilter %> step="14.28" id="range"/>
+						</div>
+						<button type="submit" class="range">اعمال فیلتر</button>
 					</form>
 				</div>
+				<div class="middle"></div>
+				<!-- TOURNAMENTS LIST -->
+				<div class="tours-cards">
+					<% if(noFilter) { %>
+						<div class="tour-card" id="create-button">
+							<a><i class="bx bx-plus-medical"></i></a>
+							<a><p>ایجاد تورنومنت</p></a>
+						</div>
+					<% } %>
+					<% if (tournaments.length > 0) { tournaments.forEach(tournament => { %>
+						<div class="tour-card">
+							<img class="td" src="<%= tournament.imageUrl?tournament.imageUrl:'img/tourcards.png' %>" alt="" />
+							<div class="tour-caption">
+								<h2 class="tour-card__title">
+									<%= tournament.name %>
+								</h2>
+								<p class="tour-card__content">
+									شروع از : <%= tournament.startDate %>
+								</p>
+								<div class="show-medals">
+									<div class="medal-title">
+										<span>رنک :</span>
+									</div>
+									<div class="second-medal">
+										<img src="img/<%= tournament.maxMMR %>_medal.webp" alt="" />
+									</div>
+									<div class="from-to"></div>
+									<div class="first-medal">
+										<img src="img/<%= tournament.minMMR %>_medal.webp" alt="" />
+									</div>
+								</div>
+								<p class="more-button">
+									<a href="/tournament/<% tournament._id %>">جز‌ئیات بیشتر</a>
+								</p>
+							</div>
+						</div>
+					<% })} else { %>
+						<!-- <% if (noFilter) { %>
+							<h1>هنوز تورنومنتی تشکیل نشده...</h1>
+						<% } %> -->
+						<h1>جستجو موردنظر یافت نشد...</h1>
+					<% } %>
+				</div>
 			</div>
+		</div>
 
-			<!-- cards -->
-			<div class="tour-cards">
-				<div class="body-plus">
-					<a href="#" class="add-tour trigger">ایجاد تورنومنت</a>
-					<a class="plus-card">
-						<span class="row"></span>
-						<span class="column"></span>
-					</a>
-				</div>
-				<div class="body-cards">
-					<img src="img/teamcreat.webp" alt="" />
-					<div class="card-titles">
-						<span>
-							<i class="bx bx-calendar"></i>
-							شروع : ۱۴۰۲/۷/۱۳
-						</span>
-						<h1>
-							<i class="bx bx-medal"></i>
-							برادران کارامازوف
-						</h1>
-						<span
-							><i class="bx bx-gift"></i>جایزه : ۱ میلیون
-							تومان</span
-						>
-					</div>
-					<button>عضو شوید</button>
-				</div>
-				<div class="body-cards">
-					<img src="./img/teamcreat.webp" alt="" />
-					<div class="card-titles">
-						<span>
-							<i class="bx bx-calendar"></i>
-							شروع : ۱۴۰۲/۷/۱۳
-						</span>
-						<h1>
-							<i class="bx bx-medal"></i>
-							برادران کارامازوف
-						</h1>
-						<span
-							><i class="bx bx-gift"></i>جایزه : ۱ میلیون
-							تومان</span
-						>
-						<button>عضو شوید</button>
-					</div>
-				</div>
-				<div class="body-cards">
-					<img src="./img/teamcreat.webp" alt="" />
-					<div class="card-titles">
-						<span>
-							<i class="bx bx-calendar"></i>
-							شروع : ۱۴۰۲/۷/۱۳
-						</span>
-						<h1>
-							<i class="bx bx-medal"></i>
-							برادران کارامازوف
-						</h1>
-						<span
-							><i class="bx bx-gift"></i>جایزه : ۱ میلیون
-							تومان</span
-						>
-						<button>عضو شوید</button>
-					</div>
-				</div>
-				<div class="body-cards">
-					<img src="./img/teamcreat.webp" alt="" />
-					<div class="card-titles">
-						<span>
-							<i class="bx bx-calendar"></i>
-							شروع : ۱۴۰۲/۷/۱۳
-						</span>
-						<h1>
-							<i class="bx bx-medal"></i>
-							برادران کارامازوف
-						</h1>
-						<span
-							><i class="bx bx-gift"></i>جایزه : ۱ میلیون
-							تومان</span
-						>
-						<button>عضو شوید</button>
-					</div>
-				</div>
-				<div class="body-cards">
-					<img src="./img/teamcreat.webp" alt="" />
-					<div class="card-titles">
-						<span>
-							<i class="bx bx-calendar"></i>
-							شروع : ۱۴۰۲/۷/۱۳
-						</span>
-						<h1>
-							<i class="bx bx-medal"></i>
-							برادران کارامازوف
-						</h1>
-						<span
-							><i class="bx bx-gift"></i>جایزه : ۱ میلیون
-							تومان</span
-						>
-						<button>عضو شوید</button>
-					</div>
-				</div>
-				<div class="body-cards">
-					<img src="./img/teamcreat.webp" alt="" />
-					<div class="card-titles">
-						<span>
-							<i class="bx bx-calendar"></i>
-							شروع : ۱۴۰۲/۷/۱۳
-						</span>
-						<h1>
-							<i class="bx bx-medal"></i>
-							برادران کارامازوف
-						</h1>
-						<span
-							><i class="bx bx-gift"></i>جایزه : ۱ میلیون
-							تومان</span
-						>
-						<button>عضو شوید</button>
-					</div>
-				</div>
-			</div>
-			<!-- Footer -->
-			<%- include('./includes/footer') %>
+		<!-- Footer -->
+		<%- include('./includes/footer') %>
 
 		<!-- scripts -->
 		<script src="js/burger.js"></script>
 		<script src="js/tour-modalbox.js"></script>
+		<script src="js/range-filter.js"></script>
 	</body>
 </html>
+
+		

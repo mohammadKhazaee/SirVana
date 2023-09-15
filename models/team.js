@@ -12,10 +12,7 @@ const teamSchema = new Schema(
 			type: String,
 			required: true,
 		},
-		description: {
-			type: String,
-			required: true,
-		},
+		description: String,
 		imageUrl: String,
 		leader: {
 			userId: {

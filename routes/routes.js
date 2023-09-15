@@ -17,6 +17,7 @@ Router.use((req, res, next) => {
 
 // Handles server-side errors
 Router.use((err, req, res, next) => {
+	console.log(err)
 	res.render('500', {
 		pageTitle: 'Not Working',
 		error: err,

@@ -33,11 +33,22 @@
 		<div class="create-team">
 			<div class="create-team__content">
 				<span class="close-button">&times;</span>
-				<form action="/team" method="post" enctype="multipart/form-data">
+				<form
+					class="team-make"
+					action="/team"
+					method="post"
+					enctype="multipart/form-data"
+				>
 					<div class="right-box">
 						<div class="form-controls">
 							<label for="name">اسم کامل تیم :</label>
-							<input type="text" name="name" id="name" autofocus required />
+							<input
+								type="text"
+								name="name"
+								id="name"
+								autofocus
+								required
+							/>
 							<label for="tag">تگ تیم :</label>
 							<input
 								type="text"
@@ -61,87 +72,81 @@
 						</div>
 						<label>تصویر تیم :</label>
 						<div class="image-uploads">
-							<input type="file" name="image" id="file"/>
+							<input type="file" name="image" id="file" />
 							<a><i class="bx bx-plus"></i></a>
 						</div>
-						<input type="hidden" name="_csrf" value="<%= csrfToken %>"/>	
+						<input
+							type="hidden"
+							name="_csrf"
+							value="<%= csrfToken %>"
+						/>
 						<button class="create" type="submit">ایجاد</button>
 					</div>
 				</form>
 			</div>
 		</div>
-		<!-- TEAM LIST -->
+
 		<div class="team-box">
 			<div class="shadow-box">
+				<!-- TEAMS FILTERS -->
 				<div class="top-box">
-					<div class="search">
-						<div
-							class="navbar__leftbox--search"
-							id="show"
-							dir="rtl"
-						>
-							<i class="bx bx-search-alt"></i>
-							<input
-								dir="rtl"
-								type="search"
-								placeholder="جستجوی تیم ، بازیکن ، تورنومنت ..."
-							/>
+					<form class="filters" action="/teams" method="get">
+						<div class="search">
+							<div class="navbar__leftbox--search" id="show" dir="rtl" >
+								<i class="bx bx-search-alt"></i>
+								<input dir="rtl" name="search" type="search" value="<%= searchInput %>" placeholder="جستجوی تیم ..."/>
+							</div>
 						</div>
-					</div>
-					<div class="dpdw-menu">
-						<i class="bx bx-sort-down"></i>
-						<span>مرتب سازی‌ :</span>
-						<div class="menu">
-							<select>
-								<option data-value="name" selected>اسم تیم</option>
-								<option data-value="avgMMR">میانگین رنک</option>
-								<option data-value="memberCount">تعداد اعضا</option>
-							</select>
-							<span class="focus"></span>
+						<div class="dpdw-menu">
+							<i class="bx bx-sort-down"></i>
+							<span>مرتب سازی‌ :</span>
+							<div class="menu">
+								<select name="sortType">
+									<option data-value="name" <%= sortType === 'اسم تیم'? 'selected': '' %>> اسم تیم </option>
+									<option data-value="avgMMR" <%= sortType === 'میانگین رنک'? 'selected': '' %>> میانگین رنک </option>
+									<option data-value="memberCount" <%= sortType === 'تعداد اعضا'? 'selected': '' %>>تعداد اعضا </option>
+								</select>
+								<span class="focus"></span>
+							</div>
 						</div>
-					</div>
-					<div class="vertical"></div>
-					<div class="checkbox">
-						<label for="check" class="form-control">
-							<input type="checkbox" id="check" name="lfp" />
-							نیازمند پلیر
-						</label>
-					</div>
+						<div class="vertical"></div>
+						<div class="checkbox">
+							<label for="check" class="form-control">
+								<input type="checkbox" id="check" name="lfp" <%= lfpCheck ? 'checked': '' %> />
+								نیازمند پلیر
+							</label>
+						</div>
+						<button type="submit" class="range">اعمال فیلتر</button>
+					</form>
 				</div>
 				<div class="middle"></div>
+				<!-- TEAMS LIST -->
 				<div class="teams-cards">
-					<div class="team-card" id="create-button">
-						<a href="#">
-							<i class="bx bx-plus-medical"></i>
-						</a>
-						<a>
-							<p>ایجاد تیم</p>
-						</a>
-					</div>
-					<% if (teams.length > 0) { %>
-						<% teams.forEach(team => { %>
-							<div class="team-card">
-								<img src="<%= team.imageUrl %>" alt="" />
-								<div class="team-caption">
-									<h2 class="team-card__title"><%= team.name %></h2>
-									<p class="team-card__content">میانگین رنک : <%= team.avgMMR %></p>
-									<p class="team-card__members">تعداد اعضا : <%= team.memberCount %></p>
-									<p class="team-card__needmember">
-										نیازمند پلیر
-										<% if (team.lfp) { %>
-											: <i class="bx bxs-check-circle"></i>
-										<% } else  { %>
-											: <i class="bx bxs-x-circle"></i>
-										<% } %>
-									</p>
-									<p class="more-button">
-										<a href="#">جز‌ئیات بیشتر</a>
-									</p>
-								</div>
+					<% if(noFilter) { %>
+						<div class="team-card" id="create-button">
+							<a><i class="bx bx-plus-medical"></i></a>
+							<a><p>ایجاد تیم</p></a>
+						</div>
+					<% } %>
+					<% if (teams.length > 0) { %> <% teams.forEach(team => { %>
+						<div class="team-card">
+							<img src="<%= team.imageUrl %>" alt="" />
+							<div class="team-caption">
+								<h2 class="team-card__title"><%= team.name %></h2>
+								<p class="team-card__content">میانگین رنک : <%= team.avgMMR %></p>
+								<p class="team-card__members">تعداد اعضا : <%= team.memberCount %></p>
+								<p class="team-card__needmember">
+									نیازمند پلیر <% if (team.lfp) { %> :
+										<i class="bx bxs-check-circle"></i> 
+									<% } else { %>
+										 : <i class="bx bxs-x-circle"></i>
+									<% } %>
+								</p>
+								<p class="more-button"><a href="#">جز‌ئیات بیشتر</a></p>
 							</div>
-						<% }) %>
-					<% } else { %>
-						<h1>تیمی برای نمایش وجود ندارد...</h1>
+						</div>
+					<% })} else { %>
+						<h1>جستجو موردنظر یافت نشد...</h1>
 					<% } %>
 				</div>
 			</div>

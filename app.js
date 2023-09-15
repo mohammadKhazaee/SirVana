@@ -62,9 +62,9 @@ app.use((req, res, next) => {
 	// res.setHeader('Access-Control-Allow-Origin', '*')
 	// res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE')
 	// res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-	res.setHeader('Cross-Origin-Opener-Policy', 'Same-Origin')
-	res.setHeader('Cross-Origin-Embedder-Policy', 'Require-Corp')
-	res.setHeader('Origin-Agent-Cluster', 'False')
+	// res.setHeader('Cross-Origin-Opener-Policy', 'Same-Origin')
+	// res.setHeader('Cross-Origin-Embedder-Policy', 'Require-Corp')
+	// res.setHeader('Origin-Agent-Cluster', 'False')
 	// res.setHeader(
 	// 	'Content-Security-Policy',
 	// 	"default-src data: gap: https://*.googleapis.com/ https://unpkg.com/ 'self' style-src 'self' 'unsafe-inline';"
@@ -72,6 +72,7 @@ app.use((req, res, next) => {
 	next()
 })
 
+app.use(express.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(multer({ storage: multerStorage, fileFilter: multerFilter }).single('image'))
 

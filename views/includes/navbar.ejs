@@ -6,14 +6,15 @@
         </div>
         <div class="navbar__leftbox--search" id="show" dir="rtl">
             <i class="bx bx-search-alt"></i>
-            <input dir="rtl" type="search" placeholder="جستجوی تیم ، بازیکن ، تورنومنت ..." />
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+            <input dir="rtl" class="liveSearchInput" type="search" placeholder="جستجوی تیم ، بازیکن ، تورنومنت ..." />
         </div>
     </div>
     <div class="navbar__rightbox">
         <div class="navbar__rightbox--link">
             <div id="hide" class="navbar__leftbox--search" dir="rtl">
                 <i id="hideI" class="bx bx-search-alt"></i>
-                <input id="hideInp" dir="rtl" type="search"
+                <input id="hideInp" class="liveSearchInput" dir="rtl" type="search"
                     placeholder="جستجوی تیم ، بازیکن ، تورنومنت .." />
             </div>
         </div>

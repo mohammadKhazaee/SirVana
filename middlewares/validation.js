@@ -1,17 +1,18 @@
-const { body, query } = require('express-validator')
+const { body, query, param } = require('express-validator')
 const bcrypt = require('bcryptjs')
 
 const User = require('../models/user')
 const throwError = require('../middlewares/throwError')
+const rank = require('../utils/rank')
 
-module.exports.postLogin = [
+exports.postLogin = [
 	body('email', 'Please enter email in right format!')
 		.trim()
 		.normalizeEmail({ gmail_remove_dots: false })
 		.notEmpty()
 		.isEmail()
 		.custom(async (email, { req }) => {
-			const user = User.findOne({ email: email })
+			const user = await User.findOne({ email: email })
 			if (!user) throwError(`Couldn't find email!`, 404)
 			req.user = user
 			return true
@@ -22,22 +23,20 @@ module.exports.postLogin = [
 		.withMessage('Please enter a password!')
 		.isLength({ min: 8, max: 32 })
 		.withMessage('Password should be 8 to 32 characters!')
-		.custom((password, { req }) => {
-			const isMatch = bcrypt.compareSync(password, req.user.password)
+		.custom(async (password, { req }) => {
+			const isMatch = await bcrypt.compareSync(password, req.user.password)
 			if (!isMatch) throwError(`Wrong password!`, 422)
 			return true
 		}),
 ]
 
-module.exports.postSignup = [
-	// checkTOS ro doros kon
+exports.postSignup = [
 	body('email', 'Please enter email in right format!')
 		.trim()
 		.normalizeEmail({ gmail_remove_dots: false })
 		.notEmpty()
 		.isEmail()
 		.custom(async (email, { req }) => {
-			console.log('email')
 			const user = await User.findOne({ email: email })
 			if (user) throwError(`This email already exists!`, 422)
 			return true
@@ -54,27 +53,63 @@ module.exports.postSignup = [
 		.withMessage('Please enter a password!')
 		.isLength({ min: 8, max: 32 })
 		.withMessage('Password should be 8 to 32 characters!')
-		.custom(async (confirmPass, { req }) => {
+		.custom((confirmPass, { req }) => {
 			const password = req.body.password
 			if (password !== confirmPass) throwError(`Passwords do not match!`, 422)
 			return true
 		}),
+	body('dota2Id')
+		.trim()
+		.escape()
+		.notEmpty()
+		.withMessage('Please enter your dota2 id!')
+		.isNumeric()
+		.withMessage('only numbers!')
+		.isLength({ max: 12 })
+		.withMessage('Too many characters!'),
+	body('discordId').trim().escape(),
+	body('tos').trim().escape(),
 ]
 
-module.exports.postResetPass = [
+exports.postResetPass = [
 	body('email', 'Please enter email in right format!')
 		.trim()
 		.normalizeEmail({ gmail_remove_dots: false })
 		.notEmpty()
 		.isEmail()
 		.custom(async (email, { req }) => {
-			const user = User.findOne({ email: email })
+			const user = await User.findOne({ email: email })
+			req.resetPassUser = user
 			if (!user) throwError(`Email doesnt exist!`, 404)
 			return true
 		}),
 ]
 
-module.exports.getTeams = [
+exports.getNewPass = [
+	param('resetToken')
+		.trim()
+		.custom(async (resetToken, { req }) => {
+			const user = await User.findOne({
+				resetToken: resetToken,
+				resetTokenExpiry: { $gt: Date.now() },
+			})
+			if (!user) throw 'Invalid token!'
+			req.resetToken = resetToken
+			req.newUser = user
+			return true
+		}),
+]
+
+exports.postNewPass = [
+	body('password')
+		.trim()
+		.notEmpty()
+		.withMessage('Please enter a password!')
+		.isLength({ min: 8, max: 32 })
+		.withMessage('Password should be 8 to 32 characters!'),
+]
+
+exports.getTeams = [
 	query('sortType')
 		.trim()
 		.escape()
@@ -95,9 +130,11 @@ module.exports.getTeams = [
 			if (lfp === 'on' || lfp === '') return true
 			throw 'Wrong checkbox input!'
 		}),
+	query('search').trim().escape(),
+	query('filter').trim().escape(),
 ]
 
-module.exports.postTeam = [
+exports.postTeam = [
 	body('name')
 		.trim()
 		.escape()
@@ -117,55 +154,21 @@ module.exports.postTeam = [
 	body('description').trim().escape(),
 ]
 
-module.exports.getTournaments = [
+exports.getTournaments = [
 	query('rankFilter')
 		.trim()
 		.escape()
 		.custom((rankFilter, { req }) => {
-			switch (rankFilter) {
-				case '':
-					req.noFilter = true
-				case '0':
-					req.rankFilter = '1.Herald'
-					req.marginLeft = '-4%'
-					break
-				case '14.28':
-					req.rankFilter = '2.Guardian'
-					req.marginLeft = '10.28%'
-					break
-				case '28.56':
-					req.rankFilter = '3.Crusader'
-					req.marginLeft = '23.56%'
-					break
-				case '42.84':
-					req.rankFilter = '4.Archon'
-					req.marginLeft = '36.84%'
-					break
-				case '57.12':
-					req.rankFilter = '5.Legend'
-					req.marginLeft = '51.12%'
-					break
-				case '71.4':
-					req.rankFilter = '6.Ancient'
-					req.marginLeft = '64.4%'
-					break
-				case '85.68':
-					req.rankFilter = '7.Divine'
-					req.marginLeft = '77.68%'
-					break
-				case '99.96':
-					req.rankFilter = '8.Immortal'
-					req.marginLeft = '91%'
-					break
-				default:
-					throw 'Wrong rank filter!'
-			}
+			req.rankFilter = rank.giveNumberedMedal(rankFilter)
+			req.marginLeft = rank.givePercent(rankFilter)
+			if (rankFilter === '' || !rank.isRank(rankFilter)) req.marginLeft = undefined
 			return true
 		}),
 	query('search').trim().escape(),
+	query('filter').trim().escape(),
 ]
 
-module.exports.postTournament = [
+exports.postTournament = [
 	body('name')
 		.trim()
 		.escape()
@@ -177,72 +180,18 @@ module.exports.postTournament = [
 		.trim()
 		.escape()
 		.custom((minMMR, { req }) => {
-			switch (minMMR) {
-				case 'Herald':
-					req.minMMR = '1.Herald'
-					break
-				case 'Guardian':
-					req.minMMR = '2.Guardian'
-					break
-				case 'Crusader':
-					req.minMMR = '3.Crusader'
-					break
-				case 'Archon':
-					req.minMMR = '4.Archon'
-					break
-				case 'Legend':
-					req.minMMR = '5.Legend'
-					break
-				case 'Ancient':
-					req.minMMR = '6.Ancient'
-					break
-				case 'Divine':
-					req.minMMR = '7.Divine'
-					break
-				case 'Immortal':
-					req.minMMR = '8.Immortal'
-					break
-				case '':
-					throw 'please choose a min mmr!'
-				default:
-					throw 'Wrong min mmr!'
-			}
-			return true
+			if (minMMR === '') throw 'please choose a min mmr!'
+			req.minMMR = rank.giveNumberedMedal(minMMR)
+			if (req.minMMR) return true
+			throw 'Wrong min mmr!'
 		}),
 	body('maxMMR')
 		.trim()
 		.escape()
 		.custom((maxMMR, { req }) => {
-			switch (maxMMR) {
-				case 'Herald':
-					req.maxMMR = '1.Herald'
-					break
-				case 'Guardian':
-					req.maxMMR = '2.Guardian'
-					break
-				case 'Crusader':
-					req.maxMMR = '3.Crusader'
-					break
-				case 'Archon':
-					req.maxMMR = '4.Archon'
-					break
-				case 'Legend':
-					req.maxMMR = '5.Legend'
-					break
-				case 'Ancient':
-					req.maxMMR = '6.Ancient'
-					break
-				case 'Divine':
-					req.maxMMR = '7.Divine'
-					break
-				case 'Immortal':
-					req.maxMMR = '8.Immortal'
-					break
-				case '':
-					throw 'please choose a max mmr!'
-				default:
-					throw 'Wrong max mmr!'
-			}
+			if (maxMMR === '') throw 'please choose a max mmr!'
+			req.maxMMR = rank.giveNumberedMedal(maxMMR)
+			if (!req.maxMMR) throw 'Wrong max mmr!'
 			if (req.maxMMR.split('.')[0] < req.minMMR.split('.')[0]) {
 				throw 'max mmr should be greater than min mmr!'
 			} else return true
@@ -264,4 +213,29 @@ module.exports.postTournament = [
 		.isNumeric()
 		.withMessage('prize should only contain number'),
 	body('description').trim().escape(),
+]
+
+exports.getPlayers = [
+	query('minMMR')
+		.trim()
+		.escape()
+		.custom((minMMR, { req }) => {
+			req.minMMR = rank.giveNumberedMedal(minMMR)
+		}),
+	query('maxMMR')
+		.trim()
+		.escape()
+		.custom((maxMMR, { req }) => {
+			req.maxMMR = rank.giveNumberedMedal(maxMMR)
+		}),
+	query('lft')
+		.trim()
+		.escape()
+		.custom((lft, { req }) => {
+			if (lft === 'on' || lft === '') return true
+			throw 'Wrong checkbox input!'
+		}),
+	query('search').trim().escape(),
+	query('pos').trim().escape(),
+	query('filter').trim().escape(),
 ]

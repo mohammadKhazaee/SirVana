@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 	<head>
 		<meta charset="UTF-8" />
@@ -7,7 +6,7 @@
 		<title><%= pageTitle %></title>
 		<link rel="shortcut icon" href="./img/shortcut icon.png" />
 		<!-- Site Icon -->
-		<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet"/>
+		<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 		<!-- css links -->
 		<link rel="stylesheet" href="css/main.css" />
 		<link rel="stylesheet" href="css/tournoment.css" />
@@ -16,20 +15,14 @@
 
 	<body>
 		<!-- Navbar -->
-		<div class="an">
-			<div class="contain">
-				<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn,
-				userName: userName}) %>
+		<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn,userName: userName, navSearch: false}) %>
 
 		<!-- background -->
 		<div class="tournament-page">
 			<div class="dark-box">
 				<div class="header-title">
 					<p>تورنومنت بزرگ خود را بسازید.</p>
-					<span
-						>بیش از صد تورنومنت کامل شده و ده ها تورنومنت پیش رو.‌
-						آیا آماده نبرد هستید ؟</span
-					>
+					<span>بیش از صد تورنومنت کامل شده و ده ها تورنومنت پیش رو.‌ آیا آماده نبرد هستید ؟ </span>
 				</div>
 			</div>
 		</div>
@@ -38,12 +31,16 @@
 		<!-- creat tournoment modal box -->
 		<div class="create-tour">
 			<div class="create-tour__content">
-				<span class="close-button">&times;</span>
-				<form action="/tournament" method="post" class="team-form" enctype="multipart/form-data">
+				<div class="modal-title">
+					<span class="close-button">&times;</span>
+					<h1 class="modal-title">تشکیل تورنومنت</h1>
+				</div>
+				<form action="/tournament" method="post" class="tour-form" enctype="multipart/form-data">
 					<div class="right-box">
 						<div class="form-acontrol">
 							<label for="name">اسم تورنومنت‌ :</label>
 							<input type="text" id="name" name="name" autofocus />
+							<!-- <span class="wrong-input-alrt">* اسم تورنومنتت یادت رفت</span> -->
 						</div>
 						<div class="mmr-control">
 							<label>محدوده رنک :</label>
@@ -74,9 +71,7 @@
 							<div class="check">
 								<div class="discheck">
 									<input type="checkbox" name="freeMMRBox" id="discheck" />
-									<label for="discheck" class="mg">
-										بدون رنک
-									</label>
+									<label for="discheck" class="mg"> بدون رنک </label>
 								</div>
 								<div class="bracket">
 									<label for="bo1">
@@ -89,15 +84,18 @@
 									</label>
 								</div>
 							</div>
+							<!-- <span class="wrong-input-alrt"> * رنک تورنومنتت رو انتخاب نکردی!</span> -->
 						</div>
 						<div class="bracket"></div>
 						<div class="date">
 							<label for="date">تاریخ شروع :</label>
-							<input type="datetime-local" name="startDate" id="date" autocomplete="off"/>
+							<input type="datetime-local" name="startDate" id="date" autocomplete="off" />
+							<!-- <span class="wrong-input-alrt">* تورنومنتت سال بعد شروع میشه مگه‌؟</span> -->
 						</div>
 						<div class="prize">
 							<label for="prize">جایزه :</label>
-							<input type="number" name="prize" id="prize"/>
+							<input type="number" name="prize" id="prize" />
+							<!-- <span class="wrong-input-alrt">* مسابقه بدون جایزه حال نمیده!</span> -->
 						</div>
 					</div>
 					<div class="vert"></div>
@@ -108,10 +106,10 @@
 						</div>
 						<label>تصویر تورنومنت :</label>
 						<div class="image-upload">
-							<input type="file" name="image" id="file"/>
+							<input type="file" name="image" id="file" />
 							<a href="#"><i class="bx bx-plus"></i></a>
 						</div>
-						<input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+						<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 						<button class="create" type="submit">ایجاد</button>
 					</div>
 				</form>
@@ -123,65 +121,70 @@
 				<!-- TEAMS FILTERS -->
 				<div class="top-box">
 					<form class="filters" action="/tournaments" method="get">
-						<div class="search">
-							<div class="navbar__leftbox--search" id="show" dir="rtl">
-								<i class="bx bx-search-alt"></i>
-								<input dir="rtl" name="search" type="search" value="<%= searchInput %>" placeholder="جستجوی تورنومنت ..." />
+						<div class="right-filter">
+							<div class="search">
+								<div class="navbar__leftbox--search" id="show" dir="rtl">
+									<i class="bx bx-search-alt"></i>
+									<input dir="rtl" name="search" type="search" value="<%= searchInput %>" placeholder="جستجوی تورنومنت ..."/>
+								</div>
+							</div>
+							<label for="range" class="range-label">رنک تورنومنت :</label>
+							<div class="slider" dir="ltr">
+								<div id="output" class="output" <%= `style" ="margin-left:${marginLeft};` %>>
+									<img class="slider-medals" src="img/<%= rankIcon %>_medal.webp" alt="" />
+								</div>
+								<input type="range" name="rankFilter" min="0" max="100" value=<%= rankFilter %> step="14.28" id="range"/>
+							</div>
+							<input type="hidden" name="filter" value="true" />
+							<input type="hidden" name="slided" value="false" />
+							<button type="submit" class="range">اعمال فیلتر</button>
+						</div>
+						<div class="left-filter">
+							<div class="remove-filter">
+								<a href="/tournaments" class="remove-filter">حذف فیلتر </a>
+								<i class="bx bx-chevron-left"></i>
 							</div>
 						</div>
-						<label for="range" class="range-label">رنک تورنومنت :</label>
-						<div class="slider" dir="ltr">
-							<div id="output" class="output" <%= `style=margin-left:${marginLeft};` %>>
-								<img class="slider-medals" src="img/<%= rankIcon %>_medal.webp" alt="" />
-							</div>
-							<input type="range" name="rankFilter" min="0" max="100" value=<%= rankFilter %> step="14.28" id="range"/>
-						</div>
-						<button type="submit" class="range">اعمال فیلتر</button>
 					</form>
 				</div>
 				<div class="middle"></div>
 				<!-- TOURNAMENTS LIST -->
 				<div class="tours-cards">
 					<% if(noFilter) { %>
-						<div class="tour-card" id="create-button">
-							<a><i class="bx bx-plus-medical"></i></a>
-							<a><p>ایجاد تورنومنت</p></a>
-						</div>
-					<% } %>
-					<% if (tournaments.length > 0) { tournaments.forEach(tournament => { %>
-						<div class="tour-card">
-							<img class="td" src="<%= tournament.imageUrl?tournament.imageUrl:'img/tourcards.png' %>" alt="" />
-							<div class="tour-caption">
-								<h2 class="tour-card__title">
-									<%= tournament.name %>
-								</h2>
-								<p class="tour-card__content">
-									شروع از : <%= tournament.startDate %>
-								</p>
-								<div class="show-medals">
-									<div class="medal-title">
-										<span>رنک :</span>
-									</div>
-									<div class="second-medal">
-										<img src="img/<%= tournament.maxMMR %>_medal.webp" alt="" />
-									</div>
-									<div class="from-to"></div>
-									<div class="first-medal">
-										<img src="img/<%= tournament.minMMR %>_medal.webp" alt="" />
-									</div>
-								</div>
-								<p class="more-button">
-									<a href="/tournament/<% tournament._id %>">جز‌ئیات بیشتر</a>
-								</p>
-							</div>
-						</div>
-					<% })} else { %>
-						<!-- <% if (noFilter) { %>
-							<h1>هنوز تورنومنتی تشکیل نشده...</h1>
-						<% } %> -->
-						<h1>جستجو موردنظر یافت نشد...</h1>
+                        <div class="tour-card" id="create-button">
+                            <a><i class="bx bx-plus-medical"></i></a>
+                            <a><p>ایجاد تورنومنت</p></a>
+                        </div>
+					<% } if (tournaments.length > 0) { tournaments.forEach(tournament => { %>
+                        <div class="tour-card">
+                            <img class="td" src="<%= tournament.imageUrl?tournament.imageUrl:'img/tourcards.png' %>" alt=""/>
+                            <div class="tour-caption">
+                                <h2 class="tour-card__title"><%= tournament.name %></h2>
+                                <p class="tour-card__content">شروع از : <%= tournament.startDate %></p>
+                                <div class="show-medals">
+                                    <div class="medal-title">
+                                        <span>رنک :</span>
+                                    </div>
+                                    <div class="second-medal">
+                                        <img src="img/<%= tournament.maxMMR %>_medal.webp" alt="" />
+                                    </div>
+                                    <div class="from-to"></div>
+                                    <div class="first-medal">
+                                        <img src="img/<%= tournament.minMMR %>_medal.webp" alt="" />
+                                    </div>
+                                </div>
+                                <p class="more-button">
+                                    <a href="/tournament/<%= tournament._id %>">جز‌ئیات بیشتر</a>
+                                </p>
+                            </div>
+                        </div>
+					<% })} if(tournaments.length == 0 && !noFilter) { %>
+						<h1 class="header1">هنوز تورنومنتی تشکیل نشده...</h1>
 					<% } %>
 				</div>
+				<% if(tournaments.length == 0 && noFilter) { %>
+				    <h1 class="header1">جستجو موردنظر یافت نشد...</h1>
+				<% } %>
 			</div>
 		</div>
 
@@ -192,7 +195,6 @@
 		<script src="js/burger.js"></script>
 		<script src="js/tour-modalbox.js"></script>
 		<script src="js/range-filter.js"></script>
+		<script src="js/main.js"></script>
 	</body>
 </html>
-
-		

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title><%= pageTitle %></title>
+
+        <link rel="shortcut icon" href="./img/shortcut icon.png" />
+        <!-- Site Icon -->
+        <link
+        href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+        rel="stylesheet"
+        />
+        <!-- css links -->
+        <link rel="stylesheet" href="css/main.css" />
+        <link rel="stylesheet" href="css/player.css" />
+        <link rel="stylesheet" href="css/footer.css" />
+    </head>
+    <body>
+        <!-- Navbar -->
+        <%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName, navSearch: false}) %>
+
+        <!-- background -->
+        <div class="teams-page">
+            <div class="dark-box"></div>
+        </div>
+        
+        <div class="team-box">
+            <div class="shadow-box">
+                <!-- FILTERS -->
+                <div class="top-box">
+                    <form class="filters" action="/players" method="get">
+                        <div class="right-filter">
+                            <div class="search">
+                                <div class="navbar__leftbox--search" id="show" dir="rtl">
+                                <i class="bx bx-search-alt"></i>
+                                <input dir="rtl" type="search" name="search" value="<%= searchInput %>" placeholder="جستجوی پلیر ..."/>
+                                </div>
+                            </div>
+                            <div class="mmr-control">
+                                <label for="mmr-first">رنک از :</label>
+                                <div class="menu" id="mmrfirst">
+                                    <select name="minMMR">
+                                        <option></option>
+                                        <option <%= minMMR === 'Herald' ? 'selected': '' %>>Herald</option>
+                                        <option <%= minMMR === 'Guardian' ? 'selected': '' %>>Guardian</option>
+                                        <option <%= minMMR === 'Crusader' ? 'selected': '' %>>Crusader</option>
+                                        <option <%= minMMR === 'Archon' ? 'selected': '' %>>Archon</option>
+                                        <option <%= minMMR === 'Legend' ? 'selected': '' %>>Legend</option>
+                                        <option <%= minMMR === 'Ancient' ? 'selected': '' %>>Ancient</option>
+                                        <option <%= minMMR === 'Divine' ? 'selected': '' %>>Divine</option>
+                                        <option <%= minMMR === 'Immortal' ? 'selected': '' %>>Immortal</option>
+                                    </select>
+                                    <span class="focus"></span>
+                                </div>
+                                <label for="">تا‌:</label>
+                                <div class="menu">
+                                <select name="maxMMR">
+                                    <option></option>
+                                    <option <%= maxMMR === 'Herald' ? 'selected': '' %>>Herald</option>
+                                    <option <%= maxMMR === 'Guardian' ? 'selected': '' %>>Guardian</option>
+                                    <option <%= maxMMR === 'Crusader' ? 'selected': '' %>>Crusader</option>
+                                    <option <%= maxMMR === 'Archon' ? 'selected': '' %>>Archon</option>
+                                    <option <%= maxMMR === 'Legend' ? 'selected': '' %>>Legend</option>
+                                    <option <%= maxMMR === 'Ancient' ? 'selected': '' %>>Ancient</option>
+                                    <option <%= maxMMR === 'Divine' ? 'selected': '' %>>Divine</option>
+                                    <option <%= maxMMR === 'Immortal' ? 'selected': '' %>>Immortal</option>
+                                </select>
+                                <span class="focus"></span>
+                                </div>
+                                <div class="vertical"></div>
+                                <label for="">پوز‌ :</label>
+                                <div class="menu">
+                                    <select name="pos">
+                                        <option></option>
+                                        <option <%= pos === '1' ? 'selected': '' %>>1</option>
+                                        <option <%= pos === '2' ? 'selected': '' %>>2</option>
+                                        <option <%= pos === '3' ? 'selected': '' %>>3</option>
+                                        <option <%= pos === '4' ? 'selected': '' %>>4</option>
+                                        <option <%= pos === '5' ? 'selected': '' %>>5</option>
+                                    </select>
+                                    <span class="focus"></span>
+                                </div>
+                            </div>
+                            <div class="checkbox">
+                                <label for="check" class="form-control">
+                                <input type="checkbox" id="check" name="lft" />
+                                نیازمند تیم
+                                </label>
+                            </div>
+                            <input type="hidden" name="filter" value="true">
+                        </div>
+                        <div class="left-filter">
+                            <button type="submit" class="range">اعمال فیلتر</button>
+                            <div class="remove-filter">
+                                <a href="/players" class="remove-filter">حذف فیلتر </a>
+                                <i class="bx bx-chevron-left"></i>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="middle"></div>
+
+                <!-- cards----------------------------------------- -->
+                <div class="players-cards">
+                    <% if (users.length > 0) { users.forEach(user => { %>
+                        <div class="player-card">
+                            <img class="pic" src="<%= user.imageUrl %>" alt="" />
+                            <div class="player-caption">
+                                <h2 class="player-card__title"><%= user.name %></h2>
+                                <p class="player-card__content">پوز : <%= user.pos? user.pos:'ثبت نشده' %></p>
+                                <div class="show-medals">
+                                    <div class="medal-title">
+                                        <span>رنک :<%= user.mmr?'':'ثبت نشده' %></span>
+                                    </div>
+                                    <% if(user.mmr) { %>
+                                    <div class="first-medal">
+                                        <img src="img/<%= user.mmr %>_medal.webp" alt="" />
+                                    </div>
+                                    <% } %>
+                                </div>
+                                <p class="player-card__needmember">
+                                    نیازمند تیم :
+                                    <% if (user.lft) { %>
+                                                        <i class="bx bxs-check-circle"></i> 
+                                    <% } else { %>
+                                    <i class="bx bxs-x-circle"></i>
+                                    <% } %>
+                                </p>
+                                <p class="more-button"><a href="#">جز‌ئیات بیشتر</a></p>
+                            </div>
+                        </div>
+                    <% })} %>
+                    <!-- <h1 class="header2">هنوز هیچ پلیری ثبت نشده است ...</h1> -->
+                </div>
+                <% if(users.length == 0) { %>
+                    <h1 class="header1">جستجو موردنظر یافت نشد...</h1>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <%- include('./includes/footer') %>
+
+        <!-- scripts -->
+        <script src="js/main.js"></script>
+        <script src="js/burger.js"></script>
+        <script src="js/team-modalbox.js"></script>
+    </body>
+</html>

@@ -3,7 +3,8 @@ const rangeInput = document.getElementById('range')
 rangeInput.addEventListener('input',() => {
     var x = document.getElementById("range").value;
     var ele = document.getElementById("output");
-    
+    document.getElementsByName('slided')[0].value = 'true'
+
     switch (x) {
         case "0":
             ele.innerHTML = `<img class="slider-medals" src="img/Herald_medal.webp">`;

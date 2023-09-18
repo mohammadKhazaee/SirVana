@@ -12,10 +12,6 @@ const userSchema = new Schema(
 			type: String,
 			required: true,
 		},
-		dotaId: {
-			type: String,
-			require: true,
-		},
 		password: {
 			type: String,
 			required: true,
@@ -23,6 +19,11 @@ const userSchema = new Schema(
 		lft: {
 			type: Boolean,
 			require: true,
+			default: false,
+		},
+		dota2Id: {
+			type: Number,
+			// required: true,
 		},
 		teams: [
 			{
@@ -36,8 +37,16 @@ const userSchema = new Schema(
 				ref: 'Tournament',
 			},
 		],
-		roles: [String],
-		pos: [String],
+		roles: {
+			type: [String],
+			default: ['Player'],
+		},
+		pos: {
+			type: [String],
+			default: [],
+		},
+		discordId: String,
+		imageUrl: String,
 		mmr: Number,
 	},
 	{ timestamps: true }

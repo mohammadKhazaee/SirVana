@@ -3,93 +3,314 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link
-			rel="shortcut icon"
-			type="image/png"
-			href="img/shortcut icon.png"
-		/>
+		<link rel="shortcut icon" type="image/png" href="img/shortcut icon.png" />
 
 		<!-- Site Icon -->
-		<link
-			href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
-			rel="stylesheet"
-		/>
+		<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 
 		<!-- Css Links -->
 		<link rel="stylesheet" href="css/main.css" />
 		<link rel="stylesheet" type="text/css" href="css/site.css" />
 		<link rel="stylesheet" href="css/footer.css" />
-
 		<title><%= pageTitle %></title>
 	</head>
-
 	<body>
-		<div class="container">
-			<!-- Navbar -->
-			<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn,
-			userName: userName}) %>
-
-			<!-- slider2 -->
-			<div class="slideshow-container">
-				<div class="mySlides fade">
-					<img src="img/slider-pic1.jpg" />
-					<div class="shadowbox">
-						<!-- <div class="numbertext">3 / 1</div> -->
-						<div class="text">
-							اعلام تاریخ پخش فصل سوم انیمیشن Dragon’s Blood
-						</div>
-					</div>
-				</div>
-
-				<div class="mySlides fade">
-					<img src="img/slider-pic2.webp" />
-					<div class="shadowbox">
-						<!-- <div class="numbertext">3 / 2</div> -->
-						<div class="text">
-							مسابقات The International 10 با قهرمانی Team Spirit
-							پایان یافت
-						</div>
-					</div>
-				</div>
-				<div class="mySlides fade">
-					<img src="img/slider-pic3.jpg" />
-					<div class="shadowbox">
-						<!-- <div class="numbertext">3 / 3</div> -->
-						<div class="text">
-							تغییر زمان و مکان برگزاری مسابقات The International
-							10
-						</div>
-					</div>
-				</div>
-				<br />
+		<!-- mouse scroll down -->
+		<div class="scroll-down">
+			<div class="mouse-scroll">
+				<div class="mouse"></div>
+			</div>
+			<div class="arrows">
+				<div class="arrow"></div>
 			</div>
 		</div>
+		<!-- ---------------------------- -->
+		<div class="slideshow-container">
+			<!-- Navbar -->
+			<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName, navSearch:
+			true}) %>
 
+			<div class="mySlides fade">
+				<div class="shadow-box"></div>
+				<img src="img/slider-pic1.jpg" />
+				<div class="text">اعلام تاریخ پخش فصل سوم انیمیشن Dragon’s Blood</div>
+			</div>
+			<div class="mySlides fade">
+				<div class="shadow-box"></div>
+				<img src="img/slider-pic2.webp" />
+				<div class="text">مسابقات The International 10 با قهرمانی Team Spirit پایان یافت</div>
+			</div>
+			<div class="mySlides fade">
+				<div class="shadow-box"></div>
+				<img src="img/slider-pic3.jpg" />
+				<!-- <div class="numbertext">3 / 3</div> -->
+				<div class="text">تغییر زمان و مکان برگزاری مسابقات The International 10</div>
+			</div>
+			<br />
+		</div>
+		<!-- LAST TOURNAMENTS -->
+		<div class="last-tournaments">
+			<div class="last-tournaments__title">
+				<p>تورنومنت های پیش رو :</p>
+			</div>
+			<div class="middle-bar"></div>
+			<div class="tours-cards">
+				<% if (tournaments.length > 0) { tournaments.forEach(tournament => { %>
+					<div class="tour-card">
+						<img class="td" src="<%= tournament.imageUrl?tournament.imageUrl:'img/tourcards.png' %>" alt=""/>
+						<div class="tour-caption">
+							<h2 class="tour-card__title"><%= tournament.name %></h2>
+							<p class="tour-card__content">شروع از : <%= tournament.startDate %></p>
+							<div class="show-medals">
+								<div class="medal-title">
+									<span>رنک :</span>
+								</div>
+								<div class="second-medal">
+									<img src="img/<%= tournament.maxMMR %>_medal.webp" alt="" />
+								</div>
+								<div class="from-to"></div>
+								<div class="first-medal">
+									<img src="img/<%= tournament.minMMR %>_medal.webp" alt="" />
+								</div>
+							</div>
+							<p class="more-button">
+								<a href="/tournament/<%= tournament._id %>">جز‌ئیات بیشتر</a>
+							</p>
+						</div>
+					</div>
+				<% })} %>
+				<!-- <h1 class="header1">جستجو موردنظر یافت نشد...</h1> -->
+				<!-- <h1 class="header2">هنوز هیچ تورنومنتی ثبت نشده است ...</h1> -->
+			</div>
+		</div>
+		<!-- End of last tournaments----------------------- -->
 		<!-- Cards -->
-		<div class="cards" id="section09">
+		<div class="cards">
 			<div class="card">
-				<img src="img/tournoment-creat.webp" class="card-img" alt="" />
+				<img src="img/tourcards.png" class="card-img" alt="" />
 				<div class="card-body">
 					<h1 class="card-title">تورنومنت برگزار کنید</h1>
-					<button class="card-btn">ایجاد تورنومنت</button>
+					<a href="tournoment.html" class="card-btn">ایجاد تورنومنت</a>
 				</div>
 			</div>
 			<div class="card">
 				<img src="img/coachcreat.webp" class="card-img" alt="" />
 				<div class="card-body">
 					<h1 class="card-title">در رنک خود مربی شوید</h1>
-					<button class="card-btn">مربی شدن</button>
+					<a href="#" class="card-btn">مربی شدن</a>
 				</div>
 			</div>
 			<div class="card" id="thirdcard">
 				<img src="img/teamcreat.webp" class="card-img" alt="" />
 				<div class="card-body">
 					<h1 class="card-title">تیم خود را داشته باشید</h1>
-					<button class="card-btn">تشکیل تیم</button>
+					<a href="teams.html" class="card-btn">تشکیل تیم</a>
 				</div>
 			</div>
 		</div>
 
+		<!-- online lft and lfp -->
+		<div class="looking-for">
+			<div class="looking-for__player--box">
+				<div class="looking-for__player--title">
+					<p>نیازمند پلیر آنلاین :</p>
+				</div>
+				<div class="looking-for__player--middle"></div>
+				<div class="looking-for__player">
+					<a href="#" class="team">
+						<div class="team-name">
+							<p>Team Jinx</p>
+						</div>
+						<div class="more-of-team">
+							<div class="player-rol">
+								<p>پوز ۱</p>
+							</div>
+							<div class="player-rank">
+								<img src="img/Divine_medal.webp" alt="" />
+							</div>
+						</div>
+					</a>
+					<a href="#" class="team">
+						<div class="team-name">
+							<p>Team Jinx</p>
+						</div>
+						<div class="more-of-team">
+							<div class="player-rol">
+								<p>پوز ۱</p>
+							</div>
+							<div class="player-rank">
+								<img src="img/Divine_medal.webp" alt="" />
+							</div>
+						</div>
+					</a>
+					<a href="#" class="team">
+						<div class="team-name">
+							<p>Team Jinx</p>
+						</div>
+						<div class="more-of-team">
+							<div class="player-rol">
+								<p>پوز ۱</p>
+							</div>
+							<div class="player-rank">
+								<img src="img/Divine_medal.webp" alt="" />
+							</div>
+						</div>
+					</a>
+					<a href="#" class="team">
+						<div class="team-name">
+							<p>Team Jinx</p>
+						</div>
+						<div class="more-of-team">
+							<div class="player-rol">
+								<p>پوز ۱</p>
+							</div>
+							<div class="player-rank">
+								<img src="img/Divine_medal.webp" alt="" />
+							</div>
+						</div>
+					</a>
+					<a href="#" class="team">
+						<div class="team-name">
+							<p>Team Jinx</p>
+						</div>
+						<div class="more-of-team">
+							<div class="player-rol">
+								<p>پوز ۱</p>
+							</div>
+							<div class="player-rank">
+								<img src="img/Divine_medal.webp" alt="" />
+							</div>
+						</div>
+					</a>
+					<a href="#" class="team">
+						<div class="team-name">
+							<p>Team Jinx</p>
+						</div>
+						<div class="more-of-team">
+							<div class="player-rol">
+								<p>پوز ۱</p>
+							</div>
+							<div class="player-rank">
+								<img src="img/Divine_medal.webp" alt="" />
+							</div>
+						</div>
+					</a>
+				</div>
+			</div>
+			<div class="looking-for__team--box">
+				<div class="looking-for__team--title">
+					<p>نیازمند تیم آنلاین :</p>
+				</div>
+				<div class="looking-for__team--middle"></div>
+				<div class="looking-for__team">
+					<a href="#" class="player">
+						<div class="player-name">
+							<p>Mr_Bean</p>
+						</div>
+						<div class="more-of-player">
+							<div class="rol">
+								<p>پوز ۱</p>
+							</div>
+							<div class="rank">
+								<img src="img/Divine_medal.webp" alt="" />
+							</div>
+						</div>
+					</a>
+					<a href="#" class="player">
+						<div class="player-name">
+							<p>Mr_Bean</p>
+						</div>
+						<div class="more-of-player">
+							<div class="rol">
+								<p>پوز ۱</p>
+							</div>
+							<div class="rank">
+								<img src="img/Divine_medal.webp" alt="" />
+							</div>
+						</div>
+					</a>
+					<a href="#" class="player">
+						<div class="player-name">
+							<p>Mr_Bean</p>
+						</div>
+						<div class="more-of-player">
+							<div class="rol">
+								<p>پوز ۱</p>
+							</div>
+							<div class="rank">
+								<img src="img/Divine_medal.webp" alt="" />
+							</div>
+						</div>
+					</a>
+					<a href="#" class="player">
+						<div class="player-name">
+							<p>Mr_Bean</p>
+						</div>
+						<div class="more-of-player">
+							<div class="rol">
+								<p>پوز ۱</p>
+							</div>
+							<div class="rank">
+								<img src="img/Divine_medal.webp" alt="" />
+							</div>
+						</div>
+					</a>
+					<a href="#" class="player">
+						<div class="player-name">
+							<p>Mr_Bean</p>
+						</div>
+						<div class="more-of-player">
+							<div class="rol">
+								<p>پوز ۱</p>
+							</div>
+							<div class="rank">
+								<img src="img/Divine_medal.webp" alt="" />
+							</div>
+						</div>
+					</a>
+					<a href="#" class="player">
+						<div class="player-name">
+							<p>Mr_Bean</p>
+						</div>
+						<div class="more-of-player">
+							<div class="rol">
+								<p>پوز ۱</p>
+							</div>
+							<div class="rank">
+								<img src="img/Divine_medal.webp" alt="" />
+							</div>
+						</div>
+					</a>
+					<a href="#" class="player">
+						<div class="player-name">
+							<p>Mr_Bean</p>
+						</div>
+						<div class="more-of-player">
+							<div class="rol">
+								<p>پوز ۱</p>
+							</div>
+							<div class="rank">
+								<img src="img/Divine_medal.webp" alt="" />
+							</div>
+						</div>
+					</a>
+					<a href="#" class="player">
+						<div class="player-name">
+							<p>Mr_Bean</p>
+						</div>
+						<div class="more-of-player">
+							<div class="rol">
+								<p>پوز ۱</p>
+							</div>
+							<div class="rank">
+								<img src="img/Divine_medal.webp" alt="" />
+							</div>
+						</div>
+					</a>
+				</div>
+			</div>
+		</div>
+		<!-- -------------------------------------------------- -->
 		<!-- Footer -->
 		<%- include('./includes/footer') %>
 
@@ -97,6 +318,7 @@
 		<script src="js/burger.js"></script>
 		<script src="js/slider2.js"></script>
 		<script src="js/scroll.js"></script>
+		<script src="js/select-menu.js"></script>
 		<script src="js/main.js"></script>
 	</body>
 </html>

@@ -20,4 +20,10 @@ Router.post('/logout', authController.postLogout)
 // /auth/reset-password => GET
 Router.post('/reset-password', validator.postResetPass, authController.postResetPass)
 
+// /auth/new-password/:resetToken => GET
+Router.post('/new-password', authController.getNewPass)
+
+// /auth/new-password => POST
+Router.post('/new-password', validator.postNewPass, authController.postNewPass)
+
 module.exports = Router

@@ -3,10 +3,28 @@ const { validationResult } = require('express-validator')
 const User = require('../models/user')
 const Team = require('../models/team')
 const Tournament = require('../models/tournament')
+const rank = require('../utils/rank')
+const { min } = require('moment/moment')
 
-exports.getIndex = (req, res, next) => {
+exports.getIndex = async (req, res, next) => {
+	const tournaments = await Tournament.find()
+		.sort('startDate')
+		.collation({ locale: 'en' }) // searching case insensitive
+		.limit(3)
+	const modifiedTournaments = tournaments.map((tournament) => {
+		const dateTime = tournament.startDate.toISOString().slice(0, 16).replaceAll('-', '/').split('T')
+		const { name, minMMR, maxMMR, imageUrl } = tournament
+		return {
+			name,
+			startDate: `${dateTime[1]} - ${dateTime[0]}`,
+			minMMR: minMMR.split('.')[1],
+			maxMMR: maxMMR.split('.')[1],
+			imageUrl: imageUrl,
+		}
+	})
 	res.render('index', {
 		pageTitle: 'SirVana',
+		tournaments: modifiedTournaments,
 	})
 }
 
@@ -87,22 +105,15 @@ exports.getTournaments = async (req, res, next) => {
 	const TOURNAMENT_PER_PAGE = 11
 	const marginLeft = req.marginLeft
 	const rankFilter = req.rankFilter
+	const slided = req.query.slided === 'true'
 	const searchInput = req.query.search
-	let dbQuery
-	if (!req.noFilter) {
-		if (searchInput !== '')
-			dbQuery = dbQuery = {
-				name: { $regex: new RegExp(`.*${searchInput}.*`, 'i') },
-				minMMR: { $lte: rankFilter },
-				maxMMR: { $gte: rankFilter },
-			}
-		else
-			dbQuery = {
-				minMMR: { $lte: rankFilter },
-				maxMMR: { $gte: rankFilter },
-			}
-	} else {
-		dbQuery = {}
+	const isFiltered = req.query.filter
+
+	let dbQuery = {}
+	if (searchInput !== '') dbQuery.name = { $regex: new RegExp(`.*${searchInput}.*`, 'i') }
+	if (rankFilter && slided) {
+		dbQuery.minMMR = { $lte: rankFilter }
+		dbQuery.maxMMR = { $gte: rankFilter }
 	}
 	try {
 		const tournaments = await Tournament.find(dbQuery)
@@ -114,26 +125,25 @@ exports.getTournaments = async (req, res, next) => {
 				.slice(0, 16)
 				.replaceAll('-', '/')
 				.split('T')
-			const { name, minMMR, maxMMR } = tournament
+			const { name, minMMR, maxMMR, imageUrl } = tournament
 			return {
 				name,
 				startDate: `${dateTime[1]} - ${dateTime[0]}`,
 				minMMR: minMMR.split('.')[1],
 				maxMMR: maxMMR.split('.')[1],
+				imageUrl: imageUrl,
 			}
 		})
-
 		res.render('tournaments', {
 			pageTitle: 'SirVana · مسابقات',
 			tournaments: modifiedTournaments,
-			marginLeft: marginLeft,
+			marginLeft: marginLeft || '-4%',
 			rankFilter: req.query.rankFilter || '0',
-			rankIcon: rankFilter.split('.')[1],
+			rankIcon: rankFilter ? rankFilter.split('.')[1] : 'Herald',
 			searchInput: searchInput,
-			noFilter: req.noFilter,
+			noFilter: !isFiltered,
 		})
 	} catch (error) {
-		console.log(error)
 		if (!error.statusCode) error.statusCode = 500
 		next(error)
 	}
@@ -175,6 +185,55 @@ exports.postTournament = async (req, res, next) => {
 	}
 }
 
+exports.getPlayers = async (req, res, next) => {
+	const TEAM_PER_PAGE = 16
+	const lft = req.query.lft === 'on'
+	const minMMR = req.minMMR
+	const maxMMR = req.maxMMR
+	const searchInput = req.query.search
+	const pos = req.query.pos
+	const isFiltered = req.query.filter
+
+	let dbQuery = {}
+	if (searchInput !== '') dbQuery.name = { $regex: new RegExp(`.*${searchInput}.*`, 'i') }
+	if (minMMR || maxMMR) dbQuery.mmr = {}
+	if (minMMR) dbQuery.mmr.$gte = rank.giveNumber(minMMR)
+	if (maxMMR) dbQuery.mmr.$lte = rank.giveNumber(maxMMR)
+	if (pos) dbQuery.pos = { $regex: new RegExp(`${pos}`) }
+	if (lft) dbQuery.lft = lft
+
+	try {
+		const users = await User.find(dbQuery)
+			.collation({ locale: 'en' }) // searching case insensitive
+			.select('_id name pos mmr imageUrl lft')
+			.limit(TEAM_PER_PAGE)
+		const modifiedUsers = users.map((user) => {
+			return {
+				...user._doc,
+				mmr: rank.numberToMedal(user.mmr),
+				pos: user.pos.join(' - '),
+			}
+		})
+		res.render('players', {
+			pageTitle: 'SirVana · بازیکنان',
+			users: modifiedUsers,
+			searchInput: searchInput,
+			minMMR: rank.giveMedal(minMMR),
+			maxMMR: rank.giveMedal(maxMMR),
+			pos: pos,
+		})
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
+}
+
+exports.postPlayer = (req, res, next) => {
+	res.render('player', {
+		pageTitle: 'SirVana · هوش مصنوعی',
+	})
+}
+
 exports.postSearchResult = async (req, res, next) => {
 	const searchInput = req.body.searchInput.trim()
 	const dbQuery = { name: { $regex: new RegExp('.*' + searchInput + '.*', 'i') } }
@@ -187,11 +246,9 @@ exports.postSearchResult = async (req, res, next) => {
 			.select('_id name minMMR maxMMR')
 			.limit(searchLimit)
 	else if (searchType === 'team')
-		searchResult = await Team.find(dbQuery)
-			.select('_id name avgMMR lfp memberCount')
-			.limit(searchLimit)
+		searchResult = await Team.find(dbQuery).select('_id name avgMMR').limit(searchLimit)
 	else if (searchType === 'player')
-		searchResult = await User.find(dbQuery).select('_id name pos mmr lft').limit(searchLimit)
+		searchResult = await User.find(dbQuery).select('_id name pos mmr').limit(searchLimit)
 
 	// console.log(searchInput, searchResult)
 	res.send({ searchResult: searchResult })

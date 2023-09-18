@@ -20,6 +20,12 @@ Router.get('/tournaments', validator.getTournaments, mainController.getTournamen
 // /tournament => POST
 Router.post('/tournament', validator.postTournament, mainController.postTournament)
 
+// /players => GET
+Router.get('/players', validator.getPlayers, mainController.getPlayers)
+
+// /player => POST
+// Router.post('/player', validator.postPlayer, mainController.postPlayer)
+
 // /searchResult => POST
 Router.post('/search-result', mainController.postSearchResult)
 

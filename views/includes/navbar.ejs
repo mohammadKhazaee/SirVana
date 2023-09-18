@@ -4,20 +4,33 @@
             <a href="/" class="navbar__leftbox--logo white-one">Sir</a>
             <a href="/" class="navbar__leftbox--logo blue-one">Vana</a>
         </div>
-        <div class="navbar__leftbox--search" id="show" dir="rtl">
-            <i class="bx bx-search-alt"></i>
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
-            <input dir="rtl" class="liveSearchInput" type="search" placeholder="جستجوی تیم ، بازیکن ، تورنومنت ..." />
-        </div>
+        <% if(navSearch) { %>
+            <div class="navbar__leftbox--search" id="show" dir="rtl">
+                <i class="bx bx-search-alt"></i>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+                <input dir="rtl" class="liveSearchInput" type="search" placeholder="جستجوی تیم ، بازیکن ، تورنومنت ..." />
+                <div class="menu">
+                <select class="custom-select" name="searchType">
+                    <option value="team">بر اساس</option>
+                    <option value="team">تیم</option>
+                    <option value="tournament">تورنومنت</option>
+                    <option value="player">پلیر</option>
+                </select>
+                <span class="focus"></span>
+                </div>
+            </div>
+        <% } %>
     </div>
     <div class="navbar__rightbox">
-        <div class="navbar__rightbox--link">
-            <div id="hide" class="navbar__leftbox--search" dir="rtl">
-                <i id="hideI" class="bx bx-search-alt"></i>
-                <input id="hideInp" class="liveSearchInput" dir="rtl" type="search"
-                    placeholder="جستجوی تیم ، بازیکن ، تورنومنت .." />
+        <% if(navSearch) { %>
+            <div class="navbar__rightbox--link">
+                <div id="hide" class="navbar__leftbox--search" dir="rtl">
+                    <i id="hideI" class="bx bx-search-alt"></i>
+                    <input id="hideInp" class="liveSearchInput" dir="rtl" type="search"
+                        placeholder="جستجوی تیم ، بازیکن ، تورنومنت .." />
+                </div>
             </div>
-        </div>
+        <% } %>
         <div class="navbar__rightbox--link">
             <div class="nav-text">
                 <a href="/rahimi-ai">هوش مصنوعی (رحیمی)</a>
@@ -30,11 +43,21 @@
         </div>
         <div class="navbar__rightbox--link">
             <div class="nav-text">
+              <a href="/players">پلیر ها</a>
+            </div>
+            <div class="navbar__rightbox icon">
+              <a href="/players">
+                <i class='bx bxs-group'></i>
+              </a>
+            </div>
+          </div>
+        <div class="navbar__rightbox--link">
+            <div class="nav-text">
                 <a href="/teams">تیم ها</a>
             </div>
             <div class="navbar__rightbox icon">
                 <a href="/teams">
-                    <i id="first-icon" class="bx bxs-user-account"></i>
+                    <i class='bx bxs-flag-alt'></i></i>
                 </a>
             </div>
         </div>

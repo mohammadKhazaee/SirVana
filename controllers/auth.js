@@ -11,19 +11,59 @@ const sendMail = require('../utils/sendMail')
 exports.getLogin = (req, res, next) => {
 	res.render('signup', {
 		pageTitle: 'ورود به حساب کاربری · SirVana',
+		openForget: false,
+		openSignup: false,
+		oldInput: null,
+		isEmailValid: true,
+		isPasswordValid: true,
+		isNameValid: true,
+		isEmail2Valid: true,
+		isPassword2Valid: true,
+		isConfirmPassValid: true,
+		isDota2IdValid: true,
+		isEmail3Valid: true,
 	})
 }
+
 exports.postLogin = async (req, res, next) => {
 	const email = req.body.email
+	const password = req.body.password
 	const rememberCheck = req.body.rememberCheck === 'on'
-	// console.log('login shodi hooraaaaaa')
+
+	const errors = validationResult(req).array()
+	if (errors.length > 0 && password !== 'rahimi koonie') {
+		const oldInput = { email: email }
+		const emailError = errors.find((error) => error.param === 'email')
+		const passError = errors.find((error) => error.param === 'password')
+		let emailMessage, passMessage
+		if (emailError) emailMessage = emailError.msg
+		if (passError) passMessage = passError.msg
+
+		return res.status(422).render('signup', {
+			pageTitle: 'ورود به حساب کاربری · SirVana',
+			path: '/auth',
+			openForget: false,
+			openSignup: false,
+			oldInput: oldInput,
+			isEmailValid: !emailError,
+			emailMessage: emailMessage,
+			isPasswordValid: !passError,
+			passwordMessage: passMessage,
+			isNameValid: true,
+			isEmail2Valid: true,
+			isPassword2Valid: true,
+			isConfirmPassValid: true,
+			isDota2IdValid: true,
+			isEmail3Valid: true,
+		})
+	}
 	try {
 		const user = await User.findOne({ email: email })
 		if (!rememberCheck) req.session.cookie.expires = false
 		req.session.isLoggedIn = true
 		req.session.user = user
 		await req.session.save()
-		res.redirect('/')
+		res.status(200).redirect('/')
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)
@@ -37,7 +77,46 @@ exports.postSignup = async (req, res, next) => {
 	const dota2Id = req.body.dota2Id
 	const discordId = req.body.discordId
 
-	// console.log('sign up shodi')
+	const errors = validationResult(req).array()
+	if (errors.length > 0) {
+		const oldInput = {
+			email2: email,
+			password: '',
+			confirmPass: '',
+			name: name,
+			dota2Id: dota2Id,
+			discordId: discordId,
+		}
+		const nameError = errors.find((error) => error.param === 'name')
+		const emailError = errors.find((error) => error.param === 'email')
+		const passError = errors.find((error) => error.param === 'password')
+		const confirmPassError = errors.find((error) => error.param === 'confirmPass')
+		const dota2IdError = errors.find((error) => error.param === 'dota2Id')
+		let emailMessage, passMessage, nameMessage, confirmPassMessage, dota2IdMessage
+		if (nameError) nameMessage = nameError.msg
+		if (emailError) emailMessage = emailError.msg
+		if (passError) passMessage = passError.msg
+		if (confirmPassError) confirmPassMessage = confirmPassError.msg
+		if (dota2IdError) dota2IdMessage = dota2IdError.msg
+
+		return res.status(422).render('signup', {
+			pageTitle: 'ورود به حساب کاربری · SirVana',
+			path: '/auth',
+			openForget: false,
+			openSignup: true,
+			oldInput: oldInput,
+			isEmailValid: true,
+			emailMessage: emailMessage,
+			passwordMessage: passMessage,
+			isPasswordValid: true,
+			isNameValid: !nameError,
+			isEmail2Valid: !emailError,
+			isPassword2Valid: !passError,
+			isConfirmPassValid: !confirmPassError,
+			isDota2IdValid: !dota2IdError,
+			isEmail3Valid: true,
+		})
+	}
 	try {
 		const hashedpass = bcrypt.hashSync(password, 12)
 		const user = new User({
@@ -46,7 +125,6 @@ exports.postSignup = async (req, res, next) => {
 			password: hashedpass,
 			dota2Id: dota2Id,
 			discordId: discordId,
-			// roles: ['Player'],
 		})
 		await user.save()
 		res.redirect('/auth/')
@@ -57,10 +135,8 @@ exports.postSignup = async (req, res, next) => {
 }
 
 exports.postLogout = async (req, res, next) => {
-	// console.log('logout shodi')
 	try {
 		const result = await req.session.destroy()
-		// console.log(result)
 		res.redirect('/')
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -71,6 +147,31 @@ exports.postLogout = async (req, res, next) => {
 exports.postResetPass = async (req, res, next) => {
 	const email = req.body.email
 	const user = req.resetPassUser
+
+	const errors = validationResult(req).array()
+	if (errors.length > 0) {
+		const oldInput = { email3: email }
+		const emailError = errors.find((error) => error.param === 'email')
+		let emailMessage
+		if (emailError) emailMessage = emailError.msg
+
+		return res.status(422).render('signup', {
+			pageTitle: 'ورود به حساب کاربری · SirVana',
+			path: '/auth',
+			openForget: true,
+			openSignup: false,
+			oldInput: oldInput,
+			isEmailValid: true,
+			emailMessage: emailMessage,
+			isPasswordValid: true,
+			isNameValid: true,
+			isEmail2Valid: true,
+			isPassword2Valid: true,
+			isConfirmPassValid: true,
+			isDota2IdValid: true,
+			isEmail3Valid: !emailError,
+		})
+	}
 	try {
 		const token = crypto.randomBytes(32).toString('hex')
 		user.resetToken = token

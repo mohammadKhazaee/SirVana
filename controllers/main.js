@@ -3,8 +3,9 @@ const { validationResult } = require('express-validator')
 const User = require('../models/user')
 const Team = require('../models/team')
 const Tournament = require('../models/tournament')
+const Message = require('../models/message')
 const rank = require('../utils/rank')
-const { min } = require('moment/moment')
+const io = require('../socket')
 
 exports.getIndex = async (req, res, next) => {
 	const tournaments = await Tournament.find()
@@ -228,12 +229,6 @@ exports.getPlayers = async (req, res, next) => {
 	}
 }
 
-exports.postPlayer = (req, res, next) => {
-	res.render('player', {
-		pageTitle: 'SirVana · هوش مصنوعی',
-	})
-}
-
 exports.postSearchResult = async (req, res, next) => {
 	const searchInput = req.body.searchInput.trim()
 	const dbQuery = { name: { $regex: new RegExp('.*' + searchInput + '.*', 'i') } }
@@ -252,6 +247,33 @@ exports.postSearchResult = async (req, res, next) => {
 
 	// console.log(searchInput, searchResult)
 	res.send({ searchResult: searchResult })
+}
+
+exports.getMessages = async (req, res, next) => {
+	try {
+		const messages = await Message.find().limit(20)
+		res.send({ messages: messages })
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
+}
+
+exports.postMessage = async (req, res, next) => {
+	try {
+		const recievedMsg = req.body
+		const message = new Message({
+			sender: { userId: req.user._id, name: req.user.name },
+			content: recievedMsg.content,
+			type: recievedMsg.type,
+		})
+		await message.save()
+		io.getIO().emit('message', message)
+		res.sendStatus(200)
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
 }
 
 exports.getRahimi = (req, res, next) => {

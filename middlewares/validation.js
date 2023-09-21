@@ -8,6 +8,7 @@ const rank = require('../utils/rank')
 exports.postLogin = [
 	body('email', 'Please enter email in right format!')
 		.trim()
+		.escape()
 		.normalizeEmail({ gmail_remove_dots: false })
 		.notEmpty()
 		.isEmail()
@@ -19,6 +20,7 @@ exports.postLogin = [
 		}),
 	body('password')
 		.trim()
+		.escape()
 		.notEmpty()
 		.withMessage('Please enter a password!')
 		.isLength({ min: 8, max: 32 })
@@ -31,8 +33,16 @@ exports.postLogin = [
 ]
 
 exports.postSignup = [
+	body('name')
+		.trim()
+		.escape()
+		.notEmpty()
+		.withMessage('please enter your name!')
+		.isLength({ min: 3 })
+		.withMessage('name should be atleast 3 characters!'),
 	body('email', 'Please enter email in right format!')
 		.trim()
+		.escape()
 		.normalizeEmail({ gmail_remove_dots: false })
 		.notEmpty()
 		.isEmail()
@@ -43,12 +53,14 @@ exports.postSignup = [
 		}),
 	body('password')
 		.trim()
+		.escape()
 		.notEmpty()
 		.withMessage('Please enter a password!')
 		.isLength({ min: 8, max: 32 })
 		.withMessage('Password should be 8 to 32 characters!'),
 	body('confirmPass')
 		.trim()
+		.escape()
 		.notEmpty()
 		.withMessage('Please enter a password!')
 		.isLength({ min: 8, max: 32 })
@@ -58,15 +70,14 @@ exports.postSignup = [
 			if (password !== confirmPass) throwError(`Passwords do not match!`, 422)
 			return true
 		}),
-	body('dota2Id')
+	body('dota2Id', 'Wrong dota2 id!')
 		.trim()
+		.escape()
 		.escape()
 		.notEmpty()
 		.withMessage('Please enter your dota2 id!')
 		.isNumeric()
-		.withMessage('only numbers!')
-		.isLength({ max: 12 })
-		.withMessage('Too many characters!'),
+		.isLength(9),
 	body('discordId').trim().escape(),
 	body('tos').trim().escape(),
 ]
@@ -74,6 +85,7 @@ exports.postSignup = [
 exports.postResetPass = [
 	body('email', 'Please enter email in right format!')
 		.trim()
+		.escape()
 		.normalizeEmail({ gmail_remove_dots: false })
 		.notEmpty()
 		.isEmail()
@@ -88,6 +100,7 @@ exports.postResetPass = [
 exports.getNewPass = [
 	param('resetToken')
 		.trim()
+		.escape()
 		.custom(async (resetToken, { req }) => {
 			const user = await User.findOne({
 				resetToken: resetToken,
@@ -103,6 +116,7 @@ exports.getNewPass = [
 exports.postNewPass = [
 	body('password')
 		.trim()
+		.escape()
 		.notEmpty()
 		.withMessage('Please enter a password!')
 		.isLength({ min: 8, max: 32 })

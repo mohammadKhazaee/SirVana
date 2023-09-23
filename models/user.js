@@ -48,6 +48,7 @@ const userSchema = new Schema(
 		discordId: String,
 		imageUrl: String,
 		mmr: Number,
+		lfMsgCd: Number,
 	},
 	{ timestamps: true }
 )

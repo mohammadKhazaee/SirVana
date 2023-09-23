@@ -211,7 +211,7 @@ exports.postNewPass = async (req, res, next) => {
 	try {
 		const hashedpass = await bcrypt.hash(password, 12)
 		const user = await User.updateOne(
-			{ _id: userId, resetToken: token, resetTokenExpiry: { $gt: new Date().now() } },
+			{ _id: userId, resetToken: token, resetTokenExpiry: { $gt: Date.now() } },
 			{ $set: { password: hashedpass, resetToken: undefined, resetTokenExpiry: undefined } }
 		)
 		res.redirect('/auth')

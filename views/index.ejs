@@ -16,15 +16,19 @@
 	</head>
 	<body>
 		<!-- mouse scroll down -->
-		<div class="scroll-down">
-			<div class="mouse-scroll">
-				<div class="mouse"></div>
+		<a href="#scrolldown">
+			<div class="scroll-down">
+				<div class="mouse-scroll">
+					<div class="mouse"></div>
+				</div>
+				<div class="arrows">
+					<div class="arrow"></div>
+				</div>
 			</div>
-			<div class="arrows">
-				<div class="arrow"></div>
-			</div>
-		</div>
+		</a>
 		<!-- ---------------------------- -->
+
+		<!-- slider2 -->
 		<div class="slideshow-container">
 			<!-- Navbar -->
 			<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName, navSearch:
@@ -49,7 +53,7 @@
 			<br />
 		</div>
 		<!-- LAST TOURNAMENTS -->
-		<div class="last-tournaments">
+		<div class="last-tournaments"  id="scrolldown">
 			<div class="last-tournaments__title">
 				<p>تورنومنت های پیش رو :</p>
 			</div>
@@ -86,30 +90,46 @@
 		<!-- End of last tournaments----------------------- -->
 		<!-- Cards -->
 		<div class="cards">
-			<div class="card">
-				<img src="img/tourcards.png" class="card-img" alt="" />
-				<div class="card-body">
-					<h1 class="card-title">تورنومنت برگزار کنید</h1>
+			<div class="shadow-box1"></div>
+			<div class="shadow-box2"></div>
+
+			<div class="card-box1">
+				<div class="card-content">
+					<h1 class="">تورنومنت برگزار کنید .</h1>
+					<p>بیش از صد تورنومنت کامل شده و ده ها تورنومنت پیش رو.‌ آیا آماده نبرد هستید ؟</p>
 					<a href="tournoment.html" class="card-btn">ایجاد تورنومنت</a>
 				</div>
-			</div>
-			<div class="card">
-				<img src="img/coachcreat.webp" class="card-img" alt="" />
-				<div class="card-body">
-					<h1 class="card-title">در رنک خود مربی شوید</h1>
-					<a href="#" class="card-btn">مربی شدن</a>
+				<div class="card">
+					<img src="img/tourcards.png" class="card-img" alt="" />
 				</div>
 			</div>
-			<div class="card" id="thirdcard">
-				<img src="img/teamcreat.webp" class="card-img" alt="" />
-				<div class="card-body">
-					<h1 class="card-title">تیم خود را داشته باشید</h1>
-					<a href="teams.html" class="card-btn">تشکیل تیم</a>
+			<div class="card-box2">
+				<div class="card-content">
+					<h1 class="">به راحتی مربی شوید .</h1>
+					<p>
+						آیا استعداد و مهارت کافی برای آموزش به دوستان و تیم های خود را دارید ؟ اینحا بهترین فرصت
+						برای مربی شدن است .
+					</p>
+					<a href="tournoment.html" class="card-btn">مربی شدن</a>
+				</div>
+				<div class="card">
+					<img src="img/coachcreat.webp" class="card-img" alt="" />
+				</div>
+			</div>
+			<div class="card-box3">
+				<div class="card-content">
+					<h1 class="">تیم خود را بسازید .</h1>
+					<p>آیا آمادگی رهبری یک تیم را دارید ؟ پس بدون وقفه تیم رویایی خود را بسازید .</p>
+					<a href="tournoment.html" class="card-btn">تشکیل تیم</a>
+				</div>
+				<div class="card">
+					<img src="img/teamcreat.webp" class="card-img" alt="" />
 				</div>
 			</div>
 		</div>
 
 		<!-- online lft and lfp -->
+		<input type="hidden" name="canSend" value="<%= canSend %>">
 		<div class="looking-for">
 			<div class="looking-for__player--box">
 				<div class="looking-for__player--title">
@@ -119,7 +139,47 @@
 				<div class="looking-for__player">
 				</div>
 				<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-				<a id="sendMsg" style="background-color: rgb(230, 90, 90); padding: 1rem; margin-right: 5rem;">ارسال</a>
+				<div class="lfp-select">
+					<!-- <div class="menu">
+						<select>
+							<option selected>Team Jinx</option>
+							<option>Team Liquid</option>
+							<option>Team Aster</option>
+						</select>
+					</div> -->
+					<div class="custom-select">
+						<select name="lfpTeam">
+							<option value="null">انتخاب تیم</option>
+							<option value="team1">Team Jinx</option>
+							<option value="team2">Team Liquid</option>
+							<option value="team3">Team Aster</option>
+						</select>
+					</div>
+					<div class="custom-select">
+						<select>
+							<option value="null">پوز</option>
+							<option value="1">پوز 1</option>
+							<option value="2">پوز 2</option>
+							<option value="3">پوز 3</option>
+							<option value="4">پوز 4</option>
+							<option value="5">پوز 5</option>
+						</select>
+					</div>
+					<div class="custom-select">
+						<select>
+							<option value="null">رنک</option>
+							<option value="Herald">Herald</option>
+							<option value="Guardian">Guardian</option>
+							<option value="Crusader">Crusader</option>
+							<option value="Archon">Archon</option>
+							<option value="Legend">Legend</option>
+							<option value="Ancient">Ancient</option>
+							<option value="Divine">Divine</option>
+							<option value="Immortal">Immortal</option>
+						</select>
+					</div>
+					<button id="lfpSend" type="submit" class="create">ثبت</button>
+				</div>
 			</div>
 			<div class="looking-for__team--box">
 				<div class="looking-for__team--title">
@@ -127,6 +187,32 @@
 				</div>
 				<div class="looking-for__team--middle"></div>
 				<div class="looking-for__team">
+				</div>
+				<div class="lft-select">
+					<div class="custom-select">
+						<select>
+							<option value="null">پوز</option>
+							<option value="1">پوز 1</option>
+							<option value="2">پوز 2</option>
+							<option value="3">پوز 3</option>
+							<option value="4">پوز 4</option>
+							<option value="5">پوز 5</option>
+						</select>
+					</div>
+					<div class="custom-select">
+						<select>
+							<option value="null">رنک</option>
+							<option value="Herald">Herald</option>
+							<option value="Guardian">Guardian</option>
+							<option value="Crusader">Crusader</option>
+							<option value="Archon">Archon</option>
+							<option value="Legend">Legend</option>
+							<option value="Ancient">Ancient</option>
+							<option value="Divine">Divine</option>
+							<option value="Immortal">Immortal</option>
+						</select>
+					</div>
+					<button id="lftSend" type="submit" class="create">ثبت</button>
 				</div>
 			</div>
 		</div>

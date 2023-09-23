@@ -26,6 +26,7 @@ exports.getIndex = async (req, res, next) => {
 	res.render('index', {
 		pageTitle: 'SirVana',
 		tournaments: modifiedTournaments,
+		canSend: req.user.lfMsgCd < Date.now(),
 	})
 }
 
@@ -72,27 +73,27 @@ exports.postTeam = async (req, res, next) => {
 	const name = req.body.name
 	const nameTag = req.body.nameTag
 	const description = req.body.description
-	const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/') : null
 
-	const team = new Team({
-		name: name,
-		nameTag: nameTag,
-		description: description,
-		imageUrl: imageUrl,
-		leader: {
-			userId: req.user._id,
-			name: req.user.name,
-		},
-		members: [
-			{
+	try {
+		const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/') : null
+		const team = new Team({
+			name: name,
+			nameTag: nameTag,
+			description: description,
+			imageUrl: imageUrl,
+			leader: {
 				userId: req.user._id,
 				name: req.user.name,
 			},
-		],
-		avgMMR: req.user.mmr || 0,
-		lfp: false,
-	})
-	try {
+			members: [
+				{
+					userId: req.user._id,
+					name: req.user.name,
+				},
+			],
+			avgMMR: req.user.mmr || 0,
+			lfp: false,
+		})
 		await team.save()
 		// have to change redirection to /team/:teamId probably
 		res.redirect('/teams')
@@ -236,17 +237,31 @@ exports.postSearchResult = async (req, res, next) => {
 	const searchLimit = req.body.searchLimit ? Number(req.body.searchLimit) : 5
 	let searchResult
 
-	if (searchType === 'tournament')
+	if (searchType === 'tournament') {
 		searchResult = await Tournament.find(dbQuery)
 			.select('_id name minMMR maxMMR')
 			.limit(searchLimit)
-	else if (searchType === 'team')
+		searchResult = searchResult.map((tournament) => {
+			return {
+				...tournament._doc,
+				maxMMR: rank.giveMedal(tournament.maxMMR),
+				minMMR: rank.giveMedal(tournament.minMMR),
+			}
+		})
+	} else if (searchType === 'team') {
 		searchResult = await Team.find(dbQuery).select('_id name avgMMR').limit(searchLimit)
-	else if (searchType === 'player')
+		searchResult = searchResult.map((team) => {
+			return { ...team._doc, avgMMR: rank.numberToMedal(team.avgMMR) }
+		})
+	} else if (searchType === 'player') {
 		searchResult = await User.find(dbQuery).select('_id name pos mmr').limit(searchLimit)
+		searchResult = searchResult.map((player) => {
+			return { ...player._doc, pos: player.pos.join('-'), mmr: rank.numberToMedal(player.mmr) }
+		})
+	}
 
 	// console.log(searchInput, searchResult)
-	res.send({ searchResult: searchResult })
+	res.send({ searchResult: searchResult, searchType: searchType })
 }
 
 exports.getMessages = async (req, res, next) => {
@@ -262,12 +277,25 @@ exports.getMessages = async (req, res, next) => {
 exports.postMessage = async (req, res, next) => {
 	try {
 		const recievedMsg = req.body
-		const message = new Message({
-			sender: { userId: req.user._id, name: req.user.name },
-			content: recievedMsg.content,
-			type: recievedMsg.type,
-		})
+		let message
+		if (recievedMsg.type === 'lfp') {
+			console.log(recievedMsg.content.name)
+			const sender = await Team.findOne({ name: recievedMsg.content.name }).select('_id')
+			message = new Message({
+				sender: { userId: sender._id, name: recievedMsg.content.name },
+				content: `${recievedMsg.content.pos} ${recievedMsg.content.rank}`,
+				type: recievedMsg.type,
+			})
+		} else {
+			message = new Message({
+				sender: { userId: req.user._id, name: req.user.name },
+				content: `${recievedMsg.content.pos} ${recievedMsg.content.rank}`,
+				type: recievedMsg.type,
+			})
+		}
 		await message.save()
+		req.user.lfMsgCd = Date.now() + 1000 * 60 * 60 * 1
+		await req.user.save()
 		io.getIO().emit('message', message)
 		res.sendStatus(200)
 	} catch (error) {

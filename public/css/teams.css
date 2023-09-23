@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Dancing+Script&family=Lato:ital,wght@1,900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script&family=Lato:ital,wght@1,900&display=swap');
 
 /* width */
 ::-webkit-scrollbar {
@@ -107,7 +107,7 @@ body {
 	display: flex;
 	justify-content: center;
 	padding: 1rem 0 0.5rem 0;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 }
 
 .close-button {
@@ -129,7 +129,7 @@ body {
 .team-make {
 	width: 100%;
 	height: 100%;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	display: flex;
 	justify-content: center;
 	flex-wrap: wrap;
@@ -170,7 +170,7 @@ body {
 
 .wrong-input-alrt {
 	color: red;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 1.2rem;
 	font-weight: bold;
 	padding: 0 0.5rem;
@@ -212,7 +212,7 @@ textarea {
 }
 
 .form-controls input::placeholder {
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 1.2rem;
 }
 
@@ -231,7 +231,7 @@ textarea {
 	margin-bottom: 2rem;
 }
 
-.find-player__search input[type="search"] {
+.find-player__search input[type='search'] {
 	width: 100%;
 
 	padding: 0.5rem 1rem;
@@ -245,11 +245,11 @@ textarea {
 
 	transition: border 0.1s, box-shadow 0.1s;
 }
-.find-player__search input[type="search"]::placeholder {
-	font-family: "Tanha";
+.find-player__search input[type='search']::placeholder {
+	font-family: 'Tanha';
 	font-size: 1.2rem;
 }
-.find-player__search input[type="search"]:focus {
+.find-player__search input[type='search']:focus {
 	outline: none;
 	border: 1px solid aqua;
 }
@@ -268,7 +268,7 @@ textarea {
 	border: none;
 	background-color: #00e5ff;
 	color: #000000;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 1.2rem;
 	transition: all 0.2s ease;
 }
@@ -285,7 +285,7 @@ textarea {
 textarea {
 	resize: none;
 	height: 12rem;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	border: 1px solid #5a5c60;
 	background: rgba(0, 0, 0, 0);
 }
@@ -357,7 +357,7 @@ textarea {
 	border: none;
 	background-color: #00e5ff;
 	color: #000000;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 1.6rem;
 	transition: all 0.2s ease;
 }
@@ -365,7 +365,7 @@ textarea {
 .team-make .create:hover {
 	background-color: #18ffff;
 }
-.team-make .create:focus {
+.team-make .create:active {
 	transform: translateY(3px);
 }
 
@@ -418,7 +418,7 @@ textarea {
 	text-decoration: none;
 	color: #fff;
 	filter: brightness(70%);
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 1.4rem;
 	padding: 0 3rem 0 1rem;
 	transition: filter 0.3s ease;
@@ -462,7 +462,7 @@ textarea {
 }
 
 .form-control {
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 1.7rem;
 	font-weight: bold;
 	line-height: 1.1;
@@ -473,7 +473,7 @@ textarea {
 	cursor: pointer;
 }
 
-.form-control input[type="checkbox"] {
+.form-control input[type='checkbox'] {
 	-webkit-appearance: none;
 	appearance: none;
 	background-color: #fff;
@@ -490,8 +490,8 @@ textarea {
 	cursor: pointer;
 }
 
-.form-control input[type="checkbox"]::before {
-	content: "";
+.form-control input[type='checkbox']::before {
+	content: '';
 	width: 0.65em;
 	height: 0.65em;
 	transform: scale(0);
@@ -499,7 +499,7 @@ textarea {
 	box-shadow: inset 1em 1em aqua;
 }
 
-.form-control input[type="checkbox"]:checked::before {
+.form-control input[type='checkbox']:checked::before {
 	transform: scale(1);
 }
 
@@ -511,7 +511,7 @@ textarea {
 
 .dpdw-menu span {
 	color: #fff;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-weight: bold;
 	font-size: 1.5rem;
 	padding: 0 0 0 1rem;
@@ -526,7 +526,7 @@ textarea {
 	color: #fff;
 	width: 100%;
 	cursor: inherit;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-weight: bold;
 	overflow: hidden;
 }
@@ -549,7 +549,7 @@ select option {
 }
 
 .menu::after {
-	content: "";
+	content: '';
 	width: 0.8em;
 	height: 0.5em;
 	background-color: #fff;
@@ -617,7 +617,7 @@ select:focus + .focus {
 	border: 1px solid rgba(255, 255, 255, 0.15);
 	background-color: rgba(255, 255, 255, 0.05);
 	color: #fff;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	cursor: pointer;
 	filter: brightness(70%);
 	transition: filter 0.2s ease;
@@ -648,7 +648,7 @@ select:focus + .focus {
 	color: #fff;
 	padding: 2rem 0 0;
 	font-size: 2rem;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-weight: bold;
 	opacity: 0.7;
 	transition: opacity 0.1s ease;
@@ -678,15 +678,9 @@ select:focus + .focus {
 .team-card:hover {
 	--border-size: 7px;
 	--border-angle: 0turn;
-	background-image: conic-gradient(
-			from var(--border-angle),
-			#213,
-			#213 50%,
-			#213
-		),
+	background-image: conic-gradient(from var(--border-angle), #213, #213 50%, #213),
 		conic-gradient(from var(--border-angle), #08f, #f03, #08f);
-	background-size: calc(100% - (var(--border-size) * 2))
-			calc(100% - (var(--border-size) * 2)),
+	background-size: calc(100% - (var(--border-size) * 2)) calc(100% - (var(--border-size) * 2)),
 		cover;
 	background-position: center center;
 	background-repeat: no-repeat;
@@ -700,7 +694,7 @@ select:focus + .focus {
 }
 
 @property --border-angle {
-	syntax: "<angle>";
+	syntax: '<angle>';
 	inherits: true;
 	initial-value: 0turn;
 }
@@ -743,13 +737,13 @@ select:focus + .focus {
 	transition: opacity 0.1s 0.3s, -webkit-transform 0.4s;
 	transition: transform 0.4s, opacity 0.1s 0.3s;
 	transition: transform 0.4s, opacity 0.1s 0.3s, -webkit-transform 0.4s;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 }
 
 .team-card__title {
 	padding: 2rem 0;
 	font-size: 2rem;
-	font-family: "Lato";
+	font-family: 'Lato';
 }
 
 .team-card__content {
@@ -813,7 +807,11 @@ select:focus + .focus {
 .header1 {
 	text-align: center;
 	color: #fff;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 3.4rem;
 	margin-top: 10rem;
+}
+
+.active a {
+	color: aqua;
 }

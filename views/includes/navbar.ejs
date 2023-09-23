@@ -9,14 +9,17 @@
                 <i class="bx bx-search-alt"></i>
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
                 <input dir="rtl" class="liveSearchInput" type="search" placeholder="جستجوی تیم ، بازیکن ، تورنومنت ..." />
-                <div class="menu">
-                <select class="custom-select" name="searchType">
-                    <option value="team">بر اساس</option>
-                    <option value="team">تیم</option>
-                    <option value="tournament">تورنومنت</option>
-                    <option value="player">پلیر</option>
-                </select>
-                <span class="focus"></span>
+                <div class="uli">
+                    <ul id="search-result-box">
+                    </ul>
+                </div>
+                <div class="custom-select">
+                    <select name="searchType">
+                        <option value="team">براساس</option>
+                        <option value="team">تیم</option>
+                        <option value="tournament">تورنومنت</option>
+                        <option value="player">پلیر</option>
+                    </select>
                 </div>
             </div>
         <% } %>

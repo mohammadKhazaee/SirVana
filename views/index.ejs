@@ -95,7 +95,7 @@
 
 			<div class="card-box1">
 				<div class="card-content">
-					<h1 class="">تورنومنت برگزار کنید .</h1>
+					<h1>تورنومنت برگزار کنید .</h1>
 					<p>بیش از صد تورنومنت کامل شده و ده ها تورنومنت پیش رو.‌ آیا آماده نبرد هستید ؟</p>
 					<a href="tournoment.html" class="card-btn">ایجاد تورنومنت</a>
 				</div>
@@ -105,7 +105,12 @@
 			</div>
 			<div class="card-box2">
 				<div class="card-content">
-					<h1 class="">به راحتی مربی شوید .</h1>
+					<form action="/join-team-req" method="post">
+				<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+						<input type="hidden" name="teamId" value="650198f21a0f950d5879e894">
+						<input type="submit" value="join team">
+					</form>
+					<h1>به راحتی مربی شوید .</h1>
 					<p>
 						آیا استعداد و مهارت کافی برای آموزش به دوستان و تیم های خود را دارید ؟ اینحا بهترین فرصت
 						برای مربی شدن است .
@@ -118,7 +123,7 @@
 			</div>
 			<div class="card-box3">
 				<div class="card-content">
-					<h1 class="">تیم خود را بسازید .</h1>
+					<h1>تیم خود را بسازید .</h1>
 					<p>آیا آمادگی رهبری یک تیم را دارید ؟ پس بدون وقفه تیم رویایی خود را بسازید .</p>
 					<a href="tournoment.html" class="card-btn">تشکیل تیم</a>
 				</div>
@@ -223,9 +228,9 @@
 		<!-- JavaScipt -->
 		<script src="js/burger.js"></script>
 		<script src="js/slider2.js"></script>
-		<script src="js/scroll.js"></script>
 		<script src="js/select-menu.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 		<script src="js/main.js"></script>
+		<script src="js/transform.js"></script>
 	</body>
 </html>

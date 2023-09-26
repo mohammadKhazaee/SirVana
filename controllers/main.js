@@ -26,7 +26,7 @@ exports.getIndex = async (req, res, next) => {
 	res.render('index', {
 		pageTitle: 'SirVana',
 		tournaments: modifiedTournaments,
-		canSend: req.user.lfMsgCd < Date.now(),
+		canSend: req.user ? req.user.lfMsgCd < Date.now() : false,
 	})
 }
 
@@ -95,6 +95,7 @@ exports.postTeam = async (req, res, next) => {
 			lfp: false,
 		})
 		await team.save()
+		await req.user.joinTeam(team, 'Team Leader')
 		// have to change redirection to /team/:teamId probably
 		res.redirect('/teams')
 	} catch (error) {
@@ -264,7 +265,7 @@ exports.postSearchResult = async (req, res, next) => {
 	res.send({ searchResult: searchResult, searchType: searchType })
 }
 
-exports.getMessages = async (req, res, next) => {
+exports.getLfMessages = async (req, res, next) => {
 	try {
 		const messages = await Message.find().limit(20)
 		res.send({ messages: messages })
@@ -274,7 +275,7 @@ exports.getMessages = async (req, res, next) => {
 	}
 }
 
-exports.postMessage = async (req, res, next) => {
+exports.postLfMessages = async (req, res, next) => {
 	try {
 		const recievedMsg = req.body
 		let message

@@ -46,12 +46,45 @@ const teamSchema = new Schema(
 		},
 		tournaments: [
 			{
-				type: Schema.Types.ObjectId,
-				ref: 'Tournament',
+				tournamentId: {
+					type: Schema.Types.ObjectId,
+					ref: 'Tournament',
+				},
+				name: {
+					type: String,
+					required: true,
+				},
 			},
 		],
 	},
 	{ timestamps: true }
 )
+
+teamSchema.methods.recruitMember = function (user) {
+	const updatedAvgMMR = (this.avgMMR * this.memberCount + user.mmr) / (this.memberCount + 1)
+	this.avgMMR = updatedAvgMMR
+	this.memberCount = this.memberCount + 1
+	let updatedMembers
+	if (this.members) {
+		updatedMembers = [...this.members, { userId: user._id, name: user.name }]
+	} else {
+		updatedMembers = [{ userId: user._id, name: user.name }]
+	}
+	this.members = updatedMembers
+	return this.save()
+}
+
+teamSchema.methods.joinToTournament = function (tournament) {
+	const updatedTournaments = [
+		...this.tournaments,
+		{
+			tournamentId: tournament._id,
+			name: tournament.name,
+			image: tournament.imageUrl,
+		},
+	]
+	this.tournaments = updatedTournaments
+	return this.save()
+}
 
 module.exports = mongoose.model('Team', teamSchema)

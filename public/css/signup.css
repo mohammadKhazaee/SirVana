@@ -1,18 +1,18 @@
 /* Webfont: ../fonts/Yekan-Font-3.0/Yekan.eot */
 @font-face {
-	font-family: "Tanha";
-	src: url("../fonts/Tanha.eot"); /* IE9 Compat Modes */
-	src: url("../fonts/?#iefix") format("embedded-opentype"),
-		/* IE6-IE8 */ url("../fonts/Tanha.woff2") format("woff2"),
-		/* Modern Browsers */ url("../fonts/Tanha.woff") format("woff"),
-		/* Modern Browsers */ url("../fonts/Tanha.ttf") format("truetype"); /* Safari, Android, iOS */
+	font-family: 'Tanha';
+	src: url('../fonts/Tanha.eot'); /* IE9 Compat Modes */
+	src: url('../fonts/?#iefix') format('embedded-opentype'),
+		/* IE6-IE8 */ url('../fonts/Tanha.woff2') format('woff2'),
+		/* Modern Browsers */ url('../fonts/Tanha.woff') format('woff'),
+		/* Modern Browsers */ url('../fonts/Tanha.ttf') format('truetype'); /* Safari, Android, iOS */
 	font-weight: normal;
 	font-style: normal;
 	text-rendering: optimizeLegibility;
 	font-display: auto;
 }
 /* Google Fonts */
-@import url("https://fonts.googleapis.com/css2?family=Dancing+Script&family=Lato:ital,wght@1,900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script&family=Lato:ital,wght@1,900&display=swap');
 
 /* width */
 ::-webkit-scrollbar {
@@ -78,7 +78,7 @@ html {
 
 /* ------------------------- >>> */
 .navbar__leftbox--logo {
-	padding: 1rem 0;
+	padding: 1.5rem 0;
 }
 
 .navbar__leftbox--logo .white-one {
@@ -94,7 +94,7 @@ html {
 	font-size: 4rem;
 	font-weight: 900;
 	cursor: pointer;
-	font-family: "Lato";
+	font-family: 'Lato';
 }
 
 .navbar__leftbox--logo:hover .white-one {
@@ -108,7 +108,7 @@ html {
 /* -------------------------------------------- */
 .login {
 	width: 40rem;
-	height: 45rem;
+	height: 47rem;
 
 	position: absolute;
 	top: 50%;
@@ -128,7 +128,7 @@ html {
 
 .login-form {
 	width: 30rem;
-	height: 100%;
+	/* height: 100%; */
 
 	display: flex;
 	flex-direction: column;
@@ -138,8 +138,8 @@ html {
 	position: absolute;
 }
 
-.login-form input[type="text"],
-.login-form input[type="password"] {
+.login-form input[type='text'],
+.login-form input[type='password'] {
 	width: 30rem;
 
 	padding: 0.5rem 1.5rem;
@@ -148,7 +148,7 @@ html {
 	display: block;
 
 	color: #fff;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 1.6rem;
 
 	outline: none;
@@ -158,8 +158,8 @@ html {
 	transition: border 0.1s, box-shadow 0.1s;
 }
 
-.login-form input[type="text"]:focus,
-.login-form input[type="password"]:focus {
+.login-form input[type='text']:focus,
+.login-form input[type='password']:focus {
 	outline: none;
 	border: 1px solid aqua;
 }
@@ -177,11 +177,16 @@ input:-webkit-autofill {
 
 .email-box,
 .password-box {
-	margin-top: 1.5rem;
+	height: 10.9rem;
+	width: 100%;
+}
 
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
+.wrong-input-alrt {
+	color: red;
+	font-family: 'Tanha';
+	font-size: 1.2rem;
+	font-weight: bold;
+	margin-top: 0.5rem;
 }
 
 .password-box {
@@ -200,7 +205,7 @@ input:-webkit-autofill {
 	visibility: hidden;
 
 	position: absolute;
-	top: 67%;
+	top: 47%;
 	left: 5%;
 
 	cursor: pointer;
@@ -208,7 +213,7 @@ input:-webkit-autofill {
 
 .email-box label,
 .password-box label {
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 2rem;
 	color: #fff;
 }
@@ -229,7 +234,7 @@ input:-webkit-autofill {
 .remember-me label {
 	margin: 0 0.6rem 0 0;
 
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 1.3rem;
 	color: #fff;
 
@@ -262,7 +267,7 @@ input:-webkit-autofill {
 }
 
 .remember-me input:before {
-	content: "";
+	content: '';
 	width: 85%;
 	height: 85%;
 
@@ -285,7 +290,7 @@ input:-webkit-autofill {
 }
 
 .forgot-password a {
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 1.3rem;
 	color: #fff;
 
@@ -295,15 +300,15 @@ input:-webkit-autofill {
 	filter: brightness(1);
 }
 
-.login-form input[type="submit"],
-.register-form input[type="submit"],
-.forgot input[type="submit"] {
+.login-form input[type='submit'],
+.register-form input[type='submit'],
+.forgot input[type='submit'] {
 	width: 30rem;
 	height: 4rem;
 	margin: 1rem 1.4rem 1.4rem 1.4rem;
 
 	font-weight: bold;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 
 	border: none;
 	outline: none;
@@ -315,21 +320,21 @@ input:-webkit-autofill {
 	cursor: pointer;
 }
 
-.register-form input[type="submit"],
-.forgot input[type="submit"] {
+.register-form input[type='submit'],
+.forgot input[type='submit'] {
 	margin: 0.5rem 0;
 }
 
-.login-form input[type="submit"]:hover,
-.registration input[type="submit"]:hover,
-.forgot input[type="submit"]:hover {
+.login-form input[type='submit']:hover,
+.registration input[type='submit']:hover,
+.forgot input[type='submit']:hover {
 	filter: brightness(1);
 }
 
 .login-form p {
 	color: #fff;
 	font-size: 1.3rem;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 
 	text-align: center;
 	margin-top: 1rem;
@@ -339,7 +344,7 @@ input:-webkit-autofill {
 }
 
 #registerbtn {
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	color: #fff;
 	font-weight: bold;
 	font-size: 1.3rem;
@@ -349,7 +354,7 @@ input:-webkit-autofill {
 /* Registration : */
 .registration {
 	width: 60rem;
-	height: 61rem;
+	height: 58rem;
 
 	position: absolute;
 	top: 50%;
@@ -371,7 +376,6 @@ input:-webkit-autofill {
 
 .register-form {
 	width: 100%;
-	height: 100%;
 
 	display: flex;
 	flex-direction: column;
@@ -385,23 +389,22 @@ input:-webkit-autofill {
 	display: flex;
 	justify-content: space-between;
 
-	height: 32.8rem;
-
-	margin-top: 2rem;
+	height: 30.6rem;
+	margin-top: 0.5rem;
 }
 
 .vert {
 	width: 3px;
-	height: 85%;
-	margin: 2rem 3rem 0;
+	height: 100%;
+	margin: 0.5rem 3rem 0;
 
 	background-color: aqua;
 }
 
-.register-form input[type="text"],
-.register-form input[type="email"],
-.register-form input[type="password"],
-.register-form input[type="number"] {
+.register-form input[type='text'],
+.register-form input[type='email'],
+.register-form input[type='password'],
+.register-form input[type='number'] {
 	width: 23rem;
 
 	padding: 0.5rem 1.5rem 0.5rem 3rem;
@@ -410,7 +413,7 @@ input:-webkit-autofill {
 	display: block;
 
 	color: #fff;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 1.6rem;
 
 	outline: none;
@@ -420,18 +423,18 @@ input:-webkit-autofill {
 	transition: border 0.1s, box-shadow 0.1s;
 }
 
-.register-form input[type="number"]::placeholder {
-	font-family: "Tanha";
+.register-form input[type='number']::placeholder {
+	font-family: 'Tanha';
 	font-size: 1.2rem;
 }
 
-.register-form input[type="number"]:focus::placeholder {
+.register-form input[type='number']:focus::placeholder {
 	color: transparent;
 }
 
-.register-form input[type="text"]:focus,
-.register-form input[type="email"]:focus,
-.register-form input[type="password"]:focus {
+.register-form input[type='text']:focus,
+.register-form input[type='email']:focus,
+.register-form input[type='password']:focus {
 	outline: none;
 	border: 1px solid aqua;
 }
@@ -447,20 +450,29 @@ input:-webkit-autofill {
 	-webkit-text-fill-color: #fff;
 }
 
-input[type="number"]::-webkit-inner-spin-button {
+input[type='number']::-webkit-inner-spin-button {
 	-webkit-appearance: none;
 }
-input[type="number"] {
+input[type='number'] {
 	-moz-appearance: textfield;
 	appearance: textfield;
 	margin: 0;
 }
 
+.right-block,
+.left-block {
+	height: 30.6rem;
+}
+
 .right-block label,
 .left-block label {
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 2rem;
 	color: #fff;
+}
+
+:is(.user-name, .signup-email, .need-password, .id, .id2) {
+	height: 10.2rem;
 }
 
 .signup-email,
@@ -495,22 +507,14 @@ input[type="number"] {
 	cursor: pointer;
 }
 
-.wrong-input-alrt {
-	color: red;
-	font-family: "Tanha";
-	font-size: 1.2rem;
-	font-weight: bold;
-	margin: 0.6rem 0;
-}
-
 .agree {
 	display: flex;
 	align-items: center;
 
-	margin: 1rem 0 1rem;
+	margin: 3rem 0 1rem;
 }
 
-.agree input[type="checkbox"] {
+.agree input[type='checkbox'] {
 	width: 1.6rem;
 	height: 1.6rem;
 
@@ -527,8 +531,8 @@ input[type="number"] {
 	position: relative;
 }
 
-.agree input[type="checkbox"]:before {
-	content: "";
+.agree input[type='checkbox']:before {
+	content: '';
 	width: 85%;
 	height: 85%;
 
@@ -544,14 +548,14 @@ input[type="number"] {
 	background-color: aqua;
 }
 
-.agree input[type="checkbox"]:checked:before {
+.agree input[type='checkbox']:checked:before {
 	transform: scale(1);
 	opacity: 1;
 }
 .agree label {
 	margin: 0 0.6rem 0 0;
 
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 1.3rem;
 	color: #fff;
 
@@ -570,7 +574,7 @@ input[type="number"] {
 .open {
 	color: #fff;
 	font-size: 1.3rem;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 
 	text-align: center;
 	margin-top: 2rem;
@@ -580,7 +584,7 @@ input[type="number"] {
 }
 
 #loginbtn {
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	color: #fff;
 	font-weight: bold;
 	font-size: 1.3rem;
@@ -622,7 +626,7 @@ input[type="number"] {
 	position: absolute;
 }
 
-.forgot input[type="email"] {
+.forgot input[type='email'] {
 	width: 30rem;
 
 	padding: 0.5rem 1.5rem;
@@ -631,7 +635,7 @@ input[type="number"] {
 	display: block;
 
 	color: #fff;
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 1.6rem;
 
 	outline: none;
@@ -649,13 +653,13 @@ input[type="number"] {
 }
 
 .forgot-box label {
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	font-size: 2rem;
 	color: #fff;
 }
 
 #logingbtn {
-	font-family: "Tanha";
+	font-family: 'Tanha';
 	color: #fff;
 	font-weight: bold;
 	font-size: 1.3rem;

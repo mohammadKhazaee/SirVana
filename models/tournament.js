@@ -37,14 +37,37 @@ const tournametSchema = new Schema(
 				required: true,
 			},
 		},
-		teams: [
-			{
-				type: Schema.Types.ObjectId,
-				ref: 'Team',
-			},
-		],
+		teams: {
+			type: [
+				{
+					teamId: {
+						type: Schema.Types.ObjectId,
+						ref: 'Team',
+						require: true,
+					},
+					name: {
+						type: String,
+						require: true,
+					},
+					image: String,
+				},
+			],
+		},
 	},
 	{ timestamps: true }
 )
+
+tournametSchema.methods.addNewTeam = function (team) {
+	const updatedTeams = [
+		...this.teams,
+		{
+			teamId: team._id,
+			name: team.name,
+			image: team.imageUrl,
+		},
+	]
+	this.teams = updatedTeams
+	return this.save()
+}
 
 module.exports = mongoose.model('Tournamet', tournametSchema)

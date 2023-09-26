@@ -15,7 +15,8 @@
 
 	<body>
 		<!-- Navbar -->
-		<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn,userName: userName, navSearch: false}) %>
+		<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn,userName: userName, navSearch:
+		false}) %>
 
 		<!-- background -->
 		<div class="tournament-page">
@@ -45,7 +46,13 @@
 						<div class="mmr-control">
 							<label>محدوده رنک :</label>
 							<label class="in" for="mmr-first">از</label>
-							<input type="text" name="minMMR" list="ranks-first" id="mmrfirst" autocomplete="off"/>
+							<input
+								type="text"
+								name="minMMR"
+								list="ranks-first"
+								id="mmrfirst"
+								autocomplete="off"
+							/>
 							<datalist id="ranks-first">
 								<option>Herald</option>
 								<option>Guardian</option>
@@ -57,7 +64,7 @@
 								<option>Immortal</option>
 							</datalist>
 							<label class="in" for="mmrlast">تا</label>
-							<input type="text" name="maxMMR" list="ranks-last" id="mmrlast" autocomplete="off"/>
+							<input type="text" name="maxMMR" list="ranks-last" id="mmrlast" autocomplete="off" />
 							<datalist id="ranks-last">
 								<option>Herald</option>
 								<option>Guardian</option>
@@ -125,15 +132,21 @@
 							<div class="search">
 								<div class="navbar__leftbox--search" id="show" dir="rtl">
 									<i class="bx bx-search-alt"></i>
-									<input dir="rtl" name="search" type="search" value="<%= searchInput %>" placeholder="جستجوی تورنومنت ..."/>
+									<input
+										dir="rtl"
+										name="search"
+										type="search"
+										value="<%= searchInput %>"
+										placeholder="جستجوی تورنومنت ..."
+									/>
 								</div>
 							</div>
 							<label for="range" class="range-label">رنک تورنومنت :</label>
 							<div class="slider" dir="ltr">
-								<div id="output" class="output" <%= `style= margin-left:${marginLeft};` %>>
+								<div id="output" class="output" <%=`style=margin-left:${marginLeft};` %>>
 									<img class="slider-medals" src="img/<%= rankIcon %>_medal.webp" alt="" />
 								</div>
-								<input type="range" name="rankFilter" min="0" max="100" value=<%= rankFilter %> step="14.28" id="range"/>
+								<input type="range" name="rankFilter" min="0" max="100" value="<%= rankFilter %>" step="14.28" id="range"/>
 							</div>
 							<input type="hidden" name="filter" value="true" />
 							<input type="hidden" name="slided" value="false" />
@@ -151,39 +164,43 @@
 				<!-- TOURNAMENTS LIST -->
 				<div class="tours-cards">
 					<% if(noFilter) { %>
-                        <div class="tour-card" id="create-button">
-                            <a><i class="bx bx-plus-medical"></i></a>
-                            <a><p>ایجاد تورنومنت</p></a>
-                        </div>
+					<div class="tour-card" id="create-button">
+						<a><i class="bx bx-plus-medical"></i></a>
+						<a><p>ایجاد تورنومنت</p></a>
+					</div>
 					<% } if (tournaments.length > 0) { tournaments.forEach(tournament => { %>
-                        <div class="tour-card">
-                            <img class="td" src="<%= tournament.imageUrl?tournament.imageUrl:'img/tourcards.png' %>" alt=""/>
-                            <div class="tour-caption">
-                                <h2 class="tour-card__title"><%= tournament.name %></h2>
-                                <p class="tour-card__content">شروع از : <%= tournament.startDate %></p>
-                                <div class="show-medals">
-                                    <div class="medal-title">
-                                        <span>رنک :</span>
-                                    </div>
-                                    <div class="second-medal">
-                                        <img src="img/<%= tournament.maxMMR %>_medal.webp" alt="" />
-                                    </div>
-                                    <div class="from-to"></div>
-                                    <div class="first-medal">
-                                        <img src="img/<%= tournament.minMMR %>_medal.webp" alt="" />
-                                    </div>
-                                </div>
-                                <p class="more-button">
-                                    <a href="/tournament/<%= tournament._id %>">جز‌ئیات بیشتر</a>
-                                </p>
-                            </div>
-                        </div>
+					<div class="tour-card">
+						<img
+							class="td"
+							src="<%= tournament.imageUrl?tournament.imageUrl:'img/tourcards.png' %>"
+							alt=""
+						/>
+						<div class="tour-caption">
+							<h2 class="tour-card__title"><%= tournament.name %></h2>
+							<p class="tour-card__content">شروع از : <%= tournament.startDate %></p>
+							<div class="show-medals">
+								<div class="medal-title">
+									<span>رنک :</span>
+								</div>
+								<div class="second-medal">
+									<img src="img/<%= tournament.maxMMR %>_medal.webp" alt="" />
+								</div>
+								<div class="from-to"></div>
+								<div class="first-medal">
+									<img src="img/<%= tournament.minMMR %>_medal.webp" alt="" />
+								</div>
+							</div>
+							<p class="more-button">
+								<a href="/tournament/<%= tournament._id %>">جز‌ئیات بیشتر</a>
+							</p>
+						</div>
+					</div>
 					<% })} if(tournaments.length == 0 && !noFilter) { %>
-						<h1 class="header1">هنوز تورنومنتی تشکیل نشده...</h1>
+					<h1 class="header1">هنوز تورنومنتی تشکیل نشده...</h1>
 					<% } %>
 				</div>
 				<% if(tournaments.length == 0 && noFilter) { %>
-				    <h1 class="header1">جستجو موردنظر یافت نشد...</h1>
+				<h1 class="header1">جستجو موردنظر یافت نشد...</h1>
 				<% } %>
 			</div>
 		</div>

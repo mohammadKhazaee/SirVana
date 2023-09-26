@@ -47,7 +47,12 @@
                         <div class="find-player">
                             <div class="find-player__search">
                                 <label for="search">یافتن پلیر :</label>
-                                <input id="search" type="search" placeholder="جستجوی پلیر ..."/>
+                                <input id="search" type="search" name="liveSearchInput" placeholder="جستجوی پلیر ..."/>
+                                <input type="hidden" name="searchType" value="team">
+                                <div class="uli">
+                                    <ul id="search-result-box">
+                                    </ul>
+                                </div>
                             </div>
                             <div class="find-player__btns">
                                 <button class="more-btn">مشاهده پروفایل پلیر</button>

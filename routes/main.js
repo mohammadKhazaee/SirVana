@@ -29,11 +29,11 @@ Router.get('/players', validator.getPlayers, mainController.getPlayers)
 // /searchResult => POST
 Router.post('/search-result', mainController.postSearchResult)
 
-// /messages => GET
-Router.get('/messages', mainController.getMessages)
+// /lfMessages => GET
+Router.get('/lfMessages', mainController.getLfMessages)
 
-// /message => POST
-Router.post('/message', mainController.postMessage)
+// /lfMessage => POST
+Router.post('/lfMessage', mainController.postLfMessages)
 
 // /rahimi-ai => GET
 Router.get('/rahimi-ai', mainController.getRahimi)

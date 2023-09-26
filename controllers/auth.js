@@ -137,7 +137,7 @@ exports.postSignup = async (req, res, next) => {
 exports.postLogout = async (req, res, next) => {
 	try {
 		const result = await req.session.destroy()
-		res.redirect('/')
+		res.sendStatus(200)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)

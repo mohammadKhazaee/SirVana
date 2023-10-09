@@ -30,10 +30,10 @@ Router.get('/players', validator.getPlayers, mainController.getPlayers)
 Router.post('/search-result', mainController.postSearchResult)
 
 // /lfMessages => GET
-Router.get('/lfMessages', mainController.getLfMessages)
+Router.get('/lf-messages', mainController.getLfMessages)
 
 // /lfMessage => POST
-Router.post('/lfMessage', mainController.postLfMessages)
+Router.post('/lf-message', mainController.postLfMessages)
 
 // /rahimi-ai => GET
 Router.get('/rahimi-ai', mainController.getRahimi)

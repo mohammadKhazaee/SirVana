@@ -19,8 +19,7 @@
 		<div class="main">
 			<div class="shadow-box">
 				<!-- SignUp ---------------------------------------------------------->
-				<div class="registration" id="register-box" <% if(openSignup){ %>
-					style="visibility: visible;"<% } %>>
+				<div class="registration" id="register-box" <% if(openSignup){ %> style="visibility: visible;"<% } %>>
 					<form action="/auth/signup" method="post" class="register-form">
 						<div class="navbar__leftbox--logo">
 							<a href="/" class="navbar__leftbox--logo white-one">Sir</a>
@@ -30,9 +29,9 @@
 							<div class="right-block">
 								<div class="user-name">
 									<label for="name">نام :</label>
-									<input <% if(oldInput){ %> value="<%= oldInput.name %>"<% } %> type="text"
-									name="name" required id="name"/> <% if (!isNameValid) { %>
-									<span class="wrong-input-alrt"> * اسمتو پیشی خورد ؟ </span>
+									<input <% if(oldInput){ %> value="<%= oldInput.name %>"<% } %> type="text" name="name" required id="name"/>
+									<% if (!isNameValid) { %>
+										<span class="wrong-input-alrt"> * اسمتو پیشی خورد ؟ </span>
 									<% } %>
 								</div>
 								<div class="signup-email">

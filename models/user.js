@@ -8,6 +8,7 @@ const userSchema = new Schema(
 			type: String,
 			required: true,
 		},
+
 		email: {
 			type: String,
 			required: true,
@@ -24,6 +25,18 @@ const userSchema = new Schema(
 		dota2Id: {
 			type: Number,
 			// required: true,
+		},
+		ownedTeam: {
+			teamId: {
+				type: Schema.Types.ObjectId,
+				ref: 'Team',
+				require: true,
+			},
+			name: {
+				type: String,
+				require: true,
+			},
+			image: String,
 		},
 		teams: [
 			{
@@ -45,9 +58,14 @@ const userSchema = new Schema(
 					tournamentId: {
 						type: Schema.Types.ObjectId,
 						ref: 'Tournament',
+						require: true,
 					},
 					name: {
 						type: String,
+						require: true,
+					},
+					joined: {
+						type: Boolean,
 						require: true,
 					},
 				},
@@ -61,6 +79,7 @@ const userSchema = new Schema(
 			type: [String],
 			default: [],
 		},
+		bio: String,
 		discordId: String,
 		imageUrl: String,
 		mmr: {
@@ -68,38 +87,33 @@ const userSchema = new Schema(
 			default: 0,
 		},
 		lfMsgCd: Number,
-		// messages: [
-		// 	{
-		// 		msgType: {
-		// 			type: String,
-		// 			require: true,
-		// 		},
-		// 		inComming: {
-		// 			type: Boolean,
-		// 			require: true,
-		// 		},
-		// 		content: {
-		// 			type: String,
-		// 			require: true,
-		// 		},
-		// 		responsor: {
-		// 			userId: {
-		// 				type: Schema.Types.ObjectId,
-		// 				ref: 'User',
-		// 				require: true,
-		// 			},
-		// 			name: {
-		// 				type: String,
-		// 				required: true,
-		// 			},
-		// 			relatedName: String,
-		// 		},
-		// 		sentAt: {
-		// 			type: Date,
-		// 			require: true,
-		// 		},
-		// 	},
-		// ],
+		mails: [
+			{
+				inComming: {
+					type: Boolean,
+					require: true,
+				},
+				content: {
+					type: String,
+					require: true,
+				},
+				responsor: {
+					userId: {
+						type: Schema.Types.ObjectId,
+						ref: 'User',
+						require: true,
+					},
+					name: {
+						type: String,
+						required: true,
+					},
+				},
+				sentAt: {
+					type: Date,
+					require: true,
+				},
+			},
+		],
 		requests: [
 			{
 				type: {
@@ -122,9 +136,116 @@ const userSchema = new Schema(
 				},
 			},
 		],
+		feeds: [
+			{
+				content: {
+					type: String,
+					require: true,
+				},
+				comments: [
+					{
+						sender: {
+							userId: {
+								type: Schema.Types.ObjectId,
+								ref: 'User',
+								require: true,
+							},
+							name: {
+								type: String,
+								required: true,
+							},
+						},
+						content: {
+							type: String,
+							require: true,
+						},
+						sentAt: {
+							type: Date,
+							require: true,
+						},
+					},
+				],
+				sentAt: {
+					type: Date,
+					require: true,
+				},
+			},
+		],
 	},
 	{ timestamps: true }
 )
+
+userSchema.methods.sendFeed = function (feedContent) {
+	let updatedFeeds
+	if (this.feeds) {
+		updatedFeeds = [
+			...this.feeds,
+			{
+				content: feedContent,
+				comments: [],
+				sentAt: new Date(),
+			},
+		]
+	} else {
+		updatedFeeds = [{ content: feedContent, comments: [], sendAt: new Date() }]
+	}
+	this.feeds = updatedFeeds
+	console.log(this.feeds)
+	// return
+	return this.save()
+}
+
+userSchema.methods.sendFeedComment = function (commentContent, receiver, feedId) {
+	const feedIndex = receiver.feeds.findIndex((feed) => feed._id.toString() === feedId)
+	if (feedIndex === -1) {
+		return Promise.reject('No feed to send the comment for!')
+	}
+	const updatedFeeds = [
+		...receiver.feeds.slice(0, feedIndex),
+		{
+			content: receiver.feeds[feedIndex].content,
+			sentAt: receiver.feeds[feedIndex].sendAt,
+			comments: [
+				...receiver.feeds[feedIndex].comments,
+				{
+					content: commentContent,
+					sentAt: new Date(),
+					sender: { userId: this._id, name: this.name },
+				},
+			],
+		},
+		...receiver.feeds.slice(feedIndex + 1),
+	]
+	receiver.feeds = updatedFeeds
+	return receiver.save()
+}
+
+userSchema.methods.sendMail = function (responsor, mailContent) {
+	if (!this.mails) this.mails = []
+	const updatedMails = [
+		...this.mails,
+		{
+			inComming: false,
+			content: mailContent,
+			responsor: { userId: responsor._id, name: responsor.name },
+			sentAt: new Date(),
+		},
+	]
+	this.mails = updatedMails
+	if (!responsor.mails) responsor.mails = []
+	const updatedMails2 = [
+		...responsor.mails,
+		{
+			inComming: true,
+			content: mailContent,
+			responsor: { userId: this._id, name: this.name },
+			sentAt: new Date(),
+		},
+	]
+	responsor.mails = updatedMails2
+	responsor.save()
+	return this.save()
+}
 
 userSchema.methods.joinToTeam = function (team, role) {
 	if (role) {
@@ -135,23 +256,72 @@ userSchema.methods.joinToTeam = function (team, role) {
 			updatedRoles = [...this.roles, role]
 		}
 		this.roles = updatedRoles
+		this.ownedTeam = {
+			teamId: team._id,
+			name: team.name,
+			image: team.imageUrl,
+		}
+	} else {
+		if (!this.teams) this.teams = []
+		const updatedTeams = [
+			...this.teams,
+			{ teamId: team._id, name: team.name, image: team.imageUrl },
+		]
+		this.teams = updatedTeams
+
+		let updatedTournaments
+		if (this.tournaments) {
+			const newTeamTournaments = team.tournaments.filter((tournament) => {
+				const sameTournament = this.tournaments.find(
+					(tour) => tour.tournamentId === tournament.tournamentId
+				)
+				if (sameTournament) return false
+				tournament = { ...tournament, joined: true }
+				return true
+			})
+			updatedTournaments = [...this.tournaments, ...newTeamTournaments]
+		} else {
+			updatedTournaments = [...team.tournaments]
+		}
+		this.tournaments = updatedTournaments
 	}
-	if (!this.teams) this.teams = []
-	const updatedTeams = [...this.teams, { teamId: team._id, name: team.name, image: team.imageUrl }]
-	this.teams = updatedTeams
+
+	return this.save()
+}
+
+userSchema.methods.joinToTour = function (tournament) {
+	const joined = tournament.leader.userId.toString() !== this._id.toString()
+	let updatedTournaments
+	if (this.tournaments) {
+		updatedTournaments = [
+			...this.tournaments,
+			{ tournamentId: tournament._id, name: tournament.name, joined: joined },
+		]
+	} else {
+		updatedTournaments = [{ tournamentId: tournament._id, name: tournament.name, joined: joined }]
+	}
+	this.tournaments = updatedTournaments
+
+	return this.save()
+}
+
+userSchema.methods.createTour = function (tournament, role) {
+	let updatedRoles
+	if (this.roles.includes(role)) {
+		updatedRoles = [...this.roles]
+	} else {
+		updatedRoles = [...this.roles, role]
+	}
+	this.roles = updatedRoles
 
 	let updatedTournaments
 	if (this.tournaments) {
-		const newTeamTournaments = team.tournaments.filter((tournament) => {
-			const sameTournament = this.tournaments.find((tour) =>
-				tour.tournamentId === tournament.tournamentId ? true : false
-			)
-			if (sameTournament) return false
-			return true
-		})
-		updatedTournaments = [...this.tournaments, ...newTeamTournaments]
+		updatedTournaments = [
+			...this.tournaments,
+			{ tournamentId: tournament._id, name: tournament.name, joined: false },
+		]
 	} else {
-		updatedTournaments = [...team.tournaments]
+		updatedTournaments = [{ tournamentId: tournament._id, name: tournament.name, joined: false }]
 	}
 	this.tournaments = updatedTournaments
 

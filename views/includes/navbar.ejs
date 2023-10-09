@@ -14,7 +14,6 @@
                         <ul id="search-result-box">
                         </ul>
                     </div>
-                    <button class="uli1__watch">مشاهده همه</button>
                 </div>
                 <div class="custom-select">
                     <select name="searchType">
@@ -88,39 +87,26 @@
                         </a>
                     </div>
             <% } else { %>
-                <div class="open__bar" dir="rtl">
-                    <div class="open__bar--block">
-                        <i class="bx bxs-dashboard"></i>
-                        <a href="/dashboard">داشبورد</a>
+                <div class="navbar__rightbox--link">
+                    <a id="login-acc"><%= userName %></a>
+                    <a><i class="bx bxs-log-in-circle"></i></a>
+                    <div class="open__bar" dir="rtl">
+                        <div class="open__bar--block">
+                            <i class="bx bxs-dashboard"></i>
+                            <a href="/dashboard" class="hover__overlay">داشبورد</a>
+                        </div>
+                        <div class="open__bar--block">
+                            <i class="bx bxs-bell"></i>
+                            <a href="#" class="hover__overlay">اعلان ها</a>
+                            <span>9+</span>
+                        </div>
+                        <div name="logoutBtn" class="open__bar--block">
+                            <i class="bx bxs-exit"></i>
+                            <a class="hover__overlay">خروج</a>
+                        </div>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
                     </div>
-                    <div class="open__bar--block">
-                        <i class="bx bxs-cog"></i>
-                        <a href="#">تنظیمات</a>
-                    </div>
-                    <div name="logoutBtn" class="open__bar--block">
-                        <i class="bx bxs-exit"></i>
-                        <a>خروج</a>
-                    </div>
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                 </div>
-                <!-- <div class="navbar__rightbox--link">
-                    <div class="nav-text">
-                        <form action="/auth/logout" method="post">
-                            <a class="submitLogout">
-                                <%= userName %>
-                            </a>
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                        </form>
-                    </div>
-                    <div class="navbar__rightbox icon">
-                        <form action="/auth/logout" method="post">
-                            <a class="submitLogout">
-                                <i class="bx bxs-log-in-circle"></i>
-                            </a>
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                        </form>
-                    </div>
-                </div> -->
             <% } %>
         </div>
     </div>

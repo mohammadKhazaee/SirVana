@@ -70,4 +70,4 @@ tournametSchema.methods.addNewTeam = function (team) {
 	return this.save()
 }
 
-module.exports = mongoose.model('Tournamet', tournametSchema)
+module.exports = mongoose.model('Tournament', tournametSchema)

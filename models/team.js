@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 
+const User = require('./user')
+
 const Schema = mongoose.Schema
 
 const teamSchema = new Schema(
@@ -38,8 +40,8 @@ const teamSchema = new Schema(
 				},
 			},
 		],
-		memberCount: Number,
-		avgMMR: Number,
+		memberCount: { type: Number, default: 1 },
+		avgMMR: { type: Number, default: 0 },
 		lfp: {
 			type: Boolean,
 			require: true,
@@ -84,6 +86,12 @@ teamSchema.methods.joinToTournament = function (tournament) {
 		},
 	]
 	this.tournaments = updatedTournaments
+
+	this.members.forEach(async (player) => {
+		const playerDoc = await User.findById(player.userId)
+		await playerDoc.joinToTour(tournament)
+	})
+
 	return this.save()
 }
 

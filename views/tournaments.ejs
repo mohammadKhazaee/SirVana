@@ -15,7 +15,7 @@
 
 	<body>
 		<!-- Navbar -->
-		<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn,userName: userName, navSearch:
+		<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName, navSearch:
 		false}) %>
 
 		<!-- background -->
@@ -30,7 +30,7 @@
 		<!--  -->
 
 		<!-- creat tournoment modal box -->
-		<div class="create-tour">
+		<div class="create-tour<%= openModal? ' show-modal':'' %>">
 			<div class="create-tour__content">
 				<div class="modal-title">
 					<span class="close-button">&times;</span>
@@ -40,19 +40,15 @@
 					<div class="right-box">
 						<div class="form-acontrol">
 							<label for="name">اسم تورنومنت‌ :</label>
-							<input type="text" id="name" name="name" autofocus />
-							<!-- <span class="wrong-input-alrt">* اسم تورنومنتت یادت رفت</span> -->
+							<input <% if(oldInput){ %> value="<%= oldInput.name %>"<% } %> type="text" id="name" name="name" autofocus />
+							<% if (!isNameValid) { %>
+								<span class="wrong-input-alrt">* اسم تورنومنتت یادت رفت</span>
+							<% } %>
 						</div>
 						<div class="mmr-control">
 							<label>محدوده رنک :</label>
 							<label class="in" for="mmr-first">از</label>
-							<input
-								type="text"
-								name="minMMR"
-								list="ranks-first"
-								id="mmrfirst"
-								autocomplete="off"
-							/>
+							<input <% if(oldInput){ %> value="<%= oldInput.minMMR %>"<% } %> type="text" name="minMMR" list="ranks-first" id="mmrfirst" autocomplete="off"/>
 							<datalist id="ranks-first">
 								<option>Herald</option>
 								<option>Guardian</option>
@@ -64,7 +60,7 @@
 								<option>Immortal</option>
 							</datalist>
 							<label class="in" for="mmrlast">تا</label>
-							<input type="text" name="maxMMR" list="ranks-last" id="mmrlast" autocomplete="off" />
+							<input <% if(oldInput){ %> value="<%= oldInput.maxMMR %>"<% } %> type="text" name="maxMMR" list="ranks-last" id="mmrlast" autocomplete="off" />
 							<datalist id="ranks-last">
 								<option>Herald</option>
 								<option>Guardian</option>
@@ -77,39 +73,45 @@
 							</datalist>
 							<div class="check">
 								<div class="discheck">
-									<input type="checkbox" name="freeMMRBox" id="discheck" />
+									<input <% if(oldInput && oldInput.freeMMRBox){ %>checked<% } %> type="checkbox" name="freeMMRBox" id="discheck" />
 									<label for="discheck" class="mg"> بدون رنک </label>
 								</div>
 								<div class="bracket">
 									<label for="bo1">
-										<input type="radio" id="bo1" name="boRadio" value="false" checked />
+										<input <% if(oldInput && !oldInput.boRadio){ %>checked<% } %> type="radio" id="bo1" name="boRadio" value="false" checked />
 										<span>bo1</span>
 									</label>
 									<label for="bo3">
-										<input type="radio" id="bo3" name="boRadio" value="true" />
+										<input <% if(oldInput && oldInput.boRadio){ %>checked<% } %> type="radio" id="bo3" name="boRadio" value="true" />
 										<span>bo3</span>
 									</label>
 								</div>
 							</div>
-							<!-- <span class="wrong-input-alrt"> * رنک تورنومنتت رو انتخاب نکردی!</span> -->
+							<% if (!isRankValid) { %>
+								<span class="wrong-input-alrt"> * رنک تورنومنتت رو انتخاب نکردی!</span>
+							<% } %>
 						</div>
 						<div class="bracket"></div>
 						<div class="date">
 							<label for="date">تاریخ شروع :</label>
-							<input type="datetime-local" name="startDate" id="date" autocomplete="off" />
-							<!-- <span class="wrong-input-alrt">* تورنومنتت سال بعد شروع میشه مگه‌؟</span> -->
+							<input <% if(oldInput){ %> value="<%= oldInput.startDate %>"<% } %> type="datetime-local" name="startDate" id="date" autocomplete="off" />
+							<% if (!isDateValid) { %>
+								<span class="wrong-input-alrt">* تورنومنتت سال بعد شروع میشه مگه‌؟</span>
+							<% } %>
 						</div>
 						<div class="prize">
 							<label for="prize">جایزه :</label>
-							<input type="number" name="prize" id="prize" />
-							<!-- <span class="wrong-input-alrt">* مسابقه بدون جایزه حال نمیده!</span> -->
+							<input <% if(oldInput){ %> value="<%= oldInput.prize %>"<% } %> type="number" name="prize" id="prize" />
+							<% if (!isPrizeValid) { %>
+								<span class="wrong-input-alrt">* مسابقه بدون جایزه حال نمیده!</span>
+							<% } %>
 						</div>
 					</div>
 					<div class="vert"></div>
 					<div class="left-box">
 						<div class="description">
 							<label for="desc">توضیحات تورنومنت :</label>
-							<textarea name="description" id="desc" cols="10" rows="10"></textarea>
+							<textarea name="description" id="desc" cols="10" rows="10"><% if(oldInput){ %><%= oldInput.description %><% } %></textarea>
 						</div>
 						<label>تصویر تورنومنت :</label>
 						<div class="image-upload">
@@ -133,12 +135,9 @@
 								<div class="navbar__leftbox--search" id="show" dir="rtl">
 									<i class="bx bx-search-alt"></i>
 									<input
-										dir="rtl"
-										name="search"
-										type="search"
+										dir="rtl" name="search" type="search"
 										value="<%= searchInput %>"
-										placeholder="جستجوی تورنومنت ..."
-									/>
+										placeholder="جستجوی تورنومنت ..."/>
 								</div>
 							</div>
 							<label for="range" class="range-label">رنک تورنومنت :</label>
@@ -173,8 +172,7 @@
 						<img
 							class="td"
 							src="<%= tournament.imageUrl?tournament.imageUrl:'img/tourcards.png' %>"
-							alt=""
-						/>
+							alt=""/>
 						<div class="tour-caption">
 							<h2 class="tour-card__title"><%= tournament.name %></h2>
 							<p class="tour-card__content">شروع از : <%= tournament.startDate %></p>

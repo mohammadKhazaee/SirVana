@@ -97,7 +97,7 @@
 				<div class="card-content">
 					<h1>تورنومنت برگزار کنید .</h1>
 					<p>بیش از صد تورنومنت کامل شده و ده ها تورنومنت پیش رو.‌ آیا آماده نبرد هستید ؟</p>
-					<a href="tournoment.html" class="card-btn">ایجاد تورنومنت</a>
+					<a href="/tournoments" class="card-btn">ایجاد تورنومنت</a>
 				</div>
 				<div class="card">
 					<img src="img/tourcards.png" class="card-img" alt="" />
@@ -105,9 +105,10 @@
 			</div>
 			<div class="card-box2">
 				<div class="card-content">
-					<form action="/join-team-req" method="post">
+					<form action="/dashboard/accept-team" method="post">
 				<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-						<input type="hidden" name="teamId" value="650198f21a0f950d5879e894">
+						<input type="hidden" name="tournamentId" value="65156abd0d9f64495459f47c">
+						<input type="hidden" name="teamId" value="651526cffafae73e1474d307">
 						<input type="submit" value="join team">
 					</form>
 					<h1>به راحتی مربی شوید .</h1>
@@ -115,7 +116,7 @@
 						آیا استعداد و مهارت کافی برای آموزش به دوستان و تیم های خود را دارید ؟ اینحا بهترین فرصت
 						برای مربی شدن است .
 					</p>
-					<a href="tournoment.html" class="card-btn">مربی شدن</a>
+					<a href="/coach" class="card-btn">مربی شدن</a>
 				</div>
 				<div class="card">
 					<img src="img/coachcreat.webp" class="card-img" alt="" />
@@ -125,7 +126,7 @@
 				<div class="card-content">
 					<h1>تیم خود را بسازید .</h1>
 					<p>آیا آمادگی رهبری یک تیم را دارید ؟ پس بدون وقفه تیم رویایی خود را بسازید .</p>
-					<a href="tournoment.html" class="card-btn">تشکیل تیم</a>
+					<a href="/teams" class="card-btn">تشکیل تیم</a>
 				</div>
 				<div class="card">
 					<img src="img/teamcreat.webp" class="card-img" alt="" />
@@ -145,19 +146,12 @@
 				</div>
 				<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 				<div class="lfp-select">
-					<!-- <div class="menu">
-						<select>
-							<option selected>Team Jinx</option>
-							<option>Team Liquid</option>
-							<option>Team Aster</option>
-						</select>
-					</div> -->
 					<div class="custom-select">
 						<select name="lfpTeam">
 							<option value="null">انتخاب تیم</option>
-							<option value="team1">Team Jinx</option>
-							<option value="team2">Team Liquid</option>
-							<option value="team3">Team Aster</option>
+							<% user.teams.forEach(team => { %>
+								<option value="<%= team.name %>"><%= team.name %></option>
+							<% }) %>
 						</select>
 					</div>
 					<div class="custom-select">
@@ -194,28 +188,30 @@
 				<div class="looking-for__team">
 				</div>
 				<div class="lft-select">
-					<div class="custom-select">
-						<select>
-							<option value="null">پوز</option>
-							<option value="1">پوز 1</option>
-							<option value="2">پوز 2</option>
-							<option value="3">پوز 3</option>
-							<option value="4">پوز 4</option>
-							<option value="5">پوز 5</option>
-						</select>
-					</div>
-					<div class="custom-select">
-						<select>
-							<option value="null">رنک</option>
-							<option value="Herald">Herald</option>
-							<option value="Guardian">Guardian</option>
-							<option value="Crusader">Crusader</option>
-							<option value="Archon">Archon</option>
-							<option value="Legend">Legend</option>
-							<option value="Ancient">Ancient</option>
-							<option value="Divine">Divine</option>
-							<option value="Immortal">Immortal</option>
-						</select>
+					<div>
+						<div class="custom-select off">
+							<select>
+								<option value="null">پوز</option>
+								<option value="1">پوز 1</option>
+								<option value="2">پوز 2</option>
+								<option value="3">پوز 3</option>
+								<option value="4">پوز 4</option>
+								<option value="5">پوز 5</option>
+							</select>
+						</div>
+						<div class="custom-select on">
+							<select>
+								<option value="null">رنک</option>
+								<option value="Herald">Herald</option>
+								<option value="Guardian">Guardian</option>
+								<option value="Crusader">Crusader</option>
+								<option value="Archon">Archon</option>
+								<option value="Legend">Legend</option>
+								<option value="Ancient">Ancient</option>
+								<option value="Divine">Divine</option>
+								<option value="Immortal">Immortal</option>
+							</select>
+						</div>
 					</div>
 					<button id="lftSend" type="submit" class="create">ثبت</button>
 				</div>
@@ -231,6 +227,7 @@
 		<script src="js/select-menu.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 		<script src="js/main.js"></script>
+		<script src="js/index.js"></script>
 		<script src="js/transform.js"></script>
 	</body>
 </html>

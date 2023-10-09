@@ -5,6 +5,9 @@ const User = require('../models/user')
 const throwError = require('../middlewares/throwError')
 const rank = require('../utils/rank')
 
+const nameRegex = /[a-zA-Z0-9'\s]+/
+const descRegex = /[^<>]+/
+
 exports.postLogin = [
 	body('email', 'Please enter email in right format!')
 		.trim()
@@ -108,7 +111,7 @@ exports.getNewPass = [
 			})
 			if (!user) throw 'Invalid token!'
 			req.resetToken = resetToken
-			req.newUser = user
+			req.newPassUser = user
 			return true
 		}),
 ]
@@ -151,21 +154,28 @@ exports.getTeams = [
 exports.postTeam = [
 	body('name')
 		.trim()
-		.escape()
 		.notEmpty()
 		.withMessage('Enter name please!')
-		.isAlphanumeric()
-		.withMessage('name should only contain english letters or numbers'),
+		.custom((name, { req }) => {
+			if (name.match(nameRegex)[0] !== name)
+				throw 'name should only contain english letters or numbers'
+			return true
+		}),
 	body('nameTag')
 		.trim()
-		.escape()
 		.notEmpty()
 		.withMessage('Enter you team tag please!')
 		.isLength({ min: 2, max: 3 })
 		.withMessage('name tag should be 2 or 3 characters')
-		.isAlpha()
+		.isAlpha('en-US')
 		.withMessage('name tag should only contain english letters'),
-	body('description').trim().escape(),
+	body('description')
+		.trim()
+		.custom((description, { req }) => {
+			if (description.match(descRegex)[0] !== description)
+				throw "description can't contain < or > character"
+			return true
+		}),
 ]
 
 exports.getTournaments = [
@@ -188,12 +198,16 @@ exports.postTournament = [
 		.escape()
 		.notEmpty()
 		.withMessage('Enter name please!')
-		.isAlphanumeric()
-		.withMessage('name should only contain english letter and number'),
+		.custom((name, { req }) => {
+			if (name.match(nameRegex)[0] !== name)
+				throw 'name should only contain english letters or numbers'
+			return true
+		}),
 	body('minMMR')
 		.trim()
 		.escape()
 		.custom((minMMR, { req }) => {
+			if (req.body.freeMMRBox === 'on') return true
 			if (minMMR === '') throw 'please choose a min mmr!'
 			req.minMMR = rank.giveNumberedMedal(minMMR)
 			if (req.minMMR) return true
@@ -203,6 +217,7 @@ exports.postTournament = [
 		.trim()
 		.escape()
 		.custom((maxMMR, { req }) => {
+			if (req.body.freeMMRBox === 'on') return true
 			if (maxMMR === '') throw 'please choose a max mmr!'
 			req.maxMMR = rank.giveNumberedMedal(maxMMR)
 			if (!req.maxMMR) throw 'Wrong max mmr!'

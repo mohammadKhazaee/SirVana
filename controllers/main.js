@@ -7,6 +7,10 @@ const Message = require('../models/message')
 const rank = require('../utils/rank')
 const io = require('../socket')
 
+const TEAM_PER_PAGE = 15
+const TOURNAMENT_PER_PAGE = 11
+const PLAYER_PER_PAGE = 16
+
 exports.getIndex = async (req, res, next) => {
 	const tournaments = await Tournament.find()
 		.sort('startDate')
@@ -23,18 +27,20 @@ exports.getIndex = async (req, res, next) => {
 			imageUrl: imageUrl,
 		}
 	})
+	const canSend = req.user ? (req.user.lfMsgCd ? req.user.lfMsgCd < Date.now() : true) : false
 	res.render('index', {
 		pageTitle: 'SirVana',
+		user: req.user
+			? { userName: req.user.name, teams: req.user.teams }
+			: { userName: '', teams: [] },
 		tournaments: modifiedTournaments,
-		canSend: req.user ? req.user.lfMsgCd < Date.now() : false,
+		canSend: true,
 	})
 }
 
 exports.getTeams = async (req, res, next) => {
-	const TEAM_PER_PAGE = 15
 	const sortType = req.sortType
 	const lfpCheck = req.query.lfp === 'on'
-	// const checkOption = lfpCheck ? { lfp: true } : {}
 	const searchInput = req.query.search || ''
 	let noFilter, dbQuery
 	if (searchInput !== '')
@@ -49,19 +55,29 @@ exports.getTeams = async (req, res, next) => {
 		noFilter = true
 		dbQuery = {}
 	}
-
+	// const newTeams = req.user.teams.filter(
+	// 	(team) =>
+	// 		team.teamId.toString() === '651526cffafae73e1474d307' ||
+	// 		team.teamId.toString() === '6515635e7c2f8f02600ed499'
+	// )
 	try {
 		const teams = await Team.find(dbQuery)
 			.collation({ locale: 'en' }) // searching case insensitive
 			.sort(sortType)
 			.limit(TEAM_PER_PAGE)
+		const renderTeams = teams.map((team) => ({ ...team._doc, avgMMR: Math.floor(team.avgMMR) }))
 		res.render('teams', {
 			pageTitle: 'SirVana · تیم ها',
-			teams: teams,
+			teams: renderTeams,
 			lfpCheck: lfpCheck,
 			sortType: req.query.sortType,
 			searchInput: searchInput,
 			noFilter: noFilter,
+			oldInput: [],
+			openModal: false,
+			isNameValid: true,
+			isNameTagValid: true,
+			isDescValid: true,
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -74,6 +90,37 @@ exports.postTeam = async (req, res, next) => {
 	const nameTag = req.body.nameTag
 	const description = req.body.description
 
+	const errors = validationResult(req).array()
+	if (errors.length > 0) {
+		const oldInput = {
+			name: name,
+			nameTag: nameTag,
+			description: description,
+		}
+		const nameError = errors.find((error) => error.param === 'name')
+		const nameTagError = errors.find((error) => error.param === 'nameTag')
+		const descError = errors.find((error) => error.param === 'description')
+		let nameTagMessage, nameMessage, descMessage
+		if (nameError) nameMessage = nameError.msg
+		if (nameTagError) nameTagMessage = nameTagError.msg
+		if (descError) descMessage = descError.msg
+
+		const teams = await Team.find().collation({ locale: 'en' }).limit(TEAM_PER_PAGE)
+		const renderTeams = teams.map((team) => ({ ...team._doc, avgMMR: Math.floor(team.avgMMR) }))
+		return res.status(422).render('teams', {
+			pageTitle: 'SirVana · تیم ها',
+			teams: renderTeams,
+			lfpCheck: false,
+			sortType: '',
+			searchInput: '',
+			noFilter: true,
+			oldInput: oldInput,
+			openModal: true,
+			isNameValid: !nameError,
+			isNameTagValid: !nameTagError,
+			isDescValid: !descError,
+		})
+	}
 	try {
 		const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/') : null
 		const team = new Team({
@@ -91,11 +138,11 @@ exports.postTeam = async (req, res, next) => {
 					name: req.user.name,
 				},
 			],
-			avgMMR: req.user.mmr || 0,
+			avgMMR: req.user.mmr,
 			lfp: false,
 		})
 		await team.save()
-		await req.user.joinTeam(team, 'Team Leader')
+		await req.user.joinToTeam(team, 'Team Leader')
 		// have to change redirection to /team/:teamId probably
 		res.redirect('/teams')
 	} catch (error) {
@@ -105,7 +152,6 @@ exports.postTeam = async (req, res, next) => {
 }
 
 exports.getTournaments = async (req, res, next) => {
-	const TOURNAMENT_PER_PAGE = 11
 	const marginLeft = req.marginLeft
 	const rankFilter = req.rankFilter
 	const slided = req.query.slided === 'true'
@@ -145,6 +191,12 @@ exports.getTournaments = async (req, res, next) => {
 			rankIcon: rankFilter ? rankFilter.split('.')[1] : 'Herald',
 			searchInput: searchInput,
 			noFilter: !isFiltered,
+			oldInput: [],
+			openModal: false,
+			isNameValid: true,
+			isRankValid: true,
+			isDateValid: true,
+			isPrizeValid: true,
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -161,26 +213,71 @@ exports.postTournament = async (req, res, next) => {
 	const startDate = req.body.startDate
 	const prize = req.body.prize
 	const description = req.body.description
-	const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/') : null
 
-	const tournament = new Tournament({
-		name: name,
-		prize: prize,
-		description: description,
-		imageUrl: imageUrl,
-		startDate: startDate,
-		bo3: boRadio === 'true',
-		minMMR: minMMR,
-		maxMMR: maxMMR,
-		organizer: {
-			userId: req.user._id,
-			name: req.user.name,
-		},
-	})
+	const errors = validationResult(req).array()
+	if (errors.length > 0) {
+		const oldInput = {
+			name: name,
+			freeMMRBox: freeMMRBox,
+			minMMR: minMMR,
+			maxMMR: maxMMR,
+			boRadio: boRadio,
+			startDate: startDate,
+			prize: prize,
+			description: description,
+		}
+		const nameError = errors.find((error) => error.param === 'name')
+		const minMMRError = errors.find((error) => error.param === 'minMMR')
+		const maxMMRError = errors.find((error) => error.param === 'maxMMR')
+		const rankError = [minMMRError, maxMMRError][0]
+		const dateError = errors.find((error) => error.param === 'startDate')
+		const prizeError = errors.find((error) => error.param === 'prize')
+		let rankMessage, nameMessage, dateMessage, prizeMessage
+		if (nameError) nameMessage = nameError.msg
+		if (!freeMMRBox && rankError) rankMessage = rankError.msg
+		if (dateError) dateMessage = dateError.msg
+		if (prizeError) prizeMessage = prizeError.msg
+
+		const tournaments = await Tournament.find()
+			.collation({ locale: 'en' })
+			.limit(TOURNAMENT_PER_PAGE)
+		return res.status(422).render('tournaments', {
+			pageTitle: 'SirVana · مسابقات',
+			path: '/tournaments',
+			oldInput: oldInput,
+			tournaments: tournaments,
+			marginLeft: '-4%',
+			rankFilter: '0',
+			rankIcon: 'Herald',
+			searchInput: '',
+			noFilter: true,
+			openModal: true,
+			isNameValid: !nameError,
+			isRankValid: !(!freeMMRBox && rankError),
+			isDateValid: !dateError,
+			isPrizeValid: !prizeError,
+		})
+	}
 	try {
-		const createdTournament = await tournament.save()
-		// console.log(createdTournament)
+		const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/') : null
+
+		const tournament = new Tournament({
+			name: name,
+			prize: prize,
+			description: description,
+			imageUrl: imageUrl,
+			startDate: startDate,
+			bo3: boRadio === 'true',
+			minMMR: minMMR,
+			maxMMR: maxMMR,
+			organizer: {
+				userId: req.user._id,
+				name: req.user.name,
+			},
+		})
 		// have to change redirection to /tournament/:tournamentId probably
+		const createdTournament = await tournament.save()
+		await req.user.createTour(tournament, 'Organizer')
 		res.redirect('/tournaments')
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -189,13 +286,11 @@ exports.postTournament = async (req, res, next) => {
 }
 
 exports.getPlayers = async (req, res, next) => {
-	const TEAM_PER_PAGE = 16
 	const lft = req.query.lft === 'on'
 	const minMMR = req.minMMR
 	const maxMMR = req.maxMMR
 	const searchInput = req.query.search
 	const pos = req.query.pos
-	const isFiltered = req.query.filter
 
 	let dbQuery = {}
 	if (searchInput !== '') dbQuery.name = { $regex: new RegExp(`.*${searchInput}.*`, 'i') }
@@ -209,7 +304,7 @@ exports.getPlayers = async (req, res, next) => {
 		const users = await User.find(dbQuery)
 			.collation({ locale: 'en' }) // searching case insensitive
 			.select('_id name pos mmr imageUrl lft')
-			.limit(TEAM_PER_PAGE)
+			.limit(PLAYER_PER_PAGE)
 		const modifiedUsers = users.map((user) => {
 			return {
 				...user._doc,
@@ -224,6 +319,7 @@ exports.getPlayers = async (req, res, next) => {
 			minMMR: rank.giveMedal(minMMR),
 			maxMMR: rank.giveMedal(maxMMR),
 			pos: pos,
+			lft: lft,
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -267,7 +363,7 @@ exports.postSearchResult = async (req, res, next) => {
 
 exports.getLfMessages = async (req, res, next) => {
 	try {
-		const messages = await Message.find().limit(20)
+		const messages = await Message.find().sort('createdAt').limit(20)
 		res.send({ messages: messages })
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -280,10 +376,9 @@ exports.postLfMessages = async (req, res, next) => {
 		const recievedMsg = req.body
 		let message
 		if (recievedMsg.type === 'lfp') {
-			console.log(recievedMsg.content.name)
-			const sender = await Team.findOne({ name: recievedMsg.content.name }).select('_id')
+			const sender = req.user.teams.find((team) => team.name === recievedMsg.content.name)
 			message = new Message({
-				sender: { userId: sender._id, name: recievedMsg.content.name },
+				sender: { userId: sender.teamId, name: recievedMsg.content.name },
 				content: `${recievedMsg.content.pos} ${recievedMsg.content.rank}`,
 				type: recievedMsg.type,
 			})
@@ -297,7 +392,7 @@ exports.postLfMessages = async (req, res, next) => {
 		await message.save()
 		req.user.lfMsgCd = Date.now() + 1000 * 60 * 60 * 1
 		await req.user.save()
-		io.getIO().emit('message', message)
+		io.getIO().emit('lf-message', message)
 		res.sendStatus(200)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500

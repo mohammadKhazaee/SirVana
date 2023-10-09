@@ -15,133 +15,109 @@
 	<body>
 		<div class="container" style="background-image: url(img/dashboard-bg.jpg)">
 			<div class="container2">
+				<a href="/" class="exit"><img src="img/shortcut icon.png" alt=""></a>
 				<div class="topblock">
 					<div class="topblock__menu">
 						<a href="#">تنظیمات</a>
 						<a>/</a>
-						<a href="#">تورنومنت</a>
+						<a href="#">اعلان ها</a>
 						<a>/</a>
-						<a href="#">تیم</a>
+						<a href="/dashboard/team-tour">تیم ها و تورنومنت ها</a>
 						<a>/</a>
-						<a href="#" class="active">پروفایل</a>
+						<a href="/dashboard" class="active">پروفایل</a>
 					</div>
 					<div class="topblock__nameteam">
-						<input type="text" value="<%= user.name %>" disabled dir="ltr" />
+						<input type="text" name="name" value="<%= user.name %>" disabled dir="ltr" />
 						<div class="topblock__team">
 							<span><%= user.createdAt %></span>
-							<span>Team Jinx</span>
+							<% if(user.ownedTeam){ %><span><%= user.ownedTeam.name %></span><% } %>
 						</div>
 					</div>
 				</div>
 				<div class="midblock">
 					<div class="midblockk">
-						<div class="midblock__rights">
-							<img src="img/png-hero.png" alt="" />
-						</div>
 						<div class="midblock__right">
-							<div class="midblock__right--top1">
-								<p>تیم ها :</p>
-								<div class="teams-details">
-									<div class="team-details__nameimage">
-										<img src="img/teamliquidlogo.jfif" alt="" />
-										<span>Team Liqiud</span>
+							<div class="midblock__right1">
+								<p>ارتباط با پلیر :</p>
+								<div class="mid-note"></div>
+								<div class="midblock__right1--coms">
+									<div class="discord-id">
+										<span>آیدی دیسکورد :</span>
+										<span dir="ltr"><input type="text" name="discordId" value="<%= user.discordId %>" disabled /></span>
 									</div>
-									<div class="more-team">
-										<a>برو به تیم</a>
-									</div>
-								</div>
-								<div class="teams-details">
-									<div class="team-details__nameimage">
-										<img src="img/teamliquidlogo.jfif" alt="" />
-										<span>Team Liqiud</span>
-									</div>
-									<div class="more-team">
-										<a>برو به تیم</a>
-									</div>
-								</div>
-								<div class="teams-details">
-									<div class="team-details__nameimage">
-										<img src="img/teamliquidlogo.jfif" alt="" />
-										<span>Team Liqiud</span>
-									</div>
-									<div class="more-team">
-										<a>برو به تیم</a>
-									</div>
-								</div>
-							</div>
-							<div class="midblock__right--top2">
-								<p>تورنومنت ها :</p>
-								<div class="tours-details">
-									<div class="tour-details__nameimage">
-										<img src="img/tourcards.png" alt="" />
-										<span>Farshad Hogo</span>
-									</div>
-									<div class="more-tour">
-										<a>برو به تورنومنت</a>
-									</div>
-								</div>
-								<div class="tours-details">
-									<div class="tour-details__nameimage">
-										<img src="img/tourcards.png" alt="" />
-										<span>Farshad Hogo</span>
-									</div>
-									<div class="more-tour">
-										<a>برو به تورنومنت</a>
-									</div>
-								</div>
-								<div class="tours-details">
-									<div class="tour-details__nameimage">
-										<img src="img/tourcards.png" alt="" />
-										<span>Farshad Hogo</span>
-									</div>
-									<div class="more-tour">
-										<a>برو به تورنومنت</a>
+									<div class="dota2-id">
+										<span>آیدی دوتا ۲ :</span>
+										<span dir="ltr"><input type="text" name="dota2Id" value="<%= user.dota2Id %>" disabled /></span>
 									</div>
 								</div>
 							</div>
 							<div class="midblock__right--top3">
-								<div class="rightbox__bot--comments">
-									<div class="comments__image">
-										<img src="img/player-card6.jpg" alt="" />
-									</div>
+								<div class="rightbox__bot--comments" id="first-post">
 									<div class="comments__box">
 										<div class="comments__box--top">
 											<div class="comments__box--top-name">
-												<span>Mr_Bean</span>
+												<span>رویداد های اخیر</span>
 											</div>
 											<div class="comments__box--top-reply">
-												<a>ارسال پست</a>
-												<a><i class="bx bx-like"></i></a>
+												<a name="sendFeedBtn">ارسال</a>
 											</div>
 										</div>
 										<div class="comments__box--bot">
 											<div class="comments__box--bot-comment">
-												<input type="text" placeholder="متن دلخواه خود را بنویسید..." />
+												<input name="feedInput" type="text" placeholder="متن دلخواه خود را بنویسید..." />
 											</div>
 										</div>
 									</div>
 								</div>
-								<div class="rightbox__bot--comments">
-									<div class="comments__image">
-										<img src="img/player-card6.jpg" alt="" />
-									</div>
-									<div class="comments__box">
-										<div class="comments__box--top">
-											<div class="comments__box--top-name">
-												<span>Mr_Bean</span>
+								<!-- ... -->
+								<div class="scroll-box">
+									<% user.feeds.forEach(feed => { %>
+										<div class="box-shadow">
+											<div class="rightbox__bot--comments">
+												<div class="comments__box">
+													<div class="comments__box--top">
+														<div class="comments__box--top-name">
+															<span><%= user.name %></span>
+														</div>
+														<div class="comments__box--top-reply">
+															<a name="deleteFeedBtn">حذف</a>
+														</div>
+													</div>
+													<div class="comments__box--bot">
+														<div class="comments__box--bot-comment">
+															<p><%= feed.content %></p>
+														</div>
+													</div>
+												</div>
 											</div>
-											<div class="comments__box--top-reply">
-												<a>تغییر متن</a>
-												<a><i class="bx bx-like"></i></a>
+											<% feed.comments.forEach(comment => { %>
+												<div class="rightbox__bot--comments">
+													<div class="comments__box">
+														<div class="comments__box--top">
+															<div class="comments__box--top-name">
+																<span><%= comment.sender.name %></span>
+															</div>
+															<div class="comments__box--top-reply">
+																<a name="deleteCommentBtn">حذف</a>
+															</div>
+														</div>
+														<div class="comments__box--bot">
+															<div class="comments__box--bot-comment">
+																<p><%= comment.content %></p>
+															</div>
+														</div>
+													</div>
+												</div>
+											<% }) %>
+											<div class="comments__box--reply">
+												<input name="commentInput" type="text" placeholder="پاسخ به این پست ..." />
+												<a name="sendCommentBtn">ارسال</a>
+												<input type="hidden" value="<%= feed._id %>">
 											</div>
 										</div>
-										<div class="comments__box--bot">
-											<div class="comments__box--bot-comment">
-												<p>سلام بجه ها من بازیمو بردم ...</p>
-											</div>
-										</div>
-									</div>
+									<% }) %>
 								</div>
+								<!-- .... -->
 							</div>
 						</div>
 						<div class="midblock__left">
@@ -149,6 +125,10 @@
 								<div class="midblock__left1--top">
 									<div class="midblock__left1--topimg">
 										<img src="<%= user.imageUrl %>" alt="" />
+										<div class="image-upload" style="display: none;">
+											<input name="image" type="file">
+											<a><i class="bx bx-plus"></i></a>
+										</div>
 									</div>
 									<div class="midblock__left1--toprole">
 										<% user.roles.forEach(role => { %>
@@ -156,7 +136,7 @@
 												<i class="bx bxs-circle"></i>
 												<span><%= role.name %></span>
 											</div>
-										<% }); %>
+										<% }) %>
 									</div>
 								</div>
 								<div class="midblock__left1--bottom">
@@ -164,47 +144,63 @@
 										<div class="rank">
 											<div class="pos">
 												<p>پوز</p>
-												<input type="text" value="<%= user.pos? user.pos:'ثبت نشده' %>" disabled />
+												<p name="posP" style="font: 1.4rem 'Lato', sans-serif;color: #fff;"><%= user.pos %></p>
+												<details class="multiple-select" style="display: none;">
+													<summary name="summary"><%= user.pos %></summary>
+													<div class="multiple-select-dropdown">
+														<label>
+															<input type="checkbox" hidden name="select" value="1" <%= user.pos === 'همه' || user.pos.indexOf("1") != -1 ? 'checked':'' %> />
+															<span class="content">1</span>
+														</label>
+														<label>
+															<input type="checkbox" hidden name="select" value="2" <%= user.pos === 'همه' || user.pos.indexOf("2") != -1 ? 'checked':'' %>/>
+															<span class="content">2</span>
+														</label>
+														<label>
+															<input type="checkbox" hidden name="select" value="3" <%= user.pos === 'همه' || user.pos.indexOf("3") != -1 ? 'checked':'' %>/>
+															<span class="content">3</span>
+														</label>
+														<label>
+															<input type="checkbox" hidden name="select" value="4" <%= user.pos === 'همه' || user.pos.indexOf("4") != -1 ? 'checked':'' %>/>
+															<span class="content">4</span>
+														</label>
+														<label>
+															<input type="checkbox" hidden name="select" value="5" <%= user.pos === 'همه' || user.pos.indexOf("5") != -1 ? 'checked':'' %>/>
+															<span class="content">5</span>
+														</label>
+													</div>
+												</details>
 											</div>
 											<div class="mmr">
 												<p>رنک</p>
-												<input type="text" value="<%= user.mmr.number %>" disabled />
+												<input type="text" name="mmr" value="<%= user.mmr.number %>" disabled />
+											</div>
+											<div class="lft">
+												<p>نیازمند تیم</p>
+												<div class="team-need">
+													<input type="checkbox" name="lftCheck" disabled <%= user.lft ? 'checked':'' %> />
+													<span class="checkmark"></span>
+												</div>
 											</div>
 										</div>
 										<div class="medal">
-											<img src="img/<%= user.mmr.medal %>_medal.webp" alt="" />
+											<img name="medalImg" src="img/<%= user.mmr.medal %>_medal.webp" alt="" />
 										</div>
 									</div>
 								</div>
 							</div>
 							<div class="midblock__left2">
-								<div
-									class="midblock__left2--images"
-									style="background-image: url(img/centaur-warrunner.jpg)"
-								></div>
-								<div
-									class="midblock__left2--images"
-									style="background-image: url(img/meepo.jpg)"
-								></div>
-								<div
-									class="midblock__left2--images"
-									style="background-image: url(img/wraith-king.jpg)"
-								></div>
+								<div class="midblock__left2--images">
+									<img src="img/centaur-warrunner.jpg" alt="" />
+									<img src="img/wraith-king.jpg" alt="" />
+									<img src="img/meepo.jpg" alt="" />
+								</div>
 							</div>
 							<div class="midblock__left3">
-								<div class="email">
-									<p>ایمیل :</p>
-									<p dir="ltr">
-										<input type="text" value="<%= user.email %>" disabled />
-									</p>
-								</div>
-								<div class="discord-id">
-									<p>آیدی دیسکورد :</p>
-									<p dir="ltr"><input type="text" value="<%= user.discordId? user.discordId:'ثبت نشده' %>" disabled /></p>
-								</div>
-								<div class="dota2-id">
-									<p>آیدی دوتا ۲ :</p>
-									<p dir="ltr"><input type="text" value="<%= user.dota2Id? user.dota2Id:'ثبت نشده' %>" disabled /></p>
+								<p>بیوگرافی :</p>
+								<div class="mid-note"></div>
+								<div class="bio">
+									<textarea disabled name="bio" cols="30" rows="6"><%= user.bio ? user.bio:'یه چیزی بنویس حالا. . .' %></textarea>
 								</div>
 							</div>
 						</div>
@@ -212,18 +208,19 @@
 				</div>
 				<div class="botblock">
 					<div class="botblockk">
-						<a class="edit-profile">
+						<a name="editProfile" class="edit-profile">
 							<i class="bx bx-pencil"></i>
-							تغییر پروفایل
+							<p>تغییر پروفایل</p>
 						</a>
 						<a class="edit-image">
-							<i class="bx bx-image"></i>
+							<label for="file-edit" style="cursor: pointer"><i class="bx bx-image"></i></label>
+							<input type="file" id="file-edit" style="display: none" />
 						</a>
 					</div>
 				</div>
 			</div>
 		</div>
-
+		<input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
 		<script src="js/dashboard.js"></script>
 	</body>
 </html>

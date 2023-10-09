@@ -26,7 +26,7 @@
 		<!--  -->
 
     <!-- create team modal box -->
-    <div class="create-team">
+    <div class="create-team<%= openModal? ' show-modal':'' %>">
         <div class="create-team__content">
             <div class="create-teambg">
                 <div class="modal-title">
@@ -37,11 +37,15 @@
                     <div class="right-box">
                         <div class="form-controls">
                             <label for="name">اسم کامل تیم :</label>
-                            <input type="text" name="name" id="name" autofocus required />
-                            <!-- <span class="wrong-input-alrt">* اسم تورنومنتت یادت رفت</span> -->
+                            <input <% if(oldInput){ %> value="<%= oldInput.name %>"<% } %> type="text" name="name" id="name" autofocus required />
+                            <% if (!isNameValid) { %>
+								<span class="wrong-input-alrt">* اسم تیم یادت رفت</span>
+							<% } %>
                             <label for="tag">تگ تیم :</label>
-                            <input type="text" name="nameTag" id="tag" placeholder="تگ مخفف اسم تیم است ." required/>
-                            <!-- <span class="wrong-input-alrt"> * رنک تورنومنتت رو انتخاب نکردی!</span> -->
+                            <input <% if(oldInput){ %> value="<%= oldInput.nameTag %>"<% } %> type="text" name="nameTag" id="tag" placeholder="تگ مخفف اسم تیم است ." required/>
+                            <% if (!isNameTagValid) { %>
+                                <span class="wrong-input-alrt">* تگ تیم یادت رفت</span>
+							<% } %>
                         </div>
 
                         <div class="find-player">
@@ -64,7 +68,7 @@
                     <div class="left-box">
                         <div class="descriptions">
                             <label for="desc">توضیحات تیم :</label>
-                            <textarea name="description" id="desc" cols="10" rows="10"></textarea>
+                            <textarea name="description" id="desc" cols="10" rows="10"> <% if(oldInput){ %><%= oldInput.description %><% } %></textarea>
                         </div>
                         <label>تصویر تیم :</label>
                         <div class="image-uploads">

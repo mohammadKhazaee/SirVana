@@ -19,10 +19,9 @@ transporter.sendMail({
 	`,
 })
 
+const myEmail = 'm.khazaee.p@gmail.com'
 const emailFarshad = 'fshdtaraki1@gmail.com'
 const farshadGithub = 'git@github.com:fshd1-front/Sirvana.git'
-
-const myEmail = 'm.khazaee.p@gmail.com'
 
 const prettierSetting = {
 	'workbench.colorTheme': 'Default Dark+',

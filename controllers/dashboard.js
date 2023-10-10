@@ -37,24 +37,30 @@ exports.getDashboard = async (req, res, next) => {
 
 exports.getDashboardTeam = async (req, res, next) => {
 	try {
-		// const renderUser = { ...req.user._doc }
-		// renderUser.roles = renderUser.roles.map((role) => {
-		// 	switch (role) {
-		// 		case 'Player':
-		// 			return { name: 'بازیکن', color: 'coach' }
-		// 		case 'Team Leader':
-		// 			return { name: 'تیم لیدر', color: 'team' }
-		// 		case 'Organizer':
-		// 			return { name: 'تورنومت لیدر', color: 'tournament' }
-		// 	}
-		// })
-		// renderUser.pos = renderUser.pos.join('-')
-		// renderUser.mmr = { number: renderUser.mmr, medal: rank.numberToMedal(renderUser.mmr) }
-		// renderUser.createdAt = renderUser.createdAt.toISOString().split('T')[0].replaceAll('-', '/')
-		// console.log(renderUser)
+		const populatedUser = await User.findById(req.user._id).populate(
+			'ownedTeam.teamId teams.teamId ownedTournament.tournamentId tournaments.tournamentId'
+		)
+		populatedUser._doc.ownedTeam.teamId._doc.avgMMR = rank.numberToMedal(
+			populatedUser._doc.ownedTeam.teamId.avgMMR
+		)
+		populatedUser._doc.teams = populatedUser._doc.teams.map((team) => {
+			team.teamId._doc.avgMMR = rank.numberToMedal(team.teamId.avgMMR)
+			return team
+		})
 		res.render('dashboard-team', {
 			pageTitle: 'SirVana · داشبورد',
-			// user: renderUser,
+			user: populatedUser,
+		})
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
+}
+
+exports.getDashboardNotif = async (req, res, next) => {
+	try {
+		res.render('dashboard-notif', {
+			pageTitle: 'SirVana · داشبورد',
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500

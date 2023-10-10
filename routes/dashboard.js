@@ -11,6 +11,9 @@ Router.get('/', dashboardController.getDashboard)
 // /dashboard/team-tour => GET
 Router.get('/team-tour', dashboardController.getDashboardTeam)
 
+// /dashboard/notif => GET
+Router.get('/notif', dashboardController.getDashboardNotif)
+
 // /dashboard/edit-profile => POST
 Router.post('/edit-profile', dashboardController.postEditProfile)
 

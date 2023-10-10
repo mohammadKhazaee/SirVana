@@ -20,7 +20,7 @@
 					<div class="topblock__menu">
 						<a href="/">تنظیمات</a>
 						<a>/</a>
-						<a href="#">اعلان ها</a>
+						<a href="/dashboard/notif">اعلان ها</a>
 						<a>/</a>
 						<a href="/dashboard/team-tour" class="active">تیم ها و تورنومنت ها</a>
 						<a>/</a>
@@ -34,23 +34,23 @@
 								<div class="mytourblock__box">
 									<p>تورنومنت من :</p>
 									<div class="mid-note"></div>
-
-									<!-- <div class="mytourblock__box--notyet">
-										<span>هنوز تورنومنتی ایجاد نکرده اید .</span>
-										<a href="tournoment.html">ایجاد تورنومنت</a>
-									</div> -->
-
-									<!-- teami ke sakhte shode ************** -->
-									<div class="mytourblock__box--tour">
-										<div class="specific-tour">
-											<img src="../img/tourcards.png" alt="" />
-											<span dir="ltr">Nariman</span>
-											<img src="../img/Archon_medal.webp" alt="" />
-											<p>تا</p>
-											<img src="../img/Divine_medal.webp" alt="" />
+									<% if(user.ownedTournament.tournamentId) { %>
+										<div class="mytourblock__box--tour">
+											<div class="specific-tour">
+												<img src="..<%= user.ownedTournament.tournamentId.imageUrl %>" alt="" />
+												<span dir="ltr">Nariman</span>
+												<img src="../img/<%= user.ownedTournament.tournamentId.minMMR.slice(2) %>_medal.webp" alt="" />
+												<p>تا</p>
+												<img src="../img/<%= user.ownedTournament.tournamentId.maxMMR.slice(2) %>_medal.webp" alt="" />
+											</div>
+											<a href="/tournament/<%= user.ownedTournament.tournamentId._id %>">مشاهده</a>
 										</div>
-										<a>مشاهده</a>
-									</div>
+									<% } else { %>
+										<div class="mytourblock__box--notyet">
+											<span>هنوز تورنومنتی ایجاد نکرده اید .</span>
+											<a href="/tournaments">ایجاد تورنومنت</a>
+										</div>
+									<% } %>
 								</div>
 							</div>
 							<div class="otherteamblock">
@@ -58,59 +58,28 @@
 									<p>دیگر تورنومنت ها :</p>
 									<div class="mid-note"></div>
 								</div>
-
-								<!-- <div class="othertourblock__notyet">
-									<span>هنوز تورنومنتی شرکت نکرده اید .</span>
-									<a href="teams.html">یافتن تورنومنت</a>
-								</div> -->
-
-								<!-- team haii ke ozv shode*************************** -->
-								<div class="othertourblock__botbox">
-									<div class="othertourblock__botbox--team">
-										<div class="specifics-tour">
-											<img src="../img/tourcards.png" alt="" />
-											<span dir="ltr">Nariman</span>
-											<img src="../img/Archon_medal.webp" alt="" />
-											<p>تا</p>
-											<img src="../img/Divine_medal.webp" alt="" />
-											<h1>10/3/2023</h1>
-										</div>
-										<a>مشاهده</a>
+								<% if(user.tournaments.length > 0) { %>
+									<div class="othertourblock__botbox">
+										<% user.tournaments.forEach(tournament => { %>
+											<div class="othertourblock__botbox--team">
+												<div class="specific-tour">
+													<img src="..<%= tournament.tournamentId.imageUrl %>" alt="" />
+													<span dir="ltr"><%= tournament.name %></span>
+													<img src="../img/<%= tournament.tournamentId.minMMR.slice(2) %>_medal.webp" alt="" />
+													<p>تا</p>
+													<img src="../img/<%= tournament.tournamentId.maxMMR.slice(2) %>_medal.webp" alt="" />
+													<h1><%= tournament.tournamentId.startDate.toISOString().split('T')[0].replaceAll('-', '/') %></h1>
+												</div>
+												<a href="/tournament/<%= tournament.tournamentId._id %>">مشاهده</a>
+											</div>
+										<% }) %>
 									</div>
-									<div class="othertourblock__botbox--team">
-										<div class="specifics-tour">
-											<img src="../img/tourcards.png" alt="" />
-											<span dir="ltr">Nariman</span>
-											<img src="../img/Archon_medal.webp" alt="" />
-											<p>تا</p>
-											<img src="../img/Divine_medal.webp" alt="" />
-											<h1>10/3/2023</h1>
-										</div>
-										<a>مشاهده</a>
+								<% } else { %>
+									<div class="othertourblock__notyet">
+										<span>هنوز تورنومنتی شرکت نکرده اید .</span>
+										<a href="/tournaments">یافتن تورنومنت</a>
 									</div>
-									<div class="othertourblock__botbox--team">
-										<div class="specifics-tour">
-											<img src="../img/tourcards.png" alt="" />
-											<span dir="ltr">Nariman</span>
-											<img src="../img/Archon_medal.webp" alt="" />
-											<p>تا</p>
-											<img src="../img/Divine_medal.webp" alt="" />
-											<h1>10/3/2023</h1>
-										</div>
-										<a>مشاهده</a>
-									</div>
-									<div class="othertourblock__botbox--team">
-										<div class="specifics-tour">
-											<img src="../img/tourcards.png" alt="" />
-											<span dir="ltr">Nariman</span>
-											<img src="../img/Archon_medal.webp" alt="" />
-											<p>تا</p>
-											<img src="../img/Divine_medal.webp" alt="" />
-											<h1>10/3/2023</h1>
-										</div>
-										<a>مشاهده</a>
-									</div>
-								</div>
+								<% } %>
 							</div>
 						</div>
 						<div class="midblock__left">
@@ -118,21 +87,21 @@
 								<div class="myteamblock__box">
 									<p>تیم من :</p>
 									<div class="mid-note"></div>
-
-									<!-- <div class="myteamblock__box--notyet">
-										<span>هنوز تیمی ایجاد نکرده اید .</span>
-										<a href="teams.html">ایجاد تیم</a>
-									</div> -->
-
-									<!-- teami ke sakhte shode ************** -->
-									<div class="myteamblock__box--team">
-										<div class="specific">
-											<img src="../img/alliancelogo.png" alt="" />
-											<span dir="ltr">Alliance</span>
-											<img src="../img/Archon_medal.webp" alt="" />
+									<% if(user.ownedTeam.teamId) { %>
+										<div class="myteamblock__box--team">
+											<div class="specific">
+												<img src="..<%= user.ownedTeam.teamId.imageUrl %>" alt="" />
+												<span dir="ltr"><%= user.ownedTeam.teamId.name %></span>
+												<img src="../img/<%= user.ownedTeam.teamId.avgMMR %>_medal.webp" alt="" />
+											</div>
+											<a href="/tournament/<%= user.ownedTeam.teamId._id %>">مشاهده</a>
 										</div>
-										<a>مشاهده</a>
-									</div>
+									<% } else { %>
+										<div class="myteamblock__box--notyet">
+											<span>هنوز تیمی ایجاد نکرده اید .</span>
+											<a href="/teams">ایجاد تیم</a>
+										</div>
+									<% } %>
 								</div>
 							</div>
 							<div class="otherteamblock">
@@ -140,39 +109,25 @@
 									<p>دیگر تیم ها :</p>
 									<div class="mid-note"></div>
 								</div>
-
-								<!-- <div class="otherteamblock__notyet">
-									<span>هنوز تیمی عضو نشده اید .</span>
-									<a href="teams.html">یافتن تیم</a>
-								</div> -->
-
-								<div class="otherteamblock__botbox">
-									<!-- team haii ke ozv shode*************************** -->
-									<div class="otherteamblock__botbox--team">
-										<div class="specifics">
-											<img src="../img/alliancelogo.png" alt="" />
-											<span dir="ltr">Alliance</span>
-											<img src="../img/Archon_medal.webp" alt="" />
-										</div>
-										<a>مشاهده</a>
+								<% if(user.tournaments.length > 0) { %>
+									<div class="otherteamblock__botbox">
+										<% user.teams.forEach(team => { %>
+											<div class="myteamblock__box--team">
+												<div class="specific">
+													<img src="..<%= team.teamId.imageUrl %>" alt="" />
+													<span dir="ltr"><%= team.teamId.name %></span>
+													<img src="../img/<%= team.teamId.avgMMR %>_medal.webp" alt="" />
+												</div>
+												<a href="/tournament/<%= team.teamId._id %>">مشاهده</a>
+											</div>
+										<% }) %>
 									</div>
-									<div class="otherteamblock__botbox--team">
-										<div class="specifics">
-											<img src="../img/alliancelogo.png" alt="" />
-											<span dir="ltr">Alliance</span>
-											<img src="../img/Archon_medal.webp" alt="" />
-										</div>
-										<a>مشاهده</a>
+								<% } else { %>
+									<div class="otherteamblock__notyet">
+										<span>هنوز تیمی عضو نشده اید .</span>
+										<a href="/teams">یافتن تیم</a>
 									</div>
-									<div class="otherteamblock__botbox--team">
-										<div class="specifics">
-											<img src="../img/alliancelogo.png" alt="" />
-											<span dir="ltr">Alliance</span>
-											<img src="../img/Archon_medal.webp" alt="" />
-										</div>
-										<a>مشاهده</a>
-									</div>
-								</div>
+								<% } %>
 							</div>
 						</div>
 					</div>

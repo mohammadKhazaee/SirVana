@@ -52,6 +52,18 @@ const userSchema = new Schema(
 				image: String,
 			},
 		],
+		ownedTournament: {
+			tournamentId: {
+				type: Schema.Types.ObjectId,
+				ref: 'Team',
+				require: true,
+			},
+			name: {
+				type: String,
+				require: true,
+			},
+			image: String,
+		},
 		tournaments: {
 			type: [
 				{
@@ -62,10 +74,6 @@ const userSchema = new Schema(
 					},
 					name: {
 						type: String,
-						require: true,
-					},
-					joined: {
-						type: Boolean,
 						require: true,
 					},
 				},

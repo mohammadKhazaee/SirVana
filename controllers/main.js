@@ -31,7 +31,7 @@ exports.getIndex = async (req, res, next) => {
 	res.render('index', {
 		pageTitle: 'SirVana',
 		user: req.user
-			? { userName: req.user.name, teams: req.user.teams }
+			? { userName: req.user.name, teams: [req.user.ownedTeam, ...req.user.teams] }
 			: { userName: '', teams: [] },
 		tournaments: modifiedTournaments,
 		canSend: true,

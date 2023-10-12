@@ -15,7 +15,10 @@ const teamSchema = new Schema(
 			required: true,
 		},
 		description: String,
-		imageUrl: String,
+		imageUrl: {
+			type: String,
+			default: 'img/default-team-picture.jpg',
+		},
 		leader: {
 			userId: {
 				type: Schema.Types.ObjectId,
@@ -38,6 +41,12 @@ const teamSchema = new Schema(
 					type: String,
 					required: true,
 				},
+				imageUrl: String,
+				pos: String,
+				isLead: {
+					type: Boolean,
+					default: false,
+				},
 			},
 		],
 		memberCount: { type: Number, default: 1 },
@@ -55,6 +64,30 @@ const teamSchema = new Schema(
 				name: {
 					type: String,
 					required: true,
+				},
+				imageUrl: String,
+			},
+		],
+		chats: [
+			{
+				content: {
+					type: String,
+					require: true,
+				},
+				sender: {
+					userId: {
+						type: Schema.Types.ObjectId,
+						ref: 'User',
+						require: true,
+					},
+					name: {
+						type: String,
+						required: true,
+					},
+				},
+				sentAt: {
+					type: Date,
+					require: true,
 				},
 			},
 		],

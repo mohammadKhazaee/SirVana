@@ -73,7 +73,7 @@
                         <label>تصویر تیم :</label>
                         <div class="image-uploads">
                             <input type="file" name="image" id="file" multiple />
-                            <a href="#"><i class="bx bx-plus"></i></a>
+                            <a><i class="bx bx-plus"></i></a>
                         </div>
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
                         <button class="create" type="submit">ایجاد</button>
@@ -150,7 +150,7 @@
                                         : <i class="bx bxs-x-circle"></i>
                                     <% } %>
                                 </p>
-                                <p class="more-button"><a href="#">جز‌ئیات بیشتر</a></p>
+                                <p class="more-button"><a href="/team/<%= team._id %>">جز‌ئیات بیشتر</a></p>
                             </div>
                         </div>
                     <% })} if(teams.length == 0 && noFilter) { %>
@@ -169,8 +169,7 @@
     <%- include('./includes/footer') %>
 
     <!-- scripts -->
-    <script src="js/burger.js"></script>
-    <script src="js/team-modalbox.js"></script>
+    <script src="js/team.js"></script>
     <script src="js/main.js"></script>
 	</body>
 </html>

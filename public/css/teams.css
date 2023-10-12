@@ -812,6 +812,6 @@ select:focus + .focus {
 	margin-top: 10rem;
 }
 
-.active a {
+.active > a {
 	color: aqua;
 }

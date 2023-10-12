@@ -105,10 +105,11 @@
 			</div>
 			<div class="card-box2">
 				<div class="card-content">
-					<form action="/dashboard/accept-team" method="post">
+					<form action="/dashboard/accept-player" method="post">
 				<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 						<input type="hidden" name="tournamentId" value="65156abd0d9f64495459f47c">
-						<input type="hidden" name="teamId" value="651526cffafae73e1474d307">
+						<input type="hidden" name="teamId" value="65159910e8e92a03f86efad9">
+						<input type="hidden" name="playerId" value="65151d571f81bd3d903edd4c">
 						<input type="submit" value="join team">
 					</form>
 					<h1>به راحتی مربی شوید .</h1>
@@ -222,12 +223,8 @@
 		<%- include('./includes/footer') %>
 
 		<!-- JavaScipt -->
-		<script src="js/burger.js"></script>
-		<script src="js/slider2.js"></script>
-		<script src="js/select-menu.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 		<script src="js/main.js"></script>
 		<script src="js/index.js"></script>
-		<script src="js/transform.js"></script>
 	</body>
 </html>

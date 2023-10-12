@@ -1,89 +1,3 @@
-// live search box functionality
-const liveSearchInput = document.getElementsByName('liveSearchInput')[0]
-const searchTypeInput = document.getElementsByName('searchType')[0]
-const searchResultEle = document.getElementById('search-result-box')
-
-liveSearchInput.addEventListener('keyup', () => {
-    if (liveSearchInput.value !== '' && 
-    liveSearchInput.value === liveSearchInput.value.match(/[a-zA-Z0-9\s]*/)[0]) 
-    {
-        // console.log(searchTypeInput.value)
-        fetch('/search-result', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
-            body: JSON.stringify({
-                'searchInput': liveSearchInput.value,
-                'searchType': searchTypeInput.value,
-                'searchLimit': '6',
-            })
-        }).then(res => res.json()).then(data => {
-            const searchResult = [...data.searchResult]
-            searchResultEle.innerHTML = ''
-            const watchAllBtn = document.getElementsByClassName('uli1__watch')[0]
-            if (watchAllBtn) watchAllBtn.remove()
-            searchResult.forEach(item => {
-                if (data.searchType === 'team') {
-                    searchResultEle.insertAdjacentHTML( 'beforeend', `<a href="#">
-                        <li>
-                            <p>${item.name}</p>
-                            <div class="class-p">
-                                <div class="p-image">
-                                    <p class="p-image--row">
-                                        <img src="img/${item.avgMMR}_medal.webp" alt="" />
-                                    </p>
-                                </div>
-                            </div>
-                        </li>
-                    </a>`)
-                } else if (data.searchType === 'tournament') {
-                    searchResultEle.insertAdjacentHTML( 'beforeend', `<li>
-                    <p>${item.name}</p>
-                    <div class="class-p">
-                        <div class="p-image">
-                            <p class="p-image--row">
-                                <img src="img/${item.minMMR}_medal.webp" alt="" />
-                            </p>
-                            <p style="margin:0 0.5rem;">تا</p>
-                            <p class="p-image--row">
-                                <img src="img/${item.maxMMR}_medal.webp" alt="" />
-                            </p>
-                        </div>
-                    </div>
-                    </li>`)
-                } else if (data.searchType === 'player') {
-                    searchResultEle.insertAdjacentHTML( 'beforeend', `<li>
-                    <p>${item.name}</p>
-                    <div class="class-p">
-                        <div class="p-pos">
-                            <p>پوز : ${item.pos? `${item.pos}`:'ثبت نشده'}</p>
-                        </div>
-                        <div class="p-image">
-                            <p class="p-image--row">
-                                ${item.mmr? `<img src="img/${item.mmr}_medal.webp" alt="" />`:'ثبت نشده'}
-                            </p>
-                        </div>
-                    </div>
-                    </li>`)
-                }
-            })
-            searchResultEle.parentNode.insertAdjacentHTML( 'afterend', `
-                <a class="uli1__watch" href="/${data.searchType}s?search=${liveSearchInput.value}&rankFilter=0&filter=true&slided=false">مشاهده همه</a>
-            `)
-            const resultItemsEle = searchResultEle.childNodes
-            for (let j = 0; j < resultItemsEle.length; j++) {
-                resultItemsEle[j].addEventListener('click', () => {
-                    liveSearchInput.value = searchResult[j].name
-                    searchResultEle.innerHTML = ''
-                })
-            }
-        }).catch(err => console.log(err))
-    } else if(liveSearchInput.value === '') {
-        searchResultEle.innerHTML = ''
-        const watchAllBtn = document.getElementsByClassName('uli1__watch')[0]
-        if (watchAllBtn) watchAllBtn.remove()
-    }
-})
-
 // Lfp & Lft live feed
 const socket = io();
 const lfpDiv = document.getElementsByClassName('looking-for__player')[0]
@@ -193,3 +107,123 @@ function addMessage(message){
 					</a>` )
     }
 }
+
+// Slider picture change
+
+let slideIndex = 0;
+const slides = document.getElementsByClassName("mySlides");
+
+showSlides();
+
+function showSlides() {
+  let i;
+  for (i = 0; i < slides.length; i++) {
+    slides[i].style.display = "none";  
+  }
+  slideIndex++;
+  if (slideIndex > slides.length) slideIndex = 1
+  slides[slideIndex-1].style.display = "block";  
+  setTimeout(showSlides, 5000);
+}
+
+// Custom select
+
+const customSelects = document.getElementsByClassName("custom-select");
+for (let i = 0; i < customSelects.length; i++) {
+  const selectEle = customSelects[i].getElementsByTagName("select")[0];
+
+  const chosenOptionEle = document.createElement("DIV");
+  chosenOptionEle.setAttribute("class", "select-selected");
+  chosenOptionEle.innerHTML = selectEle.options[selectEle.selectedIndex].innerHTML;
+  customSelects[i].appendChild(chosenOptionEle);
+  /*for each element, create a new DIV that will contain the option list:*/
+  const newSelectEle = document.createElement("DIV");
+  newSelectEle.setAttribute("class", "select-items select-hide");
+  for (let j = 1; j < selectEle.length; j++) {
+    /*for each option in the original select element,
+    create a new DIV that will act as an option item:*/
+    const newOptionEle = document.createElement("DIV");
+    newOptionEle.innerHTML = selectEle.options[j].innerHTML;
+    newOptionEle.addEventListener("click", function(e) {
+      /*when an item is clicked, update the original select box,
+      and the selected item:*/
+      for (let i = 0; i < selectEle.length; i++) {
+        if (selectEle.options[i].innerHTML == this.innerHTML) {
+          selectEle.selectedIndex = i;
+          chosenOptionEle.innerHTML = this.innerHTML;
+          const previousSelectedOption = newSelectEle.getElementsByClassName("same-as-selected");
+          for (let k = 0; k < previousSelectedOption.length; k++) {
+            previousSelectedOption[k].removeAttribute("class");
+          }
+          this.setAttribute("class", "same-as-selected");
+          break;
+        }
+      }
+      chosenOptionEle.click();
+    });
+    newSelectEle.appendChild(newOptionEle);
+  }
+  customSelects[i].appendChild(newSelectEle);
+  chosenOptionEle.addEventListener("click", function(e) {
+      /*when the select box is clicked, close any other select boxes,
+      and open/close the current select box:*/
+      e.stopPropagation();
+      closeAllSelect(this);
+      this.nextSibling.classList.toggle("select-hide");
+      this.classList.toggle("select-arrow-active");
+    });
+}
+function closeAllSelect(elmnt) {
+  /*a function that will close all select boxes in the document,
+  except the current select box:*/
+  const arrNo = [];
+  const newSelectEles = document.getElementsByClassName("select-items");
+  const chosenOptionEle = document.getElementsByClassName("select-selected");
+  for (let i = 0; i < chosenOptionEle.length; i++) {
+    if (elmnt == chosenOptionEle[i]) {
+      arrNo.push(i)
+    } else {
+      chosenOptionEle[i].classList.remove("select-arrow-active");
+    }
+  }
+  for (let i = 0; i < newSelectEles.length; i++) {
+    if (arrNo.indexOf(i)) {
+      newSelectEles[i].classList.add("select-hide");
+    }
+  }
+}
+/*if the user clicks anywhere outside the select box,
+then close all select boxes:*/
+document.addEventListener("click", closeAllSelect);
+
+// Features transform
+
+const cardBox1 = document.querySelector('.card-box1');
+window.addEventListener('scroll', () => {
+    const target = cardBox1.getBoundingClientRect()
+    if (target.top - target.height <= 0) {
+        cardBox1.style.transform = 'translateY(-10%)';
+        cardBox1.style.transition = 'all 1s ease-out';
+        cardBox1.style.opacity = '1';
+    }
+})
+
+const cardBox2 = document.querySelector('.card-box2');
+window.addEventListener('scroll', () => {
+    const target = cardBox2.getBoundingClientRect()
+    if (target.top - target.height <= 0) {
+        cardBox2.style.transform = 'translateY(-10%)';
+        cardBox2.style.transition = 'all 1s ease-out';
+        cardBox2.style.opacity = '1';
+    }
+})
+
+const cardBox3 = document.querySelector('.card-box3');
+window.addEventListener('scroll', () => {
+    const target = cardBox3.getBoundingClientRect()
+    if (target.top - target.height <= 0) {
+        cardBox3.style.transform = 'translateY(-10%)';
+        cardBox3.style.transition = 'all 1s ease-out';
+        cardBox3.style.opacity = '1';
+    }
+})

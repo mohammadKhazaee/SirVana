@@ -13,7 +13,10 @@ const tournametSchema = new Schema(
 			required: true,
 		},
 		description: String,
-		imageUrl: String,
+		imageUrl: {
+			type: String,
+			default: 'img/tourcards.png',
+		},
 		startDate: { type: Date, require: true },
 		bo3: {
 			type: Boolean,
@@ -36,6 +39,7 @@ const tournametSchema = new Schema(
 				type: String,
 				required: true,
 			},
+			imageUrl: String,
 		},
 		teams: {
 			type: [
@@ -49,7 +53,7 @@ const tournametSchema = new Schema(
 						type: String,
 						require: true,
 					},
-					image: String,
+					imageUrl: String,
 				},
 			],
 		},

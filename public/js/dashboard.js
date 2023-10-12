@@ -37,7 +37,7 @@ if (editProfile) {
 		const inputArray = [...inputEles]
 		if (!inputEles[0].disabled) {
 			const pos = inputArray
-			.filter((input, i) => input.checked && input.name !== 'lftCheck')
+			.filter((input) => input.checked && input.name !== 'lftCheck')
 			.map((input) => input.value)
 			.join('-')
 			const formData = new FormData()
@@ -65,7 +65,7 @@ if (editProfile) {
 		textEle.disabled = !textEle.disabled
 		textEle.classList.toggle('editable')
 		detailsEle.removeAttribute('open')
-		console.log(profileAvatarDiv.children[0]);
+		
 		if (detailsEle.style.display === 'none') {
 			detailsEle.style.display = 'block'
 			posP.style.display = 'none'

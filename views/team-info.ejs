@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title><%= pageTitle %></title>
+
+		<link rel="shortcut icon" href="../img/shortcut icon.png" />
+		<!-- Site Icon -->
+		<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+		<!-- css links -->
+		<link rel="stylesheet" href="../css/main.css" />
+		<link rel="stylesheet" href="../css/team-info.css" />
+		<link rel="stylesheet" href="../css/teams.css" />
+		<link rel="stylesheet" href="../css/footer.css" />
+	</head>
+	<body>
+		<!-- Navbar -->
+		<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName, navSearch: true}) %>
+
+		<!-- background -->
+		<div class="teams-page">
+			<div class="dark-box"></div>
+		</div>
+		<!--  -->
+
+		<!-- filter box -->
+		<div class="team-box">
+			<div class="shadow-box">
+				<div class="top-box"></div>
+				<div class="middle"></div>
+				<!-- End of filter box ------------------------------->
+
+				<!-- informations -->
+				<div class="informations">
+					<div class="info-header">
+						<div class="info-header__image">
+							<img src="..<%= team.imageUrl %>" />
+							<div class="image-upload" style="display: none;">
+								<input type="file">
+								<a><i class="bx bx-plus"></i></a>
+							</div>
+						</div>
+						<div class="info-header__data">
+							<div class="info-header__data--left">
+								<input name="name" type="text" value="<%= team.name %>" dir="ltr" disabled />
+								<div class="info-header__data--details">
+									<div class="tag">
+										<label for="tag">تگ تیم :</label>
+										<input name="nameTag" type="text" id="tag" value="<%= team.nameTag %>" dir="ltr" disabled/>
+									</div>
+									<div class="lft">
+										<span>نیازمند پلیر</span>
+										<div class="team-need">
+											<input type="checkbox" disabled <%= team.lfp ? 'checked':'' %>/>
+											<span class="checkmark"></span>
+										</div>
+									</div>
+									<span class="date"><%= team.createdAt %></span>
+								</div>
+							</div>
+							<img src="../img/<%= team.avgMMR %>_medal.webp" alt="" class="rank" />
+						</div>
+					</div>
+					<div class="info-blocks">
+						<div class="right-block">
+							<div class="right-block__right">
+								<div class="members__box">
+									<p>اعضای تیم‌:</p>
+									<div class="mid-note"></div>
+									<!-- nafarate team ************** -->
+									<div class="members">
+										<% team.members.forEach(member => { %>
+											<a class="members__box--team">
+												<% if(member.isLead) { %>
+													<i class="bx bxs-crown"></i>
+												<% } %>
+												<div class="members-specific">
+													<img src="../<%= member.imageUrl %>" alt="" />
+													<span dir="ltr"><%= member.name %></span>
+													<span class="pos">پوز: <%= member.pos %></span>
+													<img src="../img/<%= member.userId.mmr %>_medal.webp" alt="" />
+												</div>
+											</a>
+										<% }) %>
+									</div>
+								</div>
+								<div class="buttons">
+									<% if(isLoggedIn && !isMember) { %>
+										<a name="joinToTeam" class="button__right">درخواست عضویت</a>
+									<% } %>
+									<% if(isLead) { %>
+										<a name="editTeam" class="button__left">تغییر اطلاعات</a>
+									<% } %>
+								</div>
+							</div>
+							<% if(isMember) { %>
+								<div class="chat-box">
+									<div class="message-box">
+										<% if(team.chats.length > 0) { for(let i=team.chats.length-1;i>=0;i--) { %>
+											<% if(!team.chats[i].incomming) { %>
+												<div class="send">
+													<span class="send-time"><%= team.chats[i].sentAt %></span>
+													<p><%= team.chats[i].content %></p>
+												</div>
+											<% } else { %>
+												<div class="recieve">
+													<p><%= team.chats[i].sender.name %></p>
+													<div class="content">
+														<span class="send-time"><%= team.chats[i].sentAt %></span>
+														<p><%= team.chats[i].content %></p>
+													</div>
+												</div>
+											<% } %>
+										<% }} else { %>
+											<p>هنوز گفتگویی شروع نکرده اید ...</p>
+										<% } %>
+									</div>
+									<div class="send-box">
+										<input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+										<i name="sendChat" class="bx bx-send"></i>
+										<input name="chatInput" type="text" placeholder="اینجا بنویسید ..." />
+									</div>
+								</div>
+							<% } %>
+						</div>
+						<div class="left-block">
+							<div class="description">
+								<p>بیوگرافی تیم :</p>
+								<div class="mid-note"></div>
+								<textarea name="description" name="" id="" cols="30" rows="8" disabled><%= team.description %></textarea>
+							</div>
+							<a class="tournaments">
+								<p>تورنومنت ها :</p>
+								<div class="mid-note"></div>
+								<div class="scroll-box">
+									<% team.tournaments.forEach(tournament => { %>
+										<div class="specific-tour">
+											<img src="../<%= tournament.imageUrl %>" alt="" />
+											<span dir="ltr"><%= tournament.name %></span>
+										</div>
+									<% }) %>
+								</div>
+							</a>
+						</div>
+					</div>
+				</div>
+				<!-- <h1 class="header1">جستجو موردنظر یافت نشد...</h1> -->
+			</div>
+		</div>
+		<!-- End of Cards------------------------------------------- -->
+		<!-- Footer -->
+		<%- include('./includes/footer') %>
+
+		<!-- scripts -->
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="../js/team.js"></script>
+		<script src="../js/main.js"></script>
+	</body>
+</html>

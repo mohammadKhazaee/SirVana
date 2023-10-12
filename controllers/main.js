@@ -1,4 +1,5 @@
 const { validationResult } = require('express-validator')
+const { format } = require('date-fns-tz')
 
 const User = require('../models/user')
 const Team = require('../models/team')
@@ -55,11 +56,6 @@ exports.getTeams = async (req, res, next) => {
 		noFilter = true
 		dbQuery = {}
 	}
-	// const newTeams = req.user.teams.filter(
-	// 	(team) =>
-	// 		team.teamId.toString() === '651526cffafae73e1474d307' ||
-	// 		team.teamId.toString() === '6515635e7c2f8f02600ed499'
-	// )
 	try {
 		const teams = await Team.find(dbQuery)
 			.collation({ locale: 'en' }) // searching case insensitive
@@ -78,6 +74,56 @@ exports.getTeams = async (req, res, next) => {
 			isNameValid: true,
 			isNameTagValid: true,
 			isDescValid: true,
+		})
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
+}
+
+exports.getTeam = async (req, res, next) => {
+	try {
+		const team = await Team.findById(req.params.teamId).populate({
+			path: 'members.userId',
+			select: 'mmr _id pos',
+		})
+		const renderTeam = {
+			...team._doc,
+			createdAt: team.createdAt.toISOString().split('T')[0].replaceAll('-', '/'),
+			avgMMR: rank.numberToMedal(team.avgMMR),
+			members: team.members.map((member) => {
+				let renderPos
+				if (member.pos) renderPos = member.pos
+				else renderPos = member.userId.pos.join('-')
+				if (renderPos === '1-2-3-4-5') renderPos = 'همه'
+				if (renderPos === '') renderPos = 'ثبت نشده'
+				return {
+					...member._doc,
+					pos: renderPos,
+					userId: { mmr: rank.numberToMedal(member.userId.mmr), _id: member.userId._id },
+				}
+			}),
+		}
+		if (req.user) {
+			renderTeam.chats = team.chats.map((chat) => ({
+				...chat._doc,
+				incomming: chat.sender.userId.toString() !== req.user._id.toString(),
+				sentAt: format(chat.sentAt, 'd.M.yyyy - HH:mm'),
+			}))
+		}
+		// console.log(renderTeam)
+		const isMember =
+			req.user &&
+			renderTeam.members.filter(
+				(member) => member.userId._id.toString() === req.user._id.toString()
+			).length > 0
+		const isLead = req.user && renderTeam.leader.userId.toString() === req.user._id.toString()
+		// console.log(renderTeam.chats)
+		res.render('team-info', {
+			pageTitle: 'SirVana · مسابقات',
+			team: renderTeam,
+			isMember: isMember && false,
+			isLead: isLead,
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -151,6 +197,52 @@ exports.postTeam = async (req, res, next) => {
 	}
 }
 
+exports.postEditTeam = async (req, res, next) => {
+	try {
+		const name = req.body.name
+		const nameTag = req.body.nameTag
+		const description = req.body.description
+		const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/') : null
+		const teamId = req.body.teamId
+		const updatedTeam = {
+			name: name,
+			nameTag: nameTag,
+			description: description,
+		}
+		// etelaate team too baghie jaha avaz she(eg. esm, ax)
+		if (imageUrl) updatedTeam.imageUrl = imageUrl
+		await Team.updateOne({ _id: teamId }, { $set: updatedTeam })
+		res.sendStatus(200)
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
+}
+
+exports.postTeamChat = async (req, res, next) => {
+	try {
+		const chatContent = req.body.chatContent
+		const team = await Team.findById(req.body.teamId)
+		console.log(req.body)
+		const message = {
+			content: chatContent.trim(),
+			sentAt: new Date(),
+			sender: { userId: req.user._id, name: req.user.name },
+		}
+		team.chats = [...team._doc.chats, message]
+		team.save()
+		io.getIO().emit('team-chat', {
+			...message,
+			sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
+			incomming: message.sender.userId.toString() !== req.user._id.toString(),
+		})
+		res.sendStatus(200)
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
+}
+
 exports.getTournaments = async (req, res, next) => {
 	const marginLeft = req.marginLeft
 	const rankFilter = req.rankFilter
@@ -174,8 +266,9 @@ exports.getTournaments = async (req, res, next) => {
 				.slice(0, 16)
 				.replaceAll('-', '/')
 				.split('T')
-			const { name, minMMR, maxMMR, imageUrl } = tournament
+			const { _id, name, minMMR, maxMMR, imageUrl } = tournament
 			return {
+				_id: _id,
 				name,
 				startDate: `${dateTime[1]} - ${dateTime[0]}`,
 				minMMR: minMMR.split('.')[1],
@@ -202,6 +295,13 @@ exports.getTournaments = async (req, res, next) => {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)
 	}
+}
+
+exports.getTournament = async (req, res, next) => {
+	console.log(req.params.tournamentId)
+	res.render('tournament-info', {
+		pageTitle: 'SirVana · مسابقات',
+	})
 }
 
 exports.postTournament = async (req, res, next) => {
@@ -306,10 +406,13 @@ exports.getPlayers = async (req, res, next) => {
 			.select('_id name pos mmr imageUrl lft')
 			.limit(PLAYER_PER_PAGE)
 		const modifiedUsers = users.map((user) => {
+			let renderPos = user.pos.join(' - ')
+			if (renderPos === '1 - 2 - 3 - 4 - 5') renderPos = 'همه'
+			if (renderPos === '') renderPos = 'ثبت نشده'
 			return {
 				...user._doc,
 				mmr: rank.numberToMedal(user.mmr),
-				pos: user.pos.join(' - '),
+				pos: renderPos,
 			}
 		})
 		res.render('players', {

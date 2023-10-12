@@ -36,7 +36,7 @@ const userSchema = new Schema(
 				type: String,
 				require: true,
 			},
-			image: String,
+			imageUrl: String,
 		},
 		teams: [
 			{
@@ -49,21 +49,9 @@ const userSchema = new Schema(
 					type: String,
 					require: true,
 				},
-				image: String,
+				imageUrl: String,
 			},
 		],
-		ownedTournament: {
-			tournamentId: {
-				type: Schema.Types.ObjectId,
-				ref: 'Team',
-				require: true,
-			},
-			name: {
-				type: String,
-				require: true,
-			},
-			image: String,
-		},
 		tournaments: {
 			type: [
 				{
@@ -74,6 +62,11 @@ const userSchema = new Schema(
 					},
 					name: {
 						type: String,
+						require: true,
+					},
+					imageUrl: String,
+					owned: {
+						type: Boolean,
 						require: true,
 					},
 				},
@@ -89,7 +82,10 @@ const userSchema = new Schema(
 		},
 		bio: String,
 		discordId: String,
-		imageUrl: String,
+		imageUrl: {
+			type: String,
+			default: 'img/default-player-dash.jpg',
+		},
 		mmr: {
 			type: Number,
 			default: 0,
@@ -130,7 +126,8 @@ const userSchema = new Schema(
 					require: true,
 				},
 				state: String,
-				reciever: {
+				relativeReq: Object,
+				receiver: {
 					id: String,
 					name: String,
 				},
@@ -336,48 +333,36 @@ userSchema.methods.createTour = function (tournament, role) {
 	return this.save()
 }
 
-userSchema.methods.exchangeReq = function (type, reciever, sender) {
+userSchema.methods.exchangeReq = async function (type, receiver, sender, relativeReq) {
 	let newReq
-	if (type === 'recruit' || type === 'joinTour') {
+	if (type === 'recruit' || type === 'joinTour' || type === 'join') {
+		// checks if request is duplicate
+		if (
+			this.requests.find(
+				(req) => req.type === type && req.receiver.id.toString() === receiver._id.toString()
+			)
+		)
+			return
 		newReq = {
 			type: type,
 			state: 'Unseen',
-			reciever: {
-				id: reciever._id,
-				name: reciever.name,
-			},
-			sender: {
-				id: sender._id,
-				name: sender.name,
-			},
-			sentAt: new Date(),
-		}
-	} else if (type === 'join') {
-		newReq = {
-			type: type,
-			state: 'Unseen',
-			reciever: {
-				id: reciever._id,
-				name: reciever.name,
-			},
-			sender: {
-				id: sender._id,
-				name: sender.name,
-			},
-			sentAt: new Date(),
-		}
-	} else if (type === 'accPlayer' || type === 'accTeam') {
-		newReq = {
-			type: type,
-			reciever: {
-				id: reciever._id,
-				name: reciever.name,
+			receiver: {
+				id: receiver._id,
+				name: receiver.name,
 			},
 			sentAt: new Date(),
 		}
 	} else {
+		// checks if request is duplicate
+		if (
+			this.requests.find(
+				(req) => req.type === type && req.sender.id.toString() === sender._id.toString()
+			)
+		)
+			return
 		newReq = {
 			type: type,
+			relativeReq: relativeReq,
 			sender: {
 				id: sender._id,
 				name: sender.name,
@@ -387,8 +372,8 @@ userSchema.methods.exchangeReq = function (type, reciever, sender) {
 	}
 	const updatedReqs = [...this.requests, newReq]
 	this.requests = updatedReqs
-	console.log(this)
-	return this.save()
+	await this.save()
+	return this.requests.slice(-1)[0]._id
 }
 
 module.exports = mongoose.model('User', userSchema)

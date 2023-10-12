@@ -38,18 +38,21 @@ exports.getDashboard = async (req, res, next) => {
 exports.getDashboardTeam = async (req, res, next) => {
 	try {
 		const populatedUser = await User.findById(req.user._id).populate(
-			'ownedTeam.teamId teams.teamId ownedTournament.tournamentId tournaments.tournamentId'
+			'ownedTeam.teamId teams.teamId tournaments.tournamentId'
 		)
-		populatedUser._doc.ownedTeam.teamId._doc.avgMMR = rank.numberToMedal(
-			populatedUser._doc.ownedTeam.teamId.avgMMR
-		)
-		populatedUser._doc.teams = populatedUser._doc.teams.map((team) => {
+		const renderUser = { ...populatedUser._doc }
+		if (renderUser.ownedTeam.teamId)
+			renderUser.ownedTeam.teamId._doc.avgMMR = rank.numberToMedal(
+				renderUser.ownedTeam.teamId.avgMMR
+			)
+		renderUser.teams = renderUser.teams.map((team) => {
 			team.teamId._doc.avgMMR = rank.numberToMedal(team.teamId.avgMMR)
 			return team
 		})
+		renderUser.ownedTournaments = [...renderUser.tournaments.filter((tour) => tour.owned)]
 		res.render('dashboard-team', {
 			pageTitle: 'SirVana · داشبورد',
-			user: populatedUser,
+			user: renderUser,
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -123,14 +126,21 @@ exports.postSendFeedComment = async (req, res, next) => {
 }
 
 exports.postJoinReq = async (req, res, next) => {
-	const teamId = req.body.teamId
 	try {
-		const team = await Team.findById(teamId).populate('leader.userId')
-		const teamLeader = team.leader.userId
-		await req.user.exchangeReq('join', team, undefined)
-		await teamLeader.exchangeReq('accPlayer', team, req.user)
-		// have to change redirect path
-		res.redirect('/')
+		const team = await Team.findById(req.body.teamId).populate('leader.userId')
+		// check if you're one of team members already or not
+		const newPlayer = team.members.find(
+			(member) => member.userId.toString() === req.user._id.toString()
+		)
+		if (!newPlayer) {
+			const teamLeader = team.leader.userId
+			const reqId = await req.user.exchangeReq('join', team, undefined)
+			await teamLeader.exchangeReq('accPlayer', undefined, req.user, {
+				reqId: reqId,
+				userId: req.user._id,
+			})
+		}
+		res.sendStatus(200)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)

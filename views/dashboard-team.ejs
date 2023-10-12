@@ -34,18 +34,18 @@
 								<div class="mytourblock__box">
 									<p>تورنومنت من :</p>
 									<div class="mid-note"></div>
-									<% if(user.ownedTournament.tournamentId) { %>
+									<% if(user.ownedTournaments.length > 0) { user.ownedTournaments.forEach(tournament => { %>
 										<div class="mytourblock__box--tour">
 											<div class="specific-tour">
-												<img src="..<%= user.ownedTournament.tournamentId.imageUrl %>" alt="" />
+												<img src="../<%= tournament.tournamentId.imageUrl %>" alt="" />
 												<span dir="ltr">Nariman</span>
-												<img src="../img/<%= user.ownedTournament.tournamentId.minMMR.slice(2) %>_medal.webp" alt="" />
+												<img src="../img/<%= tournament.tournamentId.minMMR.slice(2) %>_medal.webp" alt="" />
 												<p>تا</p>
-												<img src="../img/<%= user.ownedTournament.tournamentId.maxMMR.slice(2) %>_medal.webp" alt="" />
+												<img src="../img/<%= tournament.tournamentId.maxMMR.slice(2) %>_medal.webp" alt="" />
 											</div>
-											<a href="/tournament/<%= user.ownedTournament.tournamentId._id %>">مشاهده</a>
+											<a href="/tournament/<%= tournament.tournamentId._id %>">مشاهده</a>
 										</div>
-									<% } else { %>
+									<% })} else { %>
 										<div class="mytourblock__box--notyet">
 											<span>هنوز تورنومنتی ایجاد نکرده اید .</span>
 											<a href="/tournaments">ایجاد تورنومنت</a>
@@ -63,7 +63,7 @@
 										<% user.tournaments.forEach(tournament => { %>
 											<div class="othertourblock__botbox--team">
 												<div class="specific-tour">
-													<img src="..<%= tournament.tournamentId.imageUrl %>" alt="" />
+													<img src="../<%= tournament.tournamentId.imageUrl %>" alt="" />
 													<span dir="ltr"><%= tournament.name %></span>
 													<img src="../img/<%= tournament.tournamentId.minMMR.slice(2) %>_medal.webp" alt="" />
 													<p>تا</p>
@@ -94,7 +94,7 @@
 												<span dir="ltr"><%= user.ownedTeam.teamId.name %></span>
 												<img src="../img/<%= user.ownedTeam.teamId.avgMMR %>_medal.webp" alt="" />
 											</div>
-											<a href="/tournament/<%= user.ownedTeam.teamId._id %>">مشاهده</a>
+											<a href="/team/<%= user.ownedTeam.teamId._id %>">مشاهده</a>
 										</div>
 									<% } else { %>
 										<div class="myteamblock__box--notyet">
@@ -109,7 +109,7 @@
 									<p>دیگر تیم ها :</p>
 									<div class="mid-note"></div>
 								</div>
-								<% if(user.tournaments.length > 0) { %>
+								<% if(user.teams.length > 0) { %>
 									<div class="otherteamblock__botbox">
 										<% user.teams.forEach(team => { %>
 											<div class="myteamblock__box--team">
@@ -118,7 +118,7 @@
 													<span dir="ltr"><%= team.teamId.name %></span>
 													<img src="../img/<%= team.teamId.avgMMR %>_medal.webp" alt="" />
 												</div>
-												<a href="/tournament/<%= team.teamId._id %>">مشاهده</a>
+												<a href="/team/<%= team.teamId._id %>">مشاهده</a>
 											</div>
 										<% }) %>
 									</div>

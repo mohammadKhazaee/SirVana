@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator')
 const { format } = require('date-fns-tz')
+const { add } = require('date-fns')
 
 const User = require('../models/user')
 const Team = require('../models/team')
@@ -122,7 +123,7 @@ exports.getTeam = async (req, res, next) => {
 		res.render('team-info', {
 			pageTitle: 'SirVana · مسابقات',
 			team: renderTeam,
-			isMember: isMember && false,
+			isMember: isMember,
 			isLead: isLead,
 		})
 	} catch (error) {
@@ -223,10 +224,9 @@ exports.postTeamChat = async (req, res, next) => {
 	try {
 		const chatContent = req.body.chatContent
 		const team = await Team.findById(req.body.teamId)
-		console.log(req.body)
 		const message = {
 			content: chatContent.trim(),
-			sentAt: new Date(),
+			sentAt: add(new Date(), { hours: 3, minutes: 30 }),
 			sender: { userId: req.user._id, name: req.user.name },
 		}
 		team.chats = [...team._doc.chats, message]
@@ -298,10 +298,49 @@ exports.getTournaments = async (req, res, next) => {
 }
 
 exports.getTournament = async (req, res, next) => {
-	console.log(req.params.tournamentId)
-	res.render('tournament-info', {
-		pageTitle: 'SirVana · مسابقات',
-	})
+	try {
+		const tournament = await Tournament.findById(req.params.tournamentId).populate(
+			'teams.teamId organizer.userId'
+		)
+		const renderTournament = {
+			...tournament._doc,
+			startDate: format(tournament.startDate, 'MMM.d.yyyy'),
+			teams: tournament.teams.map((team) => ({
+				...team._doc,
+				teamId: {
+					...team.teamId._doc,
+					avgMMR: rank.numberToMedal(team.teamId.avgMMR),
+				},
+			})),
+			organizer: {
+				...tournament.organizer._doc,
+				userId: {
+					...tournament.organizer.userId._doc,
+					mmr: rank.numberToMedal(tournament.organizer.userId.mmr),
+				},
+			},
+			games: tournament.games.map((game) => ({
+				...game._doc,
+				dateTime: {
+					date: format(game.dateTime, 'd/M/yyyy'),
+					time: format(game.dateTime, 'HH:mm'),
+				},
+			})),
+		}
+		// console.log(renderTournament.games)
+		const isOrganizer =
+			req.user && renderTournament.organizer.userId._id.toString() === req.user._id.toString()
+		const isLeader = !(!req.user || !req.user.ownedTeam.teamId)
+		res.render('tournament-info', {
+			pageTitle: 'SirVana · مسابقات',
+			tournament: renderTournament,
+			isOrganizer: isOrganizer,
+			isLeader: isLeader,
+		})
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
 }
 
 exports.postTournament = async (req, res, next) => {
@@ -379,6 +418,39 @@ exports.postTournament = async (req, res, next) => {
 		const createdTournament = await tournament.save()
 		await req.user.createTour(tournament, 'Organizer')
 		res.redirect('/tournaments')
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
+}
+
+exports.postEditTournament = async (req, res, next) => {
+	try {
+		const name = req.body.name
+		const startDate = req.body.startDate
+		const description = req.body.description
+		const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/') : null
+		const games = JSON.parse(req.body.games).map((game) => ({
+			...game,
+			dateTime: new Date(
+				game.startDate.date.split('/')[2],
+				game.startDate.date.split('/')[1],
+				game.startDate.date.split('/')[0],
+				game.startDate.time.split(':')[0],
+				game.startDate.time.split(':')[1]
+			),
+		}))
+		const updatedTournament = {
+			name: name,
+			description: description,
+			games: games,
+		}
+		if (imageUrl) updatedTournament.imageUrl = imageUrl
+		if (startDate) updatedTournament.startDate = startDate
+		// console.log(updatedTournament)
+		// etelaate Tournament too baghie model ha avaz she(eg. esm, ax)
+		await Tournament.updateOne({ _id: req.body.tournamentId }, { $set: updatedTournament })
+		res.sendStatus(200)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)

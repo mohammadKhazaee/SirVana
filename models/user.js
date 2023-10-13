@@ -369,6 +369,11 @@ userSchema.methods.exchangeReq = async function (type, receiver, sender, relativ
 			},
 			sentAt: new Date(),
 		}
+		if (receiver)
+			newReq.receiver = {
+				id: receiver._id,
+				name: receiver.name,
+			}
 	}
 	const updatedReqs = [...this.requests, newReq]
 	this.requests = updatedReqs

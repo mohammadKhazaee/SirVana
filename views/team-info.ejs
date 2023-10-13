@@ -130,18 +130,18 @@
 								<div class="mid-note"></div>
 								<textarea name="description" name="" id="" cols="30" rows="8" disabled><%= team.description %></textarea>
 							</div>
-							<a class="tournaments">
+							<div class="tournaments">
 								<p>تورنومنت ها :</p>
 								<div class="mid-note"></div>
 								<div class="scroll-box">
 									<% team.tournaments.forEach(tournament => { %>
-										<div class="specific-tour">
+										<a href="/tournament/<%= tournament.tournamentId %>" class="specific-tour">
 											<img src="../<%= tournament.imageUrl %>" alt="" />
 											<span dir="ltr"><%= tournament.name %></span>
-										</div>
+										</a>
 									<% }) %>
 								</div>
-							</a>
+							</div>
 						</div>
 					</div>
 				</div>

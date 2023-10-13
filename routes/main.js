@@ -32,6 +32,9 @@ Router.get('/tournament/:tournamentId', mainController.getTournament)
 // /tournament => POST
 Router.post('/tournament', validator.postTournament, mainController.postTournament)
 
+// /edit-tournament => POST
+Router.post('/edit-tournament', mainController.postEditTournament)
+
 // /players => GET
 Router.get('/players', validator.getPlayers, mainController.getPlayers)
 

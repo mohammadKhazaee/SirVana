@@ -57,9 +57,64 @@ const tournametSchema = new Schema(
 				},
 			],
 		},
+		games: [
+			{
+				team1: {
+					type: {
+						teamId: {
+							type: Schema.Types.ObjectId,
+							ref: 'Team',
+							require: true,
+						},
+						name: {
+							type: String,
+							require: true,
+						},
+					},
+					required: true,
+				},
+				team2: {
+					type: {
+						teamId: {
+							type: Schema.Types.ObjectId,
+							ref: 'Team',
+							require: true,
+						},
+						name: {
+							type: String,
+							require: true,
+						},
+					},
+					required: true,
+				},
+				dateTime: {
+					type: Date,
+					required: true,
+				},
+			},
+		],
 	},
 	{ timestamps: true }
 )
+
+tournametSchema.methods.addGame = function (team1, team2, dateTime) {
+	const updatedGames = [
+		...this.games,
+		{
+			team1: {
+				teamId: team1._id,
+				name: team1.name,
+			},
+			team2: {
+				teamId: team2._id,
+				name: team2.name,
+			},
+			dateTime: dateTime,
+		},
+	]
+	this.games = updatedGames
+	return this.save()
+}
 
 tournametSchema.methods.addNewTeam = function (team) {
 	const updatedTeams = [

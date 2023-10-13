@@ -42,24 +42,25 @@
 				<div class="informations">
 					<div class="info-header">
 						<div class="info-header__image">
-							<img src="../img/tourcards.png" alt="" />
-							<!-- <div class="image-upload">
-											<input type="file">
-											<a><i class="bx bx-plus"></i></a>
-										</div> -->
+							<img src="..<%= tournament.imageUrl %>" alt="" />
+							<div style="display: none;" class="image-upload">
+								<input name="image" type="file">
+								<a><i class="bx bx-plus"></i></a>
+							</div>
 						</div>
 						<div class="info-header__data">
 							<div class="info-header__data--left">
-								<input type="text" value="Nariman Tournament" dir="ltr" disabled />
+								<input name="name" type="text" value="<%= tournament.name %>" dir="ltr" disabled />
 								<div class="info-header__data--details">
 									<span>شروع تورنومنت :</span>
-									<span>10/10/2023</span>
+									<input type="datetime-local" name="startDate" value="<%= tournament.startDate %>" disabled>
+									<span dir="ltr"><%= tournament.startDate %></span>
 								</div>
 							</div>
 							<div class="mmr">
-								<img src="../img/Ancient_medal.webp" alt="" />
+								<img src="../img/<%= tournament.minMMR.slice(2) %>_medal.webp" alt="" />
 								<span>تا</span>
-								<img src="../img/Immortal_medal.webp" alt="" />
+								<img src="../img/<%= tournament.maxMMR.slice(2) %>_medal.webp" alt="" />
 							</div>
 						</div>
 					</div>
@@ -69,147 +70,77 @@
 								<div class="members__box">
 									<div class="top-title">
 										<p>تیم های انتخابی:</p>
-										<p>16/<span>2</span></p>
+										<p>16/<span><%= tournament.teams.length %></span></p>
 									</div>
 									<div class="mid-note"></div>
-
-									<!-- <div class="members__box--notyet">
-												<span>هنوز تیمی اضافه نشده است .</span>
-											</div> -->
-
-									<!-- nafarate team ************** -->
-									<div class="members">
-										<a class="members__box--team">
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												fill="none"
-												viewBox="0 0 24 24"
-												stroke-width="1.5"
-												stroke="currentColor"
-												class="w-6 h-6"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													d="M12 4.5v15m7.5-7.5h-15"
-												/>
-											</svg>
-											<div class="members-specific">
-												<img src="../img/alliancelogo.png" alt="" />
-												<span dir="ltr">Night Assasins</span>
-												<img src="../img/Archon_medal.webp" alt="" />
-											</div>
-										</a>
-										<a class="members__box--team">
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												fill="none"
-												viewBox="0 0 24 24"
-												stroke-width="1.5"
-												stroke="currentColor"
-												class="w-6 h-6"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													d="M12 4.5v15m7.5-7.5h-15"
-												/>
-											</svg>
-											<div class="members-specific">
-												<img src="../img/alliancelogo.png" alt="" />
-												<span dir="ltr">Night Assasins</span>
-												<img src="../img/Archon_medal.webp" alt="" />
-											</div>
-										</a>
-									</div>
+									<% if(tournament.teams.length > 0) { %>
+										<div class="members">
+											<% tournament.teams.forEach(team => { %>
+												<a class="members__box--team">
+													<svg name="addTeamPlus" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+														<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+													</svg>
+													<div class="members-specific">
+														<img src="<%= team.teamId.imageUrl %>"/>
+														<span dir="ltr"><%= team.teamId.name %></span>
+														<img src="../img/<%= team.teamId.avgMMR %>_medal.webp" alt="" />
+													</div>
+												</a>
+											<% }) %>
+										</div>
+									<% } else { %>
+										<div class="members__box--notyet">
+											<span>هنوز تیمی اضافه نشده است .</span>
+										</div>
+									<% } %>
 								</div>
 								<div class="buttons">
-									<a class="button__right">درخواست عضویت</a>
-									<a class="button__left">تغییر اطلاعات</a>
-									<!-- <a class="button__left">ثبت تیم</a> -->
+									<% if(isLeader) { %>
+										<a name="joinTourReq" class="button__right">درخواست شرکت</a>
+									<% } %>
+									<% if(isOrganizer) { %>
+										<a name="editTour" class="button__left">تغییر اطلاعات</a>
+									<% } %>
 								</div>
 							</div>
 							<div class="chart">
-								<p>زمانبندی‌ :</p>
+								<p>زمانبندی‌ بازی ها :</p>
 								<div class="mid-note"></div>
 
 								<div class="chart-box">
 									<!-- <div class="members__box--notyet1">
-												<span>هنوز تیمی اضافه نشده است .</span>
-											</div> -->
-
+										<span>هنوز تیمی اضافه نشده است .</span>
+									</div> -->
 									<div class="block1">
-										<div class="details">
-											<div class="teams-match">
-												<div class="team1">
-													<svg
-														xmlns="http://www.w3.org/2000/svg"
-														fill="none"
-														viewBox="0 0 24 24"
-														stroke-width="1.5"
-														stroke="currentColor"
-														class="w-6 h-6"
-													>
-														<path
-															stroke-linecap="round"
-															stroke-linejoin="round"
-															d="M12 4.5v15m7.5-7.5h-15"
-														/>
-													</svg>
-													<a href="team-info.html">تیم 1 : <span>Team Jinx</span></a>
+										<% tournament.games.forEach(game => { %>
+											<div class="details">
+												<div class="teams-match">
+													<div class="team1">
+														<svg name="selectTeamPlus" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+															<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+														</svg>
+														<a href="/team/<%= game.team1.teamId  %>">تیم 1 : <span><%= game.team1.name %></span></a>
+													</div>
+													<span class="vs">Vs</span>
+													<div class="team1">
+														<svg name="selectTeamPlus" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+															<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+														</svg>
+														<a href="/team/<%= game.team2.teamId  %>">تیم 2 : <span><%= game.team2.name %></span></a>
+													</div>
 												</div>
-												<span class="vs">Vs</span>
-												<div class="team1">
-													<svg
-														xmlns="http://www.w3.org/2000/svg"
-														fill="none"
-														viewBox="0 0 24 24"
-														stroke-width="1.5"
-														stroke="currentColor"
-														class="w-6 h-6"
-													>
-														<path
-															stroke-linecap="round"
-															stroke-linejoin="round"
-															d="M12 4.5v15m7.5-7.5h-15"
-														/>
-													</svg>
-													<a href="team-info.html">تیم 2 : <span>Team Jinx</span></a>
+												<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+													<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18"/>
+												</svg>
+												<div class="timedate">
+													<input type="text" value="<%= game.dateTime.date  %>" dir="ltr" disabled />
+													<input type="text" value="<%= game.dateTime.time  %>" dir="ltr" disabled />
 												</div>
 											</div>
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												fill="none"
-												viewBox="0 0 24 24"
-												stroke-width="1.5"
-												stroke="currentColor"
-												class="w-6 h-6"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18"
-												/>
-											</svg>
-											<div class="timedate">
-												<input type="text" value="10/10/2023" dir="ltr" disabled />
-												<input type="text" value="21:00" dir="ltr" disabled />
-											</div>
-										</div>
-										<div class="plus-svg">
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												fill="none"
-												viewBox="0 0 24 24"
-												stroke-width="1.5"
-												stroke="currentColor"
-												class="w-6 h-6"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													d="M12 4.5v15m7.5-7.5h-15"
-												/>
+										<% }) %>
+										<div name="addGamePlus" style="display: none;" class="plus-svg">
+											<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+												<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
 											</svg>
 										</div>
 									</div>
@@ -217,27 +148,23 @@
 							</div>
 						</div>
 						<div class="left-block">
-							<a class="tournament-leader">
+							<div href="/player/<%= tournament.organizer.userId._id %>" class="tournament-leader">
 								<p>برگذارکننده تورنومنت :</p>
 								<div class="mid-note"></div>
-								<div class="leader">
-									<img src="../img/player-card6.jpg" alt="" />
-									<span dir="ltr">Nariman</span>
-									<img src="../img/Immortal_medal.webp" alt="" />
-								</div>
-							</a>
+								<a class="leader">
+									<img src="../<%= tournament.organizer.userId.imageUrl %>" alt="" />
+									<span dir="ltr"><%= tournament.organizer.userId.name %></span>
+									<img src="../img/<%= tournament.organizer.userId.mmr %>_medal.webp" alt="" />
+								</a>
+							</div>
 							<div class="descrip">
 								<p>توضیحات تورنومنت :</p>
 								<div class="mid-note"></div>
-								<textarea name="" id="" cols="30" rows="10" disabled>
-لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است چاپگرها و متون بلکه روزنامه و مجله در ستون و سطرآنچنان که لازم است و برای شرایط فعلی تکنولوژی مورد نیاز و کاربردهای متنوع با هدف بهبود ابزارهای کاربردی می باشد</textarea
-								>
+								<textarea name="description" cols="30" rows="10" disabled><%= tournament.description %></textarea>
 							</div>
 						</div>
 					</div>
 				</div>
-
-				<!-- <h1 class="header1">جستجو موردنظر یافت نشد...</h1> -->
 			</div>
 		</div>
 
@@ -245,6 +172,7 @@
 		<%- include('./includes/footer') %>
 
 		<!-- scripts -->
+		<script src="../js/tournament.js"></script>
 		<script src="../js/main.js"></script>
 	</body>
 </html>

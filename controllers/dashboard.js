@@ -195,18 +195,22 @@ exports.postAccRecruit = async (req, res, next) => {
 }
 
 exports.postJoinTourReq = async (req, res, next) => {
-	const tournamentId = req.body.tournamentId
-	const teamId = req.body.teamId
-
 	try {
-		const tournament = await User.findById(tournamentId).populate('organizer.userId')
-		const organizer = tournament.organizer.userId
-		const team = req.user.teams.find((team) => team.teamId === teamId)
-
-		await req.user.exchangeReq('joinTour', tournament, { _id: team.teamId, name: team.name })
-		await organizer.exchangeReq('accTeam', tournament, { _id: team.teamId, name: team.name })
-		// have to change redirect path
-		res.redirect('/')
+		const tournament = await Tournament.findById(req.body.tournamentId).populate('organizer.userId')
+		const newTeam = tournament.teams.find(
+			(team) => team.teamId.toString() === req.user.ownedTeam.teamId.toString()
+		)
+		if (!newTeam) {
+			const organizer = tournament.organizer.userId
+			const reqId = await req.user.exchangeReq('joinTour', tournament)
+			await organizer.exchangeReq(
+				'accTeam',
+				tournament,
+				{ _id: req.user.ownedTeam.teamId, name: req.user.ownedTeam.name },
+				{ reqId: reqId, userId: req.user._id }
+			)
+		}
+		res.sendStatus(200)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)

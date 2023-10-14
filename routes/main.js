@@ -1,6 +1,7 @@
 const express = require('express')
 
 const mainController = require('../controllers/main')
+const dashboardController = require('../controllers/dashboard')
 const validator = require('../middlewares/validation')
 
 const Router = express.Router()
@@ -38,8 +39,8 @@ Router.post('/edit-tournament', mainController.postEditTournament)
 // /players => GET
 Router.get('/players', validator.getPlayers, mainController.getPlayers)
 
-// /player => POST
-// Router.post('/player', validator.postPlayer, mainController.postPlayer)
+// /player/:userId => GET
+Router.get('/player/:userId', dashboardController.getDashboard)
 
 // /searchResult => POST
 Router.post('/search-result', mainController.postSearchResult)

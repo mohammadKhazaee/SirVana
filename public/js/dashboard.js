@@ -175,3 +175,16 @@ for (let i = 0; i < sendCommentBtns.length; i++) {
 		.catch((err) => console.log(err))
 	})
 }
+
+// Recruit req btn
+const recruitReq = document.getElementsByName('recruitReq')[0]
+
+if (recruitReq) {
+	recruitReq.addEventListener('click', () => {
+    fetch('/dashboard/recruit-req', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
+      body: JSON.stringify({ playerId: window.location.href.split('/')[4] }),
+    }).then(res => window.location.replace('/dashboard/notif')).catch(err => console.log(err))
+  })
+}

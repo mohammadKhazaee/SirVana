@@ -42,7 +42,7 @@
 				<div class="informations">
 					<div class="info-header">
 						<div class="info-header__image">
-							<img src="..<%= tournament.imageUrl %>" alt="" />
+							<img src="../<%= tournament.imageUrl %>" alt="" />
 							<div style="display: none;" class="image-upload">
 								<input name="image" type="file">
 								<a><i class="bx bx-plus"></i></a>
@@ -81,7 +81,7 @@
 														<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
 													</svg>
 													<div class="members-specific">
-														<img src="<%= team.teamId.imageUrl %>"/>
+														<img src="../<%= team.teamId.imageUrl %>"/>
 														<span dir="ltr"><%= team.teamId.name %></span>
 														<img src="../img/<%= team.teamId.avgMMR %>_medal.webp" alt="" />
 													</div>

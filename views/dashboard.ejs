@@ -9,15 +9,15 @@
 		<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 
 		<!-- Css Links -->
-		<link rel="shortcut icon" href="img/shortcut icon.png" />
-		<link rel="stylesheet" href="css/dashboard.css" />
+		<link rel="shortcut icon" href="<%= path %>img/shortcut icon.png" />
+		<link rel="stylesheet" href="<%= path %>css/dashboard.css" />
 	</head>
 	<body>
-		<div class="container" style="background-image: url(img/dashboard-bg.jpg)">
+		<div class="container" style='background-image: url(<%= path %>img/dashboard-bg.jpg)'>
 			<div class="container2">
-				<a href="/" class="exit"><img src="img/shortcut icon.png" alt=""></a>
+				<a href="/" class="exit"><img src="<%= path %>img/shortcut icon.png"></a>
 				<div class="topblock">
-					<div class="topblock__menu">
+					<div class="topblock__menu" style="visibility: <%= isOwner? 'visible':'hidden' %>;">
 						<a href="/">تنظیمات</a>
 						<a>/</a>
 						<a href="/dashboard/notif">اعلان ها</a>
@@ -58,15 +58,19 @@
 											<div class="comments__box--top-name">
 												<span>رویداد های اخیر</span>
 											</div>
-											<div class="comments__box--top-reply">
-												<a name="sendFeedBtn">ارسال</a>
-											</div>
+											<% if(isOwner) { %>
+												<div class="comments__box--top-reply">
+													<a name="sendFeedBtn">ارسال</a>
+												</div>
+											<% } %>
 										</div>
-										<div class="comments__box--bot">
-											<div class="comments__box--bot-comment">
-												<input name="feedInput" type="text" placeholder="متن دلخواه خود را بنویسید..." />
+										<% if(isOwner) { %>
+											<div class="comments__box--bot">
+												<div class="comments__box--bot-comment">
+													<input name="feedInput" type="text" placeholder="متن دلخواه خود را بنویسید..." />
+												</div>
 											</div>
-										</div>
+										<% } %>
 									</div>
 								</div>
 								<!-- ... -->
@@ -124,7 +128,7 @@
 							<div class="midblock__left1">
 								<div class="midblock__left1--top">
 									<div class="midblock__left1--topimg">
-										<img src="<%= user.imageUrl %>" alt="" />
+										<img src="<%= path %><%= user.imageUrl %>" alt="" />
 										<div class="image-upload" style="display: none;">
 											<input name="image" type="file">
 											<a><i class="bx bx-plus"></i></a>
@@ -184,16 +188,16 @@
 											</div>
 										</div>
 										<div class="medal">
-											<img name="medalImg" src="img/<%= user.mmr.medal %>_medal.webp" alt="" />
+											<img name="medalImg" src="<%= path %>img/<%= user.mmr.medal %>_medal.webp" alt="" />
 										</div>
 									</div>
 								</div>
 							</div>
 							<div class="midblock__left2">
 								<div class="midblock__left2--images">
-									<img src="img/centaur-warrunner.jpg" alt="" />
-									<img src="img/wraith-king.jpg" alt="" />
-									<img src="img/meepo.jpg" alt="" />
+									<img src="<%= path %>img/centaur-warrunner.jpg" alt="" />
+									<img src="<%= path %>img/wraith-king.jpg" alt="" />
+									<img src="<%= path %>img/meepo.jpg" alt="" />
 								</div>
 							</div>
 							<div class="midblock__left3">
@@ -208,19 +212,29 @@
 				</div>
 				<div class="botblock">
 					<div class="botblockk">
-						<a name="editProfile" class="edit-profile">
-							<i class="bx bx-pencil"></i>
-							<p>تغییر پروفایل</p>
-						</a>
-						<a class="edit-image">
-							<label for="file-edit" style="cursor: pointer"><i class="bx bx-image"></i></label>
-							<input type="file" id="file-edit" style="display: none" />
-						</a>
+							<% if(isOwner) { %>
+								<a name="editProfile" class="edit-profile">
+									<i class="bx bx-pencil"></i>
+									<p>تغییر پروفایل</p>
+								</a>
+							<% } else if(isLeader) { %>
+								<a name="recruitReq" class="edit-profile">
+									<i class="bx bx-pencil"></i>
+									<p>دعوت به تیم</p>
+								</a>
+								<a style="display: none;"></a>
+							<% } %>
+						<% if(isOwner) { %>
+							<a class="edit-image">
+								<label for="file-edit" style="cursor: pointer"><i class="bx bx-image"></i></label>
+								<input type="file" id="file-edit" style="display: none" />
+							</a>
+						<% } %>
 					</div>
 				</div>
 			</div>
 		</div>
 		<input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
-		<script src="js/dashboard.js"></script>
+		<script src="<%= path %>js/dashboard.js"></script>
 	</body>
 </html>

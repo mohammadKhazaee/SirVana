@@ -122,12 +122,12 @@
                                 <p class="player-card__needmember">
                                     نیازمند تیم :
                                     <% if (user.lft) { %>
-                                                        <i class="bx bxs-check-circle"></i> 
+                                        <i class="bx bxs-check-circle"></i> 
                                     <% } else { %>
                                     <i class="bx bxs-x-circle"></i>
                                     <% } %>
                                 </p>
-                                <p class="more-button"><a href="#">جز‌ئیات بیشتر</a></p>
+                                <p class="more-button"><a href="/player/<%= user._id %>">جز‌ئیات بیشتر</a></p>
                             </div>
                         </div>
                     <% })} %>

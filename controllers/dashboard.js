@@ -8,7 +8,12 @@ const io = require('../socket')
 
 exports.getDashboard = async (req, res, next) => {
 	try {
-		const renderUser = { ...req.user._doc }
+		const isOwner =
+			req.originalUrl === '/dashboard' ||
+			(req.user && req.user._id.toString() === req.params.userId)
+		let user = req.user
+		if (req.originalUrl !== '/dashboard') user = await User.findById(req.params.userId)
+		const renderUser = { ...user._doc }
 		let isLeader = false
 		renderUser.roles = renderUser.roles.map((role) => {
 			switch (role) {
@@ -24,10 +29,13 @@ exports.getDashboard = async (req, res, next) => {
 		renderUser.pos = renderUser.pos.length !== 5 ? renderUser.pos.join('-') : 'همه'
 		renderUser.mmr = { number: renderUser.mmr, medal: rank.numberToMedal(renderUser.mmr) }
 		renderUser.createdAt = renderUser.createdAt.toISOString().split('T')[0].replaceAll('-', '/')
-		// console.log(renderUser.pos)
+		if (req.originalUrl !== '/dashboard' && isOwner) return res.redirect('/dashboard')
 		res.render('dashboard', {
 			pageTitle: 'SirVana · داشبورد',
 			user: renderUser,
+			isOwner: isOwner,
+			isLeader: req.user && req.user.ownedTeam,
+			path: isOwner ? '' : '../',
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -81,7 +89,7 @@ exports.postEditProfile = async (req, res, next) => {
 		const dota2Id = req.body.dota2Id !== 'ثبت نشده' ? req.body.dota2Id : ''
 		const bio = req.body.bio !== 'یه چیزی بنویس حالا. . .' ? req.body.bio : ''
 		const lft = req.body.lft
-		const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/') : req.user.imageUrl
+		const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/').slice(1) : req.user.imageUrl
 
 		req.user.imageUrl = imageUrl
 		req.user.name = name
@@ -129,10 +137,10 @@ exports.postJoinReq = async (req, res, next) => {
 	try {
 		const team = await Team.findById(req.body.teamId).populate('leader.userId')
 		// check if you're one of team members already or not
-		const newPlayer = team.members.find(
+		const newPlayer = !team.members.find(
 			(member) => member.userId.toString() === req.user._id.toString()
 		)
-		if (!newPlayer) {
+		if (newPlayer) {
 			const teamLeader = team.leader.userId
 			const reqId = await req.user.exchangeReq('join', team, undefined)
 			await teamLeader.exchangeReq('accPlayer', undefined, req.user, {
@@ -164,17 +172,21 @@ exports.postAccPlayer = async (req, res, next) => {
 	}
 }
 
-exports.postReqruitReq = async (req, res, next) => {
-	const teamId = req.body.teamId
-	const playerId = req.body.playerId
+exports.postRecruitReq = async (req, res, next) => {
 	try {
-		const team = await Team.findById(teamId)
-		const player = await User.findById(playerId)
-
-		await req.user.exchangeReq('reqruit', player, team)
-		await player.exchangeReq('accRecruit', undefined, team)
-		// have to change redirect path
-		res.redirect('/')
+		const team = await Team.findById(req.user.ownedTeam.teamId)
+		const player = await User.findById(req.body.playerId)
+		const newPlayer = !team.members.find(
+			(member) => member.userId.toString() === player._id.toString()
+		)
+		if (newPlayer) {
+			const reqId = await req.user.exchangeReq('recruit', player)
+			await player.exchangeReq('accRecruit', undefined, team, {
+				reqId: reqId,
+				userId: req.user._id,
+			})
+		}
+		res.sendStatus(200)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)
@@ -197,10 +209,10 @@ exports.postAccRecruit = async (req, res, next) => {
 exports.postJoinTourReq = async (req, res, next) => {
 	try {
 		const tournament = await Tournament.findById(req.body.tournamentId).populate('organizer.userId')
-		const newTeam = tournament.teams.find(
+		const newTeam = !tournament.teams.find(
 			(team) => team.teamId.toString() === req.user.ownedTeam.teamId.toString()
 		)
-		if (!newTeam) {
+		if (newTeam) {
 			const organizer = tournament.organizer.userId
 			const reqId = await req.user.exchangeReq('joinTour', tournament)
 			await organizer.exchangeReq(

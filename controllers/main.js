@@ -36,7 +36,7 @@ exports.getIndex = async (req, res, next) => {
 			? { userName: req.user.name, teams: [req.user.ownedTeam, ...req.user.teams] }
 			: { userName: '', teams: [] },
 		tournaments: modifiedTournaments,
-		canSend: true,
+		canSend: canSend,
 	})
 }
 
@@ -169,7 +169,7 @@ exports.postTeam = async (req, res, next) => {
 		})
 	}
 	try {
-		const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/') : null
+		const imageUrl = req.file ? req.file.path.replace('\\', '/') : 'img/default-team-picture.jpg'
 		const team = new Team({
 			name: name,
 			nameTag: nameTag,
@@ -203,7 +203,7 @@ exports.postEditTeam = async (req, res, next) => {
 		const name = req.body.name
 		const nameTag = req.body.nameTag
 		const description = req.body.description
-		const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/') : null
+		const imageUrl = req.file ? req.file.path.replace('\\', '/') : null
 		const teamId = req.body.teamId
 		const updatedTeam = {
 			name: name,
@@ -398,7 +398,9 @@ exports.postTournament = async (req, res, next) => {
 		})
 	}
 	try {
-		const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/') : null
+		const imageUrl = req.file
+			? '/' + req.file.path.replace('\\', '/').slice(1)
+			: 'img/tourcards.png'
 
 		const tournament = new Tournament({
 			name: name,
@@ -429,7 +431,7 @@ exports.postEditTournament = async (req, res, next) => {
 		const name = req.body.name
 		const startDate = req.body.startDate
 		const description = req.body.description
-		const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/') : null
+		const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/').slice(1) : null
 		const games = JSON.parse(req.body.games).map((game) => ({
 			...game,
 			dateTime: new Date(
@@ -445,7 +447,7 @@ exports.postEditTournament = async (req, res, next) => {
 			description: description,
 			games: games,
 		}
-		if (imageUrl) updatedTournament.imageUrl = imageUrl
+		if (imageUrl) updatedTournament.imageUrl = imageUrl.slice(1)
 		if (startDate) updatedTournament.startDate = startDate
 		// console.log(updatedTournament)
 		// etelaate Tournament too baghie model ha avaz she(eg. esm, ax)

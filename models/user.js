@@ -128,11 +128,11 @@ const userSchema = new Schema(
 				state: String,
 				relativeReq: Object,
 				receiver: {
-					id: String,
+					id: Schema.Types.ObjectId,
 					name: String,
 				},
 				sender: {
-					id: String,
+					id: Schema.Types.ObjectId,
 					name: String,
 				},
 				sentAt: {
@@ -264,7 +264,7 @@ userSchema.methods.joinToTeam = function (team, role) {
 		this.ownedTeam = {
 			teamId: team._id,
 			name: team.name,
-			image: team.imageUrl,
+			imageUrl: team.imageUrl,
 		}
 	} else {
 		if (!this.teams) this.teams = []

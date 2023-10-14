@@ -12,8 +12,8 @@ Router.use('/dashboard', isAuth, dashboardRouter)
 Router.use(mainRouter)
 
 // Handle not found routes
-Router.use((req, res, next) => {
-	res.render('404', {
+Router.use((req, ress, next) => {
+	ress.render('404', {
 		pageTitle: 'Not Found',
 	})
 })

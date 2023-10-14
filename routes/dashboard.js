@@ -30,7 +30,7 @@ Router.post('/join-req', dashboardController.postJoinReq)
 Router.post('/accept-player', dashboardController.postAccPlayer)
 
 // /dashboard/recruit-req => POST
-Router.post('/recruit-req', dashboardController.postReqruitReq)
+Router.post('/recruit-req', dashboardController.postRecruitReq)
 
 // /dashboard/accept-recruit => POST
 Router.post('/accept-recruit', dashboardController.postAccRecruit)

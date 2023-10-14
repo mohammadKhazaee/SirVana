@@ -90,7 +90,7 @@
 									<% if(user.ownedTeam.teamId) { %>
 										<div class="myteamblock__box--team">
 											<div class="specific">
-												<img src="..<%= user.ownedTeam.teamId.imageUrl %>" alt="" />
+												<img src="../<%= user.ownedTeam.teamId.imageUrl %>" alt="" />
 												<span dir="ltr"><%= user.ownedTeam.teamId.name %></span>
 												<img src="../img/<%= user.ownedTeam.teamId.avgMMR %>_medal.webp" alt="" />
 											</div>
@@ -114,7 +114,7 @@
 										<% user.teams.forEach(team => { %>
 											<div class="myteamblock__box--team">
 												<div class="specific">
-													<img src="..<%= team.teamId.imageUrl %>" alt="" />
+													<img src="../<%= team.teamId.imageUrl %>" alt="" />
 													<span dir="ltr"><%= team.teamId.name %></span>
 													<img src="../img/<%= team.teamId.avgMMR %>_medal.webp" alt="" />
 												</div>

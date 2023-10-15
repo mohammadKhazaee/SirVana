@@ -119,7 +119,7 @@ exports.getTeam = async (req, res, next) => {
 				(member) => member.userId._id.toString() === req.user._id.toString()
 			).length > 0
 		const isLead = req.user && renderTeam.leader.userId.toString() === req.user._id.toString()
-		// console.log(renderTeam.chats)
+		// console.log(renderTeam.members)
 		res.render('team-info', {
 			pageTitle: 'SirVana · مسابقات',
 			team: renderTeam,
@@ -183,6 +183,7 @@ exports.postTeam = async (req, res, next) => {
 				{
 					userId: req.user._id,
 					name: req.user.name,
+					isLead: true,
 				},
 			],
 			avgMMR: req.user.mmr,

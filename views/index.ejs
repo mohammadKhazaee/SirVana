@@ -130,60 +130,28 @@
 
 		<!-- online lft and lfp -->
 		<input type="hidden" name="canSend" value="<%= canSend %>">
-		<div class="looking-for">
-			<div class="looking-for__player--box">
-				<div class="looking-for__player--title">
-					<p>نیازمند پلیر آنلاین :</p>
-				</div>
-				<div class="looking-for__player--middle"></div>
-				<div class="looking-for__player">
-				</div>
-				<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-				<div class="lfp-select">
-					<div class="custom-select">
-						<select name="lfpTeam">
-							<option value="null">انتخاب تیم</option>
-							<% user.teams.forEach(team => { %>
-								<option value="<%= team.name %>"><%= team.name %></option>
-							<% }) %>
-						</select>
+		<div class="lf-bg">
+			<div class="shadow-box4"></div>
+			<div class="shadow-box5"></div>
+			<div class="looking-for">
+				<div class="looking-for__player--box">
+					<div class="looking-for__player--title">
+						<p>نیازمند پلیر آنلاین :</p>
 					</div>
-					<div class="custom-select">
-						<select>
-							<option value="null">پوز</option>
-							<option value="1">پوز 1</option>
-							<option value="2">پوز 2</option>
-							<option value="3">پوز 3</option>
-							<option value="4">پوز 4</option>
-							<option value="5">پوز 5</option>
-						</select>
+					<div class="looking-for__player--middle"></div>
+					<div class="looking-for__player">
 					</div>
-					<div class="custom-select">
-						<select>
-							<option value="null">رنک</option>
-							<option value="Herald">Herald</option>
-							<option value="Guardian">Guardian</option>
-							<option value="Crusader">Crusader</option>
-							<option value="Archon">Archon</option>
-							<option value="Legend">Legend</option>
-							<option value="Ancient">Ancient</option>
-							<option value="Divine">Divine</option>
-							<option value="Immortal">Immortal</option>
-						</select>
-					</div>
-					<button id="lfpSend" type="submit" class="create">ثبت</button>
-				</div>
-			</div>
-			<div class="looking-for__team--box">
-				<div class="looking-for__team--title">
-					<p>نیازمند تیم آنلاین :</p>
-				</div>
-				<div class="looking-for__team--middle"></div>
-				<div class="looking-for__team">
-				</div>
-				<div class="lft-select">
-					<div>
-						<div class="custom-select off">
+					<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+					<div class="lfp-select">
+						<div class="custom-select">
+							<select name="lfpTeam">
+								<option value="null">انتخاب تیم</option>
+								<% user.teams.forEach(team => { %>
+									<option value="<%= team.name %>"><%= team.name %></option>
+								<% }) %>
+							</select>
+						</div>
+						<div class="custom-select">
 							<select>
 								<option value="null">پوز</option>
 								<option value="1">پوز 1</option>
@@ -193,7 +161,7 @@
 								<option value="5">پوز 5</option>
 							</select>
 						</div>
-						<div class="custom-select on">
+						<div class="custom-select">
 							<select>
 								<option value="null">رنک</option>
 								<option value="Herald">Herald</option>
@@ -206,8 +174,44 @@
 								<option value="Immortal">Immortal</option>
 							</select>
 						</div>
+						<button id="lfpSend" type="submit" class="create">ثبت</button>
 					</div>
-					<button id="lftSend" type="submit" class="create">ثبت</button>
+				</div>
+				<div class="looking-for__team--box">
+					<div class="looking-for__team--title">
+						<p>نیازمند تیم آنلاین :</p>
+					</div>
+					<div class="looking-for__team--middle"></div>
+					<div class="looking-for__team">
+					</div>
+					<div class="lft-select">
+						<div>
+							<div class="custom-select off">
+								<select>
+									<option value="null">پوز</option>
+									<option value="1">پوز 1</option>
+									<option value="2">پوز 2</option>
+									<option value="3">پوز 3</option>
+									<option value="4">پوز 4</option>
+									<option value="5">پوز 5</option>
+								</select>
+							</div>
+							<div class="custom-select on">
+								<select>
+									<option value="null">رنک</option>
+									<option value="Herald">Herald</option>
+									<option value="Guardian">Guardian</option>
+									<option value="Crusader">Crusader</option>
+									<option value="Archon">Archon</option>
+									<option value="Legend">Legend</option>
+									<option value="Ancient">Ancient</option>
+									<option value="Divine">Divine</option>
+									<option value="Immortal">Immortal</option>
+								</select>
+							</div>
+						</div>
+						<button id="lftSend" type="submit" class="create">ثبت</button>
+					</div>
 				</div>
 			</div>
 		</div>

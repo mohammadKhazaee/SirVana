@@ -122,7 +122,7 @@ tournametSchema.methods.addNewTeam = function (team) {
 		{
 			teamId: team._id,
 			name: team.name,
-			image: team.imageUrl,
+			imageUrl: team.imageUrl,
 		},
 	]
 	this.teams = updatedTeams

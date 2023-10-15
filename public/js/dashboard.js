@@ -188,3 +188,91 @@ if (recruitReq) {
     }).then(res => window.location.replace('/dashboard/notif')).catch(err => console.log(err))
   })
 }
+
+// Remove notif
+
+const deleteNotifBtn = document.getElementsByClassName('delete')
+
+if (deleteNotifBtn) {
+	[...deleteNotifBtn].forEach(btn => {
+		btn.addEventListener('click', () => {
+			fetch('/dashboard/delete-req', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
+				body: JSON.stringify({ 
+					reqId: btn.previousElementSibling.value, 
+					reqInfo: { reqId: btn.previousElementSibling.previousElementSibling.value, userId: btn.previousElementSibling.previousElementSibling.previousElementSibling.value }
+				}),
+			}).then(res => btn.parentElement.remove()).catch(err => console.log(err))
+		})
+	})
+}
+
+// Accept&Reject notif
+const accNotifs = document.getElementsByName('accNotif')
+const rejNotifs = document.getElementsByName('rejNotif')
+
+if(accNotifs) {
+	accNotifs.forEach(accBtn => {
+		accBtn.addEventListener('click', () => {
+			let type
+			switch (accBtn.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.value) {
+				case 'accPlayer':
+					type = 'player'
+					break;
+				case 'accRecruit':
+					type = 'recruit'
+					break;
+				case 'accTeam':
+					type = 'team'
+					break;
+			}
+			fetch('/dashboard/accept-'+type, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
+				body: JSON.stringify({ 
+					reqId: accBtn.previousElementSibling.value,
+					senderId: accBtn.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.value,
+					reqInfo: { reqId: accBtn.previousElementSibling.previousElementSibling.value, userId: accBtn.previousElementSibling.previousElementSibling.previousElementSibling.value }
+				}),
+			}).then(res => {
+				if (res.status == 200) {
+					accBtn.parentElement.parentElement.remove()
+				} else {
+					console.log(res)
+				}
+			}).catch(err => console.log(err))
+		})
+	})
+	rejNotifs.forEach(rejBtn => {
+		rejBtn.addEventListener('click', () => {
+			let type
+			switch (rejBtn.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.value) {
+				case 'accPlayer':
+					type = 'player'
+					break;
+				case 'accRecruit':
+					type = 'recruit'
+					break;
+				case 'accTeam':
+					type = 'team'
+					break;
+			}
+			fetch('/dashboard/reject-'+type, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
+				body: JSON.stringify({ 
+					reqId: rejBtn.previousElementSibling.previousElementSibling.value, 
+					reqInfo: { reqId: rejBtn.previousElementSibling.previousElementSibling.previousElementSibling.value, userId: rejBtn.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.value }
+				}),
+			}).then(res => {
+				if (res.status == 200) {
+					rejBtn.parentElement.parentElement.remove()
+				} else {
+					console.log(res)
+				}
+			}).catch(err => console.log(err))
+		})
+	})
+
+}

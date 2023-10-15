@@ -97,13 +97,18 @@ const teamSchema = new Schema(
 
 teamSchema.methods.recruitMember = function (user) {
 	const updatedAvgMMR = (this.avgMMR * this.memberCount + user.mmr) / (this.memberCount + 1)
+	console.log(this.avgMMR, updatedAvgMMR)
 	this.avgMMR = updatedAvgMMR
 	this.memberCount = this.memberCount + 1
 	let updatedMembers
+	const newMember = { userId: user._id, name: user.name, imageUrl: user.imageUrl }
+	newMember.pos = user.pos.join('-')
+	if (newMember.pos === '1-2-3-4-5') newMember.pos = 'همه'
+	if (newMember.pos === '') newMember.pos = 'ثبت نشده'
 	if (this.members) {
-		updatedMembers = [...this.members, { userId: user._id, name: user.name }]
+		updatedMembers = [...this.members, newMember]
 	} else {
-		updatedMembers = [{ userId: user._id, name: user.name }]
+		updatedMembers = [newMember]
 	}
 	this.members = updatedMembers
 	return this.save()

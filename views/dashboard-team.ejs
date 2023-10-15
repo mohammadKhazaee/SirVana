@@ -16,9 +16,10 @@
 	<body>
 		<div class="container" style="background-image: url(../img/dashboard-bg.jpg)">
 			<div class="container2">
+				<!-- <a href="/" class="exit"><img src="../img/shortcut icon.png"></a> -->
 				<div class="topblock">
 					<div class="topblock__menu">
-						<a href="/">تنظیمات</a>
+						<a href="/dashboard/settings">تنظیمات</a>
 						<a>/</a>
 						<a href="/dashboard/notif">اعلان ها</a>
 						<a>/</a>
@@ -38,10 +39,11 @@
 										<div class="mytourblock__box--tour">
 											<div class="specific-tour">
 												<img src="../<%= tournament.tournamentId.imageUrl %>" alt="" />
-												<span dir="ltr">Nariman</span>
+												<span dir="ltr"><%= tournament.tournamentId.organizer.name %></span>
 												<img src="../img/<%= tournament.tournamentId.minMMR.slice(2) %>_medal.webp" alt="" />
 												<p>تا</p>
 												<img src="../img/<%= tournament.tournamentId.maxMMR.slice(2) %>_medal.webp" alt="" />
+												<span><%= tournament.tournamentId.startDate.toISOString().split('T')[0].replaceAll('-', '/') %></span>
 											</div>
 											<a href="/tournament/<%= tournament.tournamentId._id %>">مشاهده</a>
 										</div>

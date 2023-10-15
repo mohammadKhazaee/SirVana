@@ -26,7 +26,9 @@ exports.getDashboard = async (req, res, next) => {
 					return { name: 'تورنومت لیدر', color: 'tournament' }
 			}
 		})
-		renderUser.pos = renderUser.pos.length !== 5 ? renderUser.pos.join('-') : 'همه'
+		renderUser.pos = user.pos.join('-')
+		if (renderUser.pos === '1-2-3-4-5') renderUser.pos = 'همه'
+		if (renderUser.pos === '') renderUser.pos = 'ثبت نشده'
 		renderUser.mmr = { number: renderUser.mmr, medal: rank.numberToMedal(renderUser.mmr) }
 		renderUser.createdAt = renderUser.createdAt.toISOString().split('T')[0].replaceAll('-', '/')
 		if (req.originalUrl !== '/dashboard' && isOwner) return res.redirect('/dashboard')
@@ -70,7 +72,28 @@ exports.getDashboardTeam = async (req, res, next) => {
 
 exports.getDashboardNotif = async (req, res, next) => {
 	try {
+		let inReqs = [],
+			outReqs = []
+		req.user.requests.forEach((request) => {
+			if (request.type == 'accPlayer' || request.type == 'accRecruit' || request.type == 'accTeam')
+				inReqs = [...inReqs, request]
+			else outReqs = [...outReqs, request]
+		})
+		// console.log(inReqs)
 		res.render('dashboard-notif', {
+			pageTitle: 'SirVana · داشبورد',
+			inReqs: inReqs,
+			outReqs: outReqs,
+		})
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
+}
+
+exports.getDashboardSettings = async (req, res, next) => {
+	try {
+		res.render('dashboard-settings', {
 			pageTitle: 'SirVana · داشبورد',
 		})
 	} catch (error) {
@@ -109,8 +132,7 @@ exports.postEditProfile = async (req, res, next) => {
 
 exports.postSendFeed = async (req, res, next) => {
 	try {
-		const feedContent = req.body.feedContent
-		await req.user.sendFeed(feedContent)
+		await req.user.sendFeed(req.body.feedContent)
 		res.status(200).send({ feeds: req.user.feeds, name: req.user.name })
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -122,8 +144,7 @@ exports.postSendFeedComment = async (req, res, next) => {
 	try {
 		const commentContent = req.body.commentContent
 		const receiver = await User.findById(req.body.userId)
-		const feedId = req.body.feedId
-		req.user.sendFeedComment(commentContent, receiver, feedId)
+		req.user.sendFeedComment(commentContent, receiver, req.body.feedId)
 		res
 			.status(200)
 			.send({ sender: { name: req.user.name, userId: req.user._id }, content: commentContent })
@@ -136,13 +157,15 @@ exports.postSendFeedComment = async (req, res, next) => {
 exports.postJoinReq = async (req, res, next) => {
 	try {
 		const team = await Team.findById(req.body.teamId).populate('leader.userId')
-		// check if you're one of team members already or not
+		// checks if you're one of team members already or not
 		const newPlayer = !team.members.find(
 			(member) => member.userId.toString() === req.user._id.toString()
 		)
 		if (newPlayer) {
 			const teamLeader = team.leader.userId
-			const reqId = await req.user.exchangeReq('join', team, undefined)
+			const reqId = await req.user.exchangeReq('join', team, undefined, {
+				userId: team.leader.userId._id.toString(),
+			})
 			await teamLeader.exchangeReq('accPlayer', undefined, req.user, {
 				reqId: reqId,
 				userId: req.user._id,
@@ -156,16 +179,28 @@ exports.postJoinReq = async (req, res, next) => {
 }
 
 exports.postAccPlayer = async (req, res, next) => {
-	const teamId = req.body.teamId
-	const playerId = req.body.playerId
-
 	try {
-		const team = req.user.teams.find((team) => team.teamId === teamId)
-		const player = await User.findById(playerId)
-
+		const { reqId, reqInfo } = req.body
+		const team = await Team.findById(req.user.ownedTeam.teamId)
+		const player = await User.findById(reqInfo.userId)
+		const wrong = await req.user.handleReq(reqId, player, reqInfo.reqId, 'Accepted')
+		if (wrong === 'wrong') return res.sendStatus(404)
 		await player.joinToTeam(team)
 		await team.recruitMember(player)
-		res.redirect('/dashboard')
+		res.sendStatus(200)
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
+}
+
+exports.postRejPlayer = async (req, res, next) => {
+	try {
+		const { reqId, reqInfo } = req.body
+		const player = await User.findById(reqInfo.userId)
+		const wrong = req.user.handleReq(reqId, player, reqInfo.reqId, 'Rejected')
+		if (wrong === 'wrong') return res.sendStatus(404)
+		res.sendStatus(200)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)
@@ -180,7 +215,9 @@ exports.postRecruitReq = async (req, res, next) => {
 			(member) => member.userId.toString() === player._id.toString()
 		)
 		if (newPlayer) {
-			const reqId = await req.user.exchangeReq('recruit', player)
+			const reqId = await req.user.exchangeReq('recruit', player, undefined, {
+				userId: req.body.playerId,
+			})
 			await player.exchangeReq('accRecruit', undefined, team, {
 				reqId: reqId,
 				userId: req.user._id,
@@ -194,12 +231,28 @@ exports.postRecruitReq = async (req, res, next) => {
 }
 
 exports.postAccRecruit = async (req, res, next) => {
-	const teamId = req.body.teamId
 	try {
-		const team = await Team.findById(teamId)
+		const { reqId, reqInfo, senderId } = req.body
+		const team = await Team.findById(senderId)
+		const teamLeader = await User.findById(reqInfo.userId)
+		const wrong = await req.user.handleReq(reqId, teamLeader, reqInfo.reqId, 'Accepted')
+		if (wrong === 'wrong') return res.sendStatus(404)
 		await req.user.joinToTeam(team)
 		await team.recruitMember(req.user)
-		res.redirect('/dashboard')
+		res.sendStatus(200)
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
+}
+
+exports.postRejRecruit = async (req, res, next) => {
+	try {
+		const { reqId, reqInfo } = req.body
+		const teamLeader = await User.findById(reqInfo.userId)
+		const wrong = req.user.handleReq(reqId, teamLeader, reqInfo.reqId, 'Rejected')
+		if (wrong === 'wrong') return res.sendStatus(404)
+		res.sendStatus(200)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)
@@ -214,7 +267,9 @@ exports.postJoinTourReq = async (req, res, next) => {
 		)
 		if (newTeam) {
 			const organizer = tournament.organizer.userId
-			const reqId = await req.user.exchangeReq('joinTour', tournament)
+			const reqId = await req.user.exchangeReq('joinTour', tournament, undefined, {
+				userId: tournament.organizer.userId._id.toString(),
+			})
 			await organizer.exchangeReq(
 				'accTeam',
 				tournament,
@@ -230,16 +285,43 @@ exports.postJoinTourReq = async (req, res, next) => {
 }
 
 exports.postAccTeam = async (req, res, next) => {
-	const tournamentId = req.body.tournamentId
-	const teamId = req.body.teamId
 	try {
-		// change state of requests
-		const tournament = await Tournament.findById(tournamentId)
-		const team = await Team.findById(teamId)
+		const { reqId, reqInfo, senderId } = req.body
+		const team = await Team.findById(senderId)
+		const teamLeader = await User.findById(reqInfo.userId)
+		const wrong = await req.user.handleReq(reqId, teamLeader, reqInfo.reqId, 'Accepted')
+		if (wrong === 'wrong') return res.sendStatus(404)
+		const tournaments = req.user.tournaments.filter((tour) => tour.owned)
+		const tournament = await Tournament.findOne(tournaments[tournaments.length - 1].tournamentId)
 		await tournament.addNewTeam(team)
 		await team.joinToTournament(tournament)
-		// should be redirect to tournament/:tournamentId
-		res.redirect('/dashboard')
+		res.sendStatus(200)
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
+}
+
+exports.postRejTeam = async (req, res, next) => {
+	try {
+		const { reqId, reqInfo } = req.body
+		const teamLeader = await User.findById(reqInfo.userId)
+		const wrong = req.user.handleReq(reqId, teamLeader, reqInfo.reqId, 'Rejected')
+		if (wrong === 'wrong') return res.sendStatus(404)
+		res.sendStatus(200)
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
+}
+
+exports.postDeleteReq = async (req, res, next) => {
+	try {
+		const { reqId, reqInfo } = req.body
+		const receiver = await User.findById(reqInfo.userId)
+		const wrong = req.user.handleReq(reqId, receiver)
+		if (wrong === 'wrong') return res.sendStatus(404)
+		res.sendStatus(200)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)

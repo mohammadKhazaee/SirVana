@@ -270,10 +270,9 @@ userSchema.methods.joinToTeam = function (team, role) {
 		if (!this.teams) this.teams = []
 		const updatedTeams = [
 			...this.teams,
-			{ teamId: team._id, name: team.name, image: team.imageUrl },
+			{ teamId: team._id, name: team.name, imageUrl: team.imageUrl },
 		]
 		this.teams = updatedTeams
-
 		let updatedTournaments
 		if (this.tournaments) {
 			const newTeamTournaments = team.tournaments.filter((tournament) => {
@@ -281,7 +280,7 @@ userSchema.methods.joinToTeam = function (team, role) {
 					(tour) => tour.tournamentId === tournament.tournamentId
 				)
 				if (sameTournament) return false
-				tournament = { ...tournament, joined: true }
+				tournament = { ...tournament, owned: role ? true : false }
 				return true
 			})
 			updatedTournaments = [...this.tournaments, ...newTeamTournaments]
@@ -290,20 +289,22 @@ userSchema.methods.joinToTeam = function (team, role) {
 		}
 		this.tournaments = updatedTournaments
 	}
-
 	return this.save()
 }
 
 userSchema.methods.joinToTour = function (tournament) {
-	const joined = tournament.leader.userId.toString() !== this._id.toString()
+	const owned = tournament.organizer.userId.toString() === this._id.toString()
 	let updatedTournaments
+	const newTour = {
+		tournamentId: tournament._id,
+		name: tournament.name,
+		imageUrl: tournament.imageUrl,
+		owned: owned,
+	}
 	if (this.tournaments) {
-		updatedTournaments = [
-			...this.tournaments,
-			{ tournamentId: tournament._id, name: tournament.name, joined: joined },
-		]
+		updatedTournaments = [...this.tournaments, newTour]
 	} else {
-		updatedTournaments = [{ tournamentId: tournament._id, name: tournament.name, joined: joined }]
+		updatedTournaments = [newTour]
 	}
 	this.tournaments = updatedTournaments
 
@@ -333,6 +334,53 @@ userSchema.methods.createTour = function (tournament, role) {
 	return this.save()
 }
 
+userSchema.methods.handleReq = async function (reqId, responsorUser, relativeReqId, state) {
+	let deleteReq
+	responsorUser.requests.forEach((req) => {
+		if (req._id.toString() === relativeReqId) deleteReq = req.type
+	})
+	const updatedRequests = this.requests.filter((req) => {
+		if (req._id.toString() === reqId) {
+			if (req.state === 'Unseen') deleteReq = 'Unseen'
+			return false
+		}
+		return true
+	})
+	if (this.requests.length === updatedRequests.length) return 'wrong'
+	if (deleteReq) {
+		let updatedRequestss,
+			changed = false
+		switch (deleteReq) {
+			case 'Unseen':
+				updatedRequestss = responsorUser.requests.filter((req) => {
+					if (req.relativeReq.reqId == undefined || req.relativeReq.reqId.toString() !== reqId)
+						return true
+					changed = true
+					return false
+				})
+				break
+			case 'join':
+			case 'recruit':
+			case 'joinTour':
+				updatedRequestss = responsorUser.requests.map((req) => {
+					let updatedReq = { ...req._doc }
+					if (req._id.toString() === relativeReqId) {
+						updatedReq.state = state
+						changed = true
+					}
+					return updatedReq
+				})
+				break
+		}
+		// console.log(responsorUser.requests.length === updatedRequestss.length)
+		if (!changed) return 'wrong'
+		responsorUser.requests = updatedRequestss
+		await responsorUser.save()
+	}
+	this.requests = updatedRequests
+	return this.save()
+}
+
 userSchema.methods.exchangeReq = async function (type, receiver, sender, relativeReq) {
 	let newReq
 	if (type === 'recruit' || type === 'joinTour' || type === 'join') {
@@ -346,6 +394,7 @@ userSchema.methods.exchangeReq = async function (type, receiver, sender, relativ
 		newReq = {
 			type: type,
 			state: 'Unseen',
+			relativeReq: relativeReq,
 			receiver: {
 				id: receiver._id,
 				name: receiver.name,

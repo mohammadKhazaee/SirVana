@@ -14,6 +14,9 @@ Router.get('/team-tour', dashboardController.getDashboardTeam)
 // /dashboard/notif => GET
 Router.get('/notif', dashboardController.getDashboardNotif)
 
+// /dashboard/settings => GET
+Router.get('/settings', dashboardController.getDashboardSettings)
+
 // /dashboard/edit-profile => POST
 Router.post('/edit-profile', dashboardController.postEditProfile)
 
@@ -29,17 +32,29 @@ Router.post('/join-req', dashboardController.postJoinReq)
 // /dashboard/accept-player => POST
 Router.post('/accept-player', dashboardController.postAccPlayer)
 
+// /dashboard/reject-player => POST
+Router.post('/reject-player', dashboardController.postRejPlayer)
+
 // /dashboard/recruit-req => POST
 Router.post('/recruit-req', dashboardController.postRecruitReq)
 
 // /dashboard/accept-recruit => POST
 Router.post('/accept-recruit', dashboardController.postAccRecruit)
 
+// /dashboard/reject-recruit => POST
+Router.post('/reject-recruit', dashboardController.postRejRecruit)
+
 // /dashboard/join-tour-req => POST
 Router.post('/join-tour-req', dashboardController.postJoinTourReq)
 
 // /dashboard/accept-team => POST
 Router.post('/accept-team', dashboardController.postAccTeam)
+
+// /dashboard/reject-team => POST
+Router.post('/reject-team', dashboardController.postRejTeam)
+
+// /dashboard/delete-req => POST
+Router.post('/delete-req', dashboardController.postDeleteReq)
 
 // /dashboard/send-mail => POST
 Router.post('/send-mail', dashboardController.postPvMail)

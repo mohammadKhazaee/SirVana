@@ -15,6 +15,7 @@ const compression = require('compression')
 
 const router = require('./routes/routes')
 const User = require('./models/user')
+const Socket = require('./models/socket')
 
 const app = express()
 // The store that sessions will be store there
@@ -131,9 +132,26 @@ mongoose
 	})
 	.then((result) => {
 		const server = app.listen(process.env.PORT || 3000)
+		Socket.deleteMany().then((data) => {})
 		const io = require('./socket').init(server)
 		io.on('connection', (socket) => {
-			console.log('client connected')
+			// console.log('id:' + socket.id + ' connected')
+			socket.on('userConnect', (userId, friendId) => {
+				const newSocket = new Socket({
+					userId: userId,
+					socketId: socket.id,
+					type: 'pvChat',
+					friendId: friendId,
+				})
+				newSocket.save()
+			})
+			socket.on('userDisconnect', (socketId) => {
+				// console.log(socketId + ' disconnected')
+				Socket.deleteOne({ socketId: socketId }).then((data) => {})
+			})
+			socket.on('test', (test) => {
+				console.log(test)
+			})
 		})
 	})
 	.catch((err) => console.log(err))

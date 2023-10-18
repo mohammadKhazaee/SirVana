@@ -5,4 +5,7 @@ public/bower_components
 *copy.json
 .bowerrc
 test.js
+temp.js
 *.orig
+images/*
+!.gitkeep

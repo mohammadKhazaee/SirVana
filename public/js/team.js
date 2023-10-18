@@ -22,9 +22,9 @@ if(createTeam){
 const sendChat = document.getElementsByName('sendChat')[0]
 const chatInput = document.getElementsByName('chatInput')[0]
 const msgBox = document.getElementsByClassName('message-box')[0]
-const socket = io();
 
 if (chatInput) {
+  const socket = io();
   socket.on('team-chat', message => {
     if(!message.incomming) {
       msgBox.insertAdjacentHTML(

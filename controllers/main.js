@@ -529,9 +529,13 @@ exports.postSearchResult = async (req, res, next) => {
 			return { ...team._doc, avgMMR: rank.numberToMedal(team.avgMMR) }
 		})
 	} else if (searchType === 'player') {
-		searchResult = await User.find(dbQuery).select('_id name pos mmr').limit(searchLimit)
+		searchResult = await User.find(dbQuery).select('_id imageUrl name pos mmr').limit(searchLimit)
 		searchResult = searchResult.map((player) => {
-			return { ...player._doc, pos: player.pos.join('-'), mmr: rank.numberToMedal(player.mmr) }
+			return {
+				...player._doc,
+				pos: player.pos.length !== 5 ? player.pos.join('-') : 'همه',
+				mmr: rank.numberToMedal(player.mmr),
+			}
 		})
 	}
 

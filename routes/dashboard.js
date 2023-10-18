@@ -56,6 +56,9 @@ Router.post('/reject-team', dashboardController.postRejTeam)
 // /dashboard/delete-req => POST
 Router.post('/delete-req', dashboardController.postDeleteReq)
 
+// /dashboard/mail/:friendId => GET
+Router.get('/mail/:friendId', dashboardController.getPvMail)
+
 // /dashboard/send-mail => POST
 Router.post('/send-mail', dashboardController.postPvMail)
 

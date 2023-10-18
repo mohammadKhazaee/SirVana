@@ -80,6 +80,18 @@ body {
 }
 .container2 .exit {
 	position: absolute;
+	top: 12%;
+	right: 30%;
+	width: 6rem;
+	height: 6rem;
+}
+.exit img {
+	width: 100%;
+	height: 100%;
+	transition: filter 0.3s ease;
+}
+.container2 .exit {
+	position: absolute;
 	top: 13%;
 	right: 30.5%;
 	width: 5rem;
@@ -162,7 +174,7 @@ body {
 	outline: none;
 	border: transparent;
 
-	font: 3.5rem 'Lato', sans-serif;
+	font: 3.5rem 'Lato', 'Tanha', sans-serif;
 	color: #fff;
 }
 .editable {
@@ -916,7 +928,7 @@ body {
 	}
 }
 
-@media (min-width: 1600px) {
+@media (min-width: 1700px) {
 	.container {
 		justify-content: normal;
 	}

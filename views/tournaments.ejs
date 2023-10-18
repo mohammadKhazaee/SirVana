@@ -4,7 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title><%= pageTitle %></title>
-		<link rel="shortcut icon" href="./img/shortcut icon.png" />
+		<link rel="shortcut icon" href="img/logo-lone.png" />
 		<!-- Site Icon -->
 		<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 		<!-- css links -->
@@ -16,7 +16,7 @@
 	<body>
 		<!-- Navbar -->
 		<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName, navSearch:
-		false}) %>
+		false, subpath: false}) %>
 
 		<!-- background -->
 		<div class="tournament-page">
@@ -200,6 +200,19 @@
 				<% if(tournaments.length == 0 && noFilter) { %>
 				<h1 class="header1">جستجو موردنظر یافت نشد...</h1>
 				<% } %>
+			</div>
+		</div>
+		<div class="center">
+			<div class="pagination">
+				<a href="#">&raquo;</a>
+				<a href="#"  class="active">1</a>
+				<a href="#">2</a>
+				<a href="#">3</a>
+				<a href="#">...</a>
+				<a href="#">4</a>
+				<a href="#">5</a>
+				<a href="#">6</a>
+				<a href="#">&laquo;</a>
 			</div>
 		</div>
 

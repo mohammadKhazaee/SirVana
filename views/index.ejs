@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="shortcut icon" type="image/png" href="img/shortcut icon.png" />
+		<link rel="shortcut icon" href="img/logo-lone.png" />
 
 		<!-- Site Icon -->
 		<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
@@ -32,7 +32,7 @@
 		<div class="slideshow-container">
 			<!-- Navbar -->
 			<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName, navSearch:
-			true}) %>
+			true, subpath: false}) %>
 
 			<div class="mySlides fade">
 				<div class="shadow-box"></div>
@@ -132,7 +132,36 @@
 		<input type="hidden" name="canSend" value="<%= canSend %>">
 		<div class="lf-bg">
 			<div class="shadow-box4"></div>
-			<div class="shadow-box5"></div>
+			<div class="shadow-box5">
+				<div class="topbox">
+					<h1>" نیازمند پلیر آنلاین " چیست ؟</h1>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="1.5"
+						stroke="currentColor"
+						class="w-6 h-6"
+						id="toptobotbtn"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M19.5 5.25l-7.5 7.5-7.5-7.5m15 6l-7.5 7.5-7.5-7.5"
+						/>
+					</svg>
+					<h1>" نیازمند تیم آنلاین " چیست ؟</h1>
+				</div>
+				<div class="botbox">
+					<p>
+						جهت صرفه جویی در وقت ، تیم لیدر ها میتوانید با تکمیل پارامترهای مورد نیاز، اطلاعات پلیر مورد نظر خود را ثبت نمایند. تا اعضای سایت، تیم آنها را برای عضویت پیدا کنند .
+					</p>
+					<div class="vert"></div>
+					<p>
+						جهت صرفه جویی در وقت ، اگر شما بدنبال تیم هستید میتوانید با انتخاب رنک و رول مورد علاقه خود ،تیم مورد نظر خود را پیدا نمایید .
+					</p>
+				</div>
+			</div>
 			<div class="looking-for">
 				<div class="looking-for__player--box">
 					<div class="looking-for__player--title">
@@ -223,5 +252,6 @@
 		<script src="/socket.io/socket.io.js"></script>
 		<script src="js/main.js"></script>
 		<script src="js/index.js"></script>
+		<script src="js/toptobot.js"></script>
 	</body>
 </html>

@@ -190,7 +190,6 @@ if (recruitReq) {
 }
 
 // Remove notif
-
 const deleteNotifBtn = document.getElementsByClassName('delete')
 
 if (deleteNotifBtn) {
@@ -275,4 +274,163 @@ if(accNotifs) {
 		})
 	})
 
+}
+
+// Loads chats with chosen friend
+const responsorEle = document.getElementsByClassName('reciever-name')[0]
+const mailBox = document.getElementsByClassName('message-box')[0]
+const noMessage = document.getElementById('noMessage')
+const chooseFriend = document.getElementById('chooseFriend')
+const liveSearchInput = document.getElementsByName('liveSearchInput')[0]
+const searchResultEle = document.getElementById('search-result-box')
+const isNotif = document.getElementsByClassName('out-messages__top').length > 0? true:false
+
+if (isNotif) {
+	const userId = document.getElementsByName('userId')[0]
+	const sendChatBtn = document.getElementsByClassName('send-box')[0].children[0]
+	const chatInput = document.getElementsByClassName('send-box')[0].children[1]
+	let prevSocket, prevSocketId
+
+	const setFriendsListener = () => {
+		const getPvMails = document.getElementsByName('getPvMails')
+		getPvMails.forEach(friendEle => {
+			friendEle.addEventListener('click', () => {
+				fetch(`/dashboard/mail/${friendEle.previousElementSibling.value}`, {
+					method: 'GET',
+					headers: { 'Content-Type': 'application/json' },
+				}).then(res => res.json()).then(mails => {
+					if(mails.length > 0)
+						mailBox.innerHTML = ''
+					responsorEle.setAttribute('href', '/player/'+friendEle.previousElementSibling.value)
+					responsorEle.style.display = 'flex'
+					responsorEle.children[0].innerHTML = friendEle.previousElementSibling.previousElementSibling.value
+					responsorEle.children[1].setAttribute('src', '../'+friendEle.previousElementSibling.previousElementSibling.previousElementSibling.value)
+					const socket = io();
+					if (prevSocket)	{
+						prevSocket.on('disconnect', () => {
+							console.log(`client disconnected ${prevSocketId}`);
+							socket.emit('userDisconnect', prevSocketId)
+						});
+						prevSocket.disconnect()
+					}
+					prevSocket = socket
+					socket.on('sendPvMail', message => {
+						mailBox.insertAdjacentHTML(
+							'afterbegin',`
+								<div class="${message.inComming? 'recieve':'send'}">
+									<span class="send-time">${message.sentAt}</span>
+									<p dir="${!message.inComming? 'ltr':'rtl'}">${message.content}</p>
+								</div>
+							`
+						)
+					})
+					socket.on('connect', () => {
+						prevSocketId = socket.id
+						console.log(`client connected ${socket.id}`);
+						socket.emit('userConnect', userId.value, friendEle.previousElementSibling.value)
+					})
+					
+					mails.forEach(message => {
+						mailBox.insertAdjacentHTML(
+							'afterbegin',`
+								<div class="${message.inComming? 'recieve':'send'}">
+									<span class="send-time">${message.sentAt}</span>
+									<p dir="${!message.inComming? 'ltr':'rtl'}">${message.content}</p>
+								</div>
+							`
+						)
+					})
+				}).catch(err => console.log(err))
+			})
+		})
+	}
+	window.addEventListener('beforeunload', (e) => {
+		if (prevSocket){
+			prevSocket.emit('userDisconnect', prevSocketId)
+			prevSocket.disconnect()
+		}
+	})
+	setFriendsListener()
+
+	sendChatBtn.addEventListener('click', () => {
+		if(chatInput.value.trim() !== '')
+			fetch('/dashboard/send-mail', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
+				body: JSON.stringify({ 
+					content: chatInput.value,
+					responsorId: responsorEle.getAttribute('href').split('/')[2]
+				}),
+			}).then((res) => res.json())
+			.then((message) => {
+				chatInput.value = ''
+				mailBox.insertAdjacentHTML(
+					'afterbegin',`
+						<div class="${message.inComming? 'recieve':'send'}">
+							<span class="send-time">${message.sentAt}</span>
+							<p dir="${!message.inComming? 'ltr':'rtl'}">${message.content}</p>
+						</div>
+					`
+				)
+			})
+			.catch((err) => console.log(err))
+	})
+	// console.log(liveSearchInput);
+	liveSearchInput.addEventListener('keyup', () => {
+		if (liveSearchInput.value !== '' && 
+		liveSearchInput.value === liveSearchInput.value.match(/[a-zA-Z0-9\s]*/)[0]) {
+			searchType = liveSearchInput.nextElementSibling.value
+			fetch('/search-result', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
+				body: JSON.stringify({
+					'searchInput': liveSearchInput.value,
+					'searchType': searchType,
+					'searchLimit': '6',
+				})
+			}).then(res => res.json()).then(data => {
+				const searchResult = [...data.searchResult]
+				searchResultEle.innerHTML = ''
+				const friendsEle = document.getElementsByClassName('bot-box')[0]
+				searchResult.forEach(item => {
+					let isDupe = false
+					for (let i = 0; i < friendsEle.getElementsByTagName('a').length; i++) {
+						if(friendsEle.getElementsByTagName('a')[i].previousElementSibling.value == item._id.toString())
+							isDupe = true
+					}
+					if(item._id.toString() === userId.value || isDupe ) return
+					searchResultEle.insertAdjacentHTML( 'beforeend', `<li>
+						<a>
+							<input type="hidden" value="${item._id}">
+							<input type="hidden" value="${item.imageUrl}">
+							<p>${item.name}</p>
+							<div class="class-p">
+								<div class="p-image">
+									<p class="p-image--row">
+										${item.mmr? `<img src="../img/${item.mmr}_medal.webp" alt="" />`:'ثبت نشده'}
+									</p>
+								</div>
+							</div>
+						</a>
+					</li>`)		
+				})
+				const resultItemsEle = searchResultEle.childNodes
+				for (let j = 0; j < resultItemsEle.length; j++) {
+					resultItemsEle[j].addEventListener('click', () => {
+						liveSearchInput.value = resultItemsEle[j].children[0].children[2].innerHTML
+						friendsEle.insertAdjacentHTML('afterbegin',`
+							<input type="hidden" value="${ resultItemsEle[j].children[0].children[1].value }">
+							<input type="hidden" value="${ resultItemsEle[j].children[0].children[2].innerHTML }">
+							<input type="hidden" value="${ resultItemsEle[j].children[0].children[0].value }">
+							<a name="getPvMails" class="players">${ resultItemsEle[j].children[0].children[2].innerHTML }</a>
+						`)
+						setFriendsListener()
+						searchResultEle.innerHTML = ''
+					})
+				}
+			}).catch(err => console.log(err))
+		} else if(liveSearchInput.value === '') {
+			searchResultEle.innerHTML = ''
+		}
+	})
 }

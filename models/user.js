@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const { format } = require('date-fns-tz')
+const { add } = require('date-fns')
 
 const Schema = mongoose.Schema
 
@@ -38,20 +40,23 @@ const userSchema = new Schema(
 			},
 			imageUrl: String,
 		},
-		teams: [
-			{
-				teamId: {
-					type: Schema.Types.ObjectId,
-					ref: 'Team',
-					require: true,
+		teams: {
+			type: [
+				{
+					teamId: {
+						type: Schema.Types.ObjectId,
+						ref: 'Team',
+						require: true,
+					},
+					name: {
+						type: String,
+						require: true,
+					},
+					imageUrl: String,
 				},
-				name: {
-					type: String,
-					require: true,
-				},
-				imageUrl: String,
-			},
-		],
+			],
+			default: [],
+		},
 		tournaments: {
 			type: [
 				{
@@ -71,6 +76,7 @@ const userSchema = new Schema(
 					},
 				},
 			],
+			default: [],
 		},
 		roles: {
 			type: [String],
@@ -91,17 +97,39 @@ const userSchema = new Schema(
 			default: 0,
 		},
 		lfMsgCd: Number,
-		mails: [
-			{
-				inComming: {
-					type: Boolean,
-					require: true,
+		mails: {
+			type: [
+				{
+					inComming: {
+						type: Boolean,
+						require: true,
+					},
+					content: {
+						type: String,
+						require: true,
+					},
+					responsor: {
+						userId: {
+							type: Schema.Types.ObjectId,
+							ref: 'User',
+							require: true,
+						},
+						name: {
+							type: String,
+							required: true,
+						},
+					},
+					sentAt: {
+						type: Date,
+						require: true,
+					},
 				},
-				content: {
-					type: String,
-					require: true,
-				},
-				responsor: {
+			],
+			default: [],
+		},
+		chatFriends: {
+			type: [
+				{
 					userId: {
 						type: Schema.Types.ObjectId,
 						ref: 'User',
@@ -109,90 +137,96 @@ const userSchema = new Schema(
 					},
 					name: {
 						type: String,
-						required: true,
+						require: true,
+					},
+					imageUrl: String,
+					seen: {
+						type: Boolean,
+						default: true,
 					},
 				},
-				sentAt: {
-					type: Date,
-					require: true,
+			],
+			default: [],
+		},
+		requests: {
+			type: [
+				{
+					type: {
+						//  out: 'join', 'recruit', 'joinTour'/ in: 'accPlayer', 'accRecruit', 'accTeam'
+						type: String,
+						require: true,
+					},
+					state: String,
+					relativeReq: Object,
+					receiver: {
+						id: Schema.Types.ObjectId,
+						name: String,
+					},
+					sender: {
+						id: Schema.Types.ObjectId,
+						name: String,
+					},
+					sentAt: {
+						type: Date,
+						require: true,
+					},
 				},
-			},
-		],
-		requests: [
-			{
-				type: {
-					//  out: 'join', 'recruit', 'joinTour'/ in: 'accPlayer', 'accRecruit', 'accTeam'
-					type: String,
-					require: true,
-				},
-				state: String,
-				relativeReq: Object,
-				receiver: {
-					id: Schema.Types.ObjectId,
-					name: String,
-				},
-				sender: {
-					id: Schema.Types.ObjectId,
-					name: String,
-				},
-				sentAt: {
-					type: Date,
-					require: true,
-				},
-			},
-		],
-		feeds: [
-			{
-				content: {
-					type: String,
-					require: true,
-				},
-				comments: [
-					{
-						sender: {
-							userId: {
-								type: Schema.Types.ObjectId,
-								ref: 'User',
+			],
+			default: [],
+		},
+		feeds: {
+			type: [
+				{
+					content: {
+						type: String,
+						require: true,
+					},
+					comments: [
+						{
+							sender: {
+								userId: {
+									type: Schema.Types.ObjectId,
+									ref: 'User',
+									require: true,
+								},
+								name: {
+									type: String,
+									required: true,
+								},
+							},
+							content: {
+								type: String,
 								require: true,
 							},
-							name: {
-								type: String,
-								required: true,
+							sentAt: {
+								type: Date,
+								require: true,
 							},
 						},
-						content: {
-							type: String,
-							require: true,
-						},
-						sentAt: {
-							type: Date,
-							require: true,
-						},
+					],
+					sentAt: {
+						type: Date,
+						require: true,
 					},
-				],
-				sentAt: {
-					type: Date,
-					require: true,
 				},
-			},
-		],
+			],
+			default: [],
+		},
 	},
 	{ timestamps: true }
 )
 
 userSchema.methods.sendFeed = function (feedContent) {
 	let updatedFeeds
+	const newFeed = {
+		content: feedContent,
+		comments: [],
+		sendAt: add(new Date(), { hours: 3, minutes: 30 }),
+	}
 	if (this.feeds) {
-		updatedFeeds = [
-			...this.feeds,
-			{
-				content: feedContent,
-				comments: [],
-				sentAt: new Date(),
-			},
-		]
+		updatedFeeds = [...this.feeds, newFeed]
 	} else {
-		updatedFeeds = [{ content: feedContent, comments: [], sendAt: new Date() }]
+		updatedFeeds = [newFeed]
 	}
 	this.feeds = updatedFeeds
 	console.log(this.feeds)
@@ -214,7 +248,7 @@ userSchema.methods.sendFeedComment = function (commentContent, receiver, feedId)
 				...receiver.feeds[feedIndex].comments,
 				{
 					content: commentContent,
-					sentAt: new Date(),
+					sentAt: add(new Date(), { hours: 3, minutes: 30 }),
 					sender: { userId: this._id, name: this.name },
 				},
 			],
@@ -225,18 +259,23 @@ userSchema.methods.sendFeedComment = function (commentContent, receiver, feedId)
 	return receiver.save()
 }
 
-userSchema.methods.sendMail = function (responsor, mailContent) {
+userSchema.methods.sendMail = async function (responsor, mailContent, inChat) {
 	if (!this.mails) this.mails = []
-	const updatedMails = [
-		...this.mails,
-		{
-			inComming: false,
-			content: mailContent,
-			responsor: { userId: responsor._id, name: responsor.name },
-			sentAt: new Date(),
-		},
-	]
+	const newMessage = {
+		inComming: false,
+		content: mailContent,
+		responsor: { userId: responsor._id, name: responsor.name },
+		sentAt: add(new Date(), { hours: 3, minutes: 30 }),
+	}
+	const updatedMails = [...this.mails, newMessage]
 	this.mails = updatedMails
+
+	if (!this.chatFriends.find((friend) => friend.userId.toString() === responsor._id.toString()))
+		this.chatFriends = [
+			...this.chatFriends,
+			{ userId: responsor._id, name: responsor.name, imageUrl: responsor.imageUrl, seen: true },
+		]
+
 	if (!responsor.mails) responsor.mails = []
 	const updatedMails2 = [
 		...responsor.mails,
@@ -244,12 +283,23 @@ userSchema.methods.sendMail = function (responsor, mailContent) {
 			inComming: true,
 			content: mailContent,
 			responsor: { userId: this._id, name: this.name },
-			sentAt: new Date(),
+			sentAt: add(new Date(), { hours: 3, minutes: 30 }),
 		},
 	]
 	responsor.mails = updatedMails2
-	responsor.save()
-	return this.save()
+
+	const friendIndex = responsor.chatFriends.findIndex(
+		(friend) => friend.userId.toString() === this._id.toString()
+	)
+	if (friendIndex === -1)
+		responsor.chatFriends = [
+			...responsor.chatFriends,
+			{ userId: this._id, name: this.name, imageUrl: this.imageUrl, seen: false },
+		]
+	else responsor.chatFriends[friendIndex].seen = inChat
+	await responsor.save()
+	this.save()
+	return { ...newMessage, sentAt: format(new Date(), 'd.M.yyyy - HH:mm') }
 }
 
 userSchema.methods.joinToTeam = function (team, role) {
@@ -399,7 +449,7 @@ userSchema.methods.exchangeReq = async function (type, receiver, sender, relativ
 				id: receiver._id,
 				name: receiver.name,
 			},
-			sentAt: new Date(),
+			sentAt: add(new Date(), { hours: 3, minutes: 30 }),
 		}
 	} else {
 		// checks if request is duplicate
@@ -416,7 +466,7 @@ userSchema.methods.exchangeReq = async function (type, receiver, sender, relativ
 				id: sender._id,
 				name: sender.name,
 			},
-			sentAt: new Date(),
+			sentAt: add(new Date(), { hours: 3, minutes: 30 }),
 		}
 		if (receiver)
 			newReq.receiver = {

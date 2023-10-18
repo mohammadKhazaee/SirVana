@@ -1,8 +1,11 @@
 const { validationResult } = require('express-validator')
+const { format } = require('date-fns-tz')
+const { add } = require('date-fns')
 
 const User = require('../models/user')
 const Team = require('../models/team')
 const Tournament = require('../models/tournament')
+const Socket = require('../models/socket')
 const rank = require('../utils/rank')
 const io = require('../socket')
 
@@ -79,9 +82,11 @@ exports.getDashboardNotif = async (req, res, next) => {
 				inReqs = [...inReqs, request]
 			else outReqs = [...outReqs, request]
 		})
-		// console.log(inReqs)
+		// console.log(req.user.chatFriends[0].userId)
 		res.render('dashboard-notif', {
 			pageTitle: 'SirVana · داشبورد',
+			userId: req.user._id,
+			chatFriends: req.user.chatFriends,
 			inReqs: inReqs,
 			outReqs: outReqs,
 		})
@@ -112,7 +117,7 @@ exports.postEditProfile = async (req, res, next) => {
 		const dota2Id = req.body.dota2Id !== 'ثبت نشده' ? req.body.dota2Id : ''
 		const bio = req.body.bio !== 'یه چیزی بنویس حالا. . .' ? req.body.bio : ''
 		const lft = req.body.lft
-		const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/').slice(1) : req.user.imageUrl
+		const imageUrl = req.file ? req.file.path.replace('\\', '/') : req.user.imageUrl
 
 		req.user.imageUrl = imageUrl
 		req.user.name = name
@@ -329,16 +334,86 @@ exports.postDeleteReq = async (req, res, next) => {
 }
 
 exports.getPvMail = async (req, res, next) => {
-	// fetch all mail with the user
+	try {
+		const friendId = req.params.friendId
+		const friendChats = req.user.mails.filter(
+			(mail) => mail.responsor.userId.toString() === friendId
+		)
+		const updatedChatFriends = req.user.chatFriends.map((friend) => {
+			if (friend.userId.toString() === friendId) friend.seen = true
+			return friend
+		})
+		req.user.chatFriends = updatedChatFriends
+		req.user.save()
+		// const testChats = [
+		// 		incomming: true,
+		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
+		// 		content: 'salam basani',
+		// 	},
+		// 	{
+		// 		incomming: false,
+		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
+		// 		content: 'khubi?',
+		// 	},
+		// 	{
+		// 		incomming: false,
+		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
+		// 		content: 'salam kooni',
+		// 	},
+		// 	{
+		// 		incomming: true,
+		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
+		// 		content: 'salam basani',
+		// 	},
+		// 	{
+		// 		incomming: false,
+		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
+		// 		content: 'khubi?',
+		// 	},
+		// 	{
+		// 		incomming: false,
+		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
+		// 		content: 'salam kooni',
+		// 	},
+		// 	{
+		// 		incomming: true,
+		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
+		// 		content: 'salam basani',
+		// 	},
+		// 	{
+		// 		incomming: false,
+		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
+		// 		content: 'khubi?',
+		// 	},
+		// ]
+		res.status(200).send(friendChats)
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
 }
 
 exports.postPvMail = async (req, res, next) => {
 	try {
 		const responsorId = req.body.responsorId
-		const mailContent = req.body.mailContent
+		const mailContent = req.body.content
 		const responsor = await User.findById(responsorId)
-		await req.user.sendMail(responsor, mailContent)
-		res.sendStatus(200)
+		// console.log(req.body)
+		// const message = {
+		// 	incomming: false,
+		// 	sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
+		// 	content: mailContent,
+		// }
+		const sockets = await Socket.find({ type: 'pvChat', userId: responsorId })
+		const inChat =
+			sockets.findIndex((socket) => socket.friendId.toString() === req.user._id.toString()) !== -1
+		const message = await req.user.sendMail(responsor, mailContent, inChat)
+		if (sockets.length > 0) {
+			io.getIO()
+				.to(sockets[0].socketId)
+				.emit('sendPvMail', { ...message, inComming: true })
+		}
+		res.status(200).send(message)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)

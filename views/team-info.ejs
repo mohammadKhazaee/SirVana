@@ -32,6 +32,10 @@
 				<!-- End of filter box ------------------------------->
 
 				<!-- informations -->
+				<input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+				<% if(userId) { %>
+					<input type="hidden" name="userId" value="<%= userId %>"/>
+				<% } %>
 				<div class="informations">
 					<div class="info-header">
 						<div class="info-header__image">
@@ -127,7 +131,6 @@
 										<% } %>
 									</div>
 									<div class="send-box">
-										<input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
 										<i name="sendChat" class="bx bx-send"></i>
 										<input name="chatInput" type="text" placeholder="اینجا بنویسید ..." />
 									</div>

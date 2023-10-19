@@ -22,11 +22,14 @@ if(createTeam){
 const sendChat = document.getElementsByName('sendChat')[0]
 const chatInput = document.getElementsByName('chatInput')[0]
 const msgBox = document.getElementsByClassName('message-box')[0]
+const userId = document.getElementsByName('userId')[0]
 
-if (chatInput) {
+if (chatInput && userId) {
   const socket = io();
+  socket.emit('join-team-chat', window.location.href.split('/')[4], userId.value)
   socket.on('team-chat', message => {
-    if(!message.incomming) {
+    const incomming = userId.value !== message.sender.userId.toString()
+    if(!incomming) {
       msgBox.insertAdjacentHTML(
         'afterbegin',`
           <div class="send">
@@ -48,15 +51,22 @@ if (chatInput) {
         `
       )
     }
+    msgBox.firstElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
   })
   sendChat.addEventListener('click', () => {
-    fetch('/team-chat', {
-      method: 'POST',
-			headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
-			body: JSON.stringify({ chatContent: chatInput.value, teamId: window.location.href.split('/')[4] }),
-		})
-    chatInput.value = ''
-	})
+    if (chatInput.value.trim() !== '') {
+      fetch('/team-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
+        body: JSON.stringify({ chatContent: chatInput.value, teamId: window.location.href.split('/')[4] }),
+      }).then(res => {
+        if (res.status === 200) {
+          
+          chatInput.value = ''
+        }
+      }).catch(err => console.log(err))
+    }
+  })
 }
 
 //  Edit team info

@@ -309,7 +309,7 @@ if (isNotif) {
 					if (prevSocket)	{
 						prevSocket.on('disconnect', () => {
 							console.log(`client disconnected ${prevSocketId}`);
-							socket.emit('userDisconnect', prevSocketId)
+							socket.emit('pvDisconnect', prevSocketId)
 						});
 						prevSocket.disconnect()
 					}
@@ -327,7 +327,7 @@ if (isNotif) {
 					socket.on('connect', () => {
 						prevSocketId = socket.id
 						console.log(`client connected ${socket.id}`);
-						socket.emit('userConnect', userId.value, friendEle.previousElementSibling.value)
+						socket.emit('pvConnect', userId.value, friendEle.previousElementSibling.value)
 					})
 					
 					mails.forEach(message => {
@@ -346,7 +346,7 @@ if (isNotif) {
 	}
 	window.addEventListener('beforeunload', (e) => {
 		if (prevSocket){
-			prevSocket.emit('userDisconnect', prevSocketId)
+			prevSocket.emit('pvDisconnect', prevSocketId)
 			prevSocket.disconnect()
 		}
 	})
@@ -372,6 +372,7 @@ if (isNotif) {
 						</div>
 					`
 				)
+				mailBox.firstElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
 			})
 			.catch((err) => console.log(err))
 	})

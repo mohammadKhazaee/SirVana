@@ -6,6 +6,7 @@ const User = require('../models/user')
 const Team = require('../models/team')
 const Tournament = require('../models/tournament')
 const Message = require('../models/message')
+const Socket = require('../models/socket')
 const rank = require('../utils/rank')
 const io = require('../socket')
 
@@ -119,10 +120,10 @@ exports.getTeam = async (req, res, next) => {
 				(member) => member.userId._id.toString() === req.user._id.toString()
 			).length > 0
 		const isLead = req.user && renderTeam.leader.userId.toString() === req.user._id.toString()
-		// console.log(renderTeam.members)
 		res.render('team-info', {
 			pageTitle: 'SirVana · مسابقات',
 			team: renderTeam,
+			userId: req.user ? req.user._id : undefined,
 			isMember: isMember,
 			isLead: isLead,
 		})
@@ -232,11 +233,13 @@ exports.postTeamChat = async (req, res, next) => {
 		}
 		team.chats = [...team._doc.chats, message]
 		team.save()
-		io.getIO().emit('team-chat', {
-			...message,
-			sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
-			incomming: message.sender.userId.toString() !== req.user._id.toString(),
-		})
+		io.getIO()
+			.to('team-' + req.body.teamId)
+			.emit('team-chat', {
+				...message,
+				sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
+				// incomming: message.sender.userId.toString() !== req.user._id.toString(),
+			})
 		res.sendStatus(200)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500

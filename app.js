@@ -15,6 +15,7 @@ const compression = require('compression')
 
 const router = require('./routes/routes')
 const User = require('./models/user')
+const Team = require('./models/team')
 const Socket = require('./models/socket')
 
 const app = express()
@@ -136,7 +137,7 @@ mongoose
 		const io = require('./socket').init(server)
 		io.on('connection', (socket) => {
 			// console.log('id:' + socket.id + ' connected')
-			socket.on('userConnect', (userId, friendId) => {
+			socket.on('pvConnect', (userId, friendId) => {
 				const newSocket = new Socket({
 					userId: userId,
 					socketId: socket.id,
@@ -145,9 +146,17 @@ mongoose
 				})
 				newSocket.save()
 			})
-			socket.on('userDisconnect', (socketId) => {
+			socket.on('pvDisconnect', (socketId) => {
 				// console.log(socketId + ' disconnected')
 				Socket.deleteOne({ socketId: socketId }).then((data) => {})
+			})
+			socket.on('join-team-chat', async (teamId, userId) => {
+				const team = await Team.findById(teamId)
+				const isMember =
+					userId &&
+					team.members.filter((member) => member.userId._id.toString() === userId.toString())
+						.length > 0
+				if (isMember) socket.join('team-' + teamId)
 			})
 			socket.on('test', (test) => {
 				console.log(test)

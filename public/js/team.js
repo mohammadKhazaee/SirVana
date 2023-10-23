@@ -76,6 +76,7 @@ const nameTagInput = document.getElementsByName('nameTag')[0]
 const bioText = document.getElementsByName('description')[0]
 const imageContainer = document.getElementsByClassName('info-header__image')[0]
 const lfpContainer = document.getElementsByClassName('team-need')[0]
+const posEles = document.getElementsByClassName('role')
 
 if(editTeam) {
   editTeam.addEventListener('click', () => {
@@ -90,15 +91,29 @@ if(editTeam) {
     if (nameInput.classList.contains('editable')) {
 			imageContainer.children[0].style.display = 'none'
 			imageContainer.children[1].style.display = 'block'
+      ;[...posEles].forEach(posEle => {
+        posEle.children[0].style.display = 'block'
+        posEle.children[1].style.display = 'block'
+        posEle.children[2].style.display = 'none'
+      });
 		} else {
 			imageContainer.children[0].style.display = 'block'
 			imageContainer.children[1].style.display = 'none'
+      let membersPos = []
+      ;[...posEles].forEach(posEle => {
+        posEle.children[0].style.display = 'none'
+        posEle.children[1].style.display = 'none'
+        posEle.children[2].style.display = 'block'
+        posEle.children[2].innerHTML = 'پوز: '+ posEle.children[1].value
+        membersPos = [...membersPos, posEle.children[1].value]
+      });
 
       // Sending new data to server
       const formData = new FormData()
 			formData.append('name', nameInput.value)
 			formData.append('nameTag', nameTagInput.value)
 			formData.append('description', bioText.value)
+			formData.append('membersPos', membersPos)
 			formData.append('teamId', window.location.href.split('/')[4])
 			formData.append('image', imageContainer.children[1].firstElementChild.files[0])
 			fetch('/edit-team', {

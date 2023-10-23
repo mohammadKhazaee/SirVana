@@ -12,6 +12,11 @@ const tournametSchema = new Schema(
 			type: Number,
 			required: true,
 		},
+		teamCount: {
+			type: Number,
+			required: true,
+			default: 16,
+		},
 		description: String,
 		imageUrl: {
 			type: String,
@@ -126,6 +131,11 @@ tournametSchema.methods.addNewTeam = function (team) {
 		},
 	]
 	this.teams = updatedTeams
+	return this.save()
+}
+
+tournametSchema.methods.removeTeam = function (teamId) {
+	this.teams = this.teams.filter((team) => team.teamId.toString() !== teamId.toString())
 	return this.save()
 }
 

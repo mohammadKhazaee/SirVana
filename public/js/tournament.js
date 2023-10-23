@@ -91,16 +91,26 @@ if (rangeInput) {
 //  Edit tournament info
 const editTour = document.getElementsByName('editTour')[0]
 const nameInput = document.getElementsByName('name')[0]
-const dateInput = document.getElementsByName('startDate')[0]
+const dateDiv = document.getElementsByClassName('info-header__data--details')[0]
 const descriptionText = document.getElementsByName('description')[0]
 const imageContainer = document.getElementsByClassName('info-header__image')[0]
-//  minMMR maxMMR selects
+const boRadios = document.getElementsByName('boRadio')
+const dateTimes = document.getElementsByClassName('timedate')
+const mmrdrops = document.getElementsByClassName('mmr')[0]
+const mmrMedals = document.getElementsByClassName('mmr2')[0]
+const prizeInput = document.getElementsByName('prizeInput')[0]
+const mmrSelects = document.getElementsByTagName('select')
+const gameEles = document.getElementsByClassName('details')
+const maxEle = document.getElementsByClassName('max')[0]
 
 const selectTeamPluses = document.getElementsByName('selectTeamPlus')
 const addTeamPluses = document.getElementsByName('addTeamPlus')
 const addGamePlus = document.getElementsByName('addGamePlus')[0]
-const dateTimes = document.getElementsByClassName('timedate')
- 
+const removeTeamBtns = document.getElementsByName('removeTeamBtns')
+const removeGameBtns = document.getElementsByName('removeGameBtns')
+const deleteFromTour = document.getElementsByName('deleteFromTour')[0]
+
+
 if(editTour) {
   selectTeamPluses.forEach(svgBtn => {
     svgBtn.addEventListener('click', () => {
@@ -115,12 +125,10 @@ if(editTour) {
       selectTeamPluses.forEach(selectTeamPlus => {
         if (selectTeamPlus.nextElementSibling.children[0].style.color === 'rgb(255, 255, 255)') {
           selectTeamPlus.nextElementSibling.children[0].innerHTML = svgBtn.nextElementSibling.children[1].innerHTML
-          selectTeamPlus.nextElementSibling.setAttribute('href', '/team/')
-          // console.log(selectTeamPlus.nextElementSibling.children[0])
+          selectTeamPlus.nextElementSibling.setAttribute('href', svgBtn.nextElementSibling.children[1].getAttribute("href"))
         }
         selectTeamPlus.nextElementSibling.children[0].style.color = '#cacaca'
       })
-      // console.log(svgBtn.nextElementSibling.children[1].innerHTML);
     })
   })
   addGamePlus.addEventListener('click', () => {
@@ -142,13 +150,15 @@ if(editTour) {
               <a>تیم 2 : <span>انتخاب کنید</span></a>
             </div>
           </div>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 fh">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18"/>
           </svg>
           <div class="timedate">
-            <input class="editable" type="text" placeholder="تاریخ" dir="ltr"/>
-            <input class="editable" type="text" placeholder="ساعت" dir="ltr"/>
+            <input class="editable" type="datetime-local" value="<%= game.dateTime %>">
           </div>
+          <svg name="removeTeamBtns" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 gh">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </div>
       `
     )
@@ -160,41 +170,88 @@ if(editTour) {
       })
     })
   })
+  removeGameBtns.forEach(svgBtn => {
+    svgBtn.addEventListener('click', () => {
+      svgBtn.parentElement.remove()
+    })
+  })
+  let deletedTeam
+  deleteFromTour.addEventListener('click', () => {
+    toggleModal()
+    fetch('/dashboard/remove-from-tour', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
+      body: JSON.stringify({ leaderId: deleteFromTour.previousElementSibling.value }),
+    }).then(res => {
+      if (res.status === 200) {
+        deletedTeam.remove()
+      }
+    }).catch(err => console.log(err))
+  })
   editTour.addEventListener('click', () => {
     nameInput.classList.toggle('editable')
-    dateInput.classList.toggle('editable')
-    descriptionText.classList.toggle('editable')
     nameInput.disabled = !nameInput.disabled
-    dateInput.disabled = !dateInput.disabled
+    descriptionText.classList.toggle('editable')
     descriptionText.disabled = !descriptionText.disabled
-    ;[...dateTimes].forEach(dateTime => {
-      dateTime.children[0].disabled = !dateTime.children[0].disabled
-      dateTime.children[1].disabled = !dateTime.children[1].disabled
+    prizeInput.classList.toggle('editable')
+    prizeInput.disabled = !prizeInput.disabled
+    boRadios[0].disabled = !boRadios[0].disabled
+    boRadios[1].disabled = !boRadios[1].disabled
+    ;[...gameEles].forEach(gameEle => {
+      gameEle.children[2].children[0].disabled = !gameEle.children[2].children[0].disabled
+      gameEle.children[2].children[0].classList.toggle('editable')
     })
-
     const filteredGames = [...document.getElementsByClassName('details')]
       .filter(gameEle => {
         const validGame = gameEle.children[0].children[0].children[1].getAttribute('href') && 
         gameEle.children[0].children[2].children[1].getAttribute('href') &&
-        gameEle.children[2].children[0].value !== '' &&
-        gameEle.children[2].children[1].value !== ''
+        gameEle.children[2].children[0].value !== ''
         if (!validGame) gameEle.remove()
         return validGame
       })
     if (nameInput.classList.contains('editable')) {
+      // Edit mode here
+      mmrdrops.style.display = 'flex'
+      mmrMedals.style.display = 'none'
+      boRadios[0].nextElementSibling.style.cursor = 'pointer'
+      // radioBtn cursor pointer for span's before
+      boRadios[1].nextElementSibling.style.cursor = 'pointer'
 			imageContainer.children[0].style.display = 'none'
 			imageContainer.children[1].style.display = 'block'
+			maxEle.style.display = 'block'
+			maxEle.previousElementSibling.style.display = 'none'
+			dateDiv.children[1].style.display = 'none'
+			dateDiv.children[2].style.display = 'block'
 			addGamePlus.style.display = 'block'
       selectTeamPluses.forEach(svgBtn => svgBtn.style.display = 'block')
-      ;[...dateTimes].forEach(dateTime => {
-        dateTime.children[0] = !dateTime.children[0].classList.toggle('editable')
-        dateTime.children[1] = !dateTime.children[1].classList.toggle('editable')
-      })
+      removeTeamBtns.forEach(svgBtn => svgBtn.style.display = 'block')
+      removeGameBtns.forEach(svgBtn => svgBtn.style.display = 'block')
 		} else {
+      mmrdrops.style.display = 'none'
+      mmrMedals.style.display = 'flex'
+      boRadios[0].nextElementSibling.style.cursor = 'default'
+      boRadios[1].nextElementSibling.style.cursor = 'default'
       imageContainer.children[0].style.display = 'block'
 			imageContainer.children[1].style.display = 'none'
+      maxEle.style.display = 'none'
+      maxEle.previousElementSibling.children[0].innerHTML = maxEle.children[1].value
+      maxEle.previousElementSibling.style.display = 'block'
+			dateDiv.children[1].style.display = 'block'
+			dateDiv.children[2].style.display = 'none'
+      if (dateDiv.children[2].value !== '') {
+        const newDate = new Date(dateDiv.children[2].value).toLocaleString('en-GB', {
+          year: "numeric",
+          month: "short",
+          day: '2-digit',
+          hour: 'numeric',
+          minute: '2-digit',
+        })
+        dateDiv.children[1].innerHTML = newDate.replaceAll(' ', '.').replaceAll(',.', ' - ')
+      }
 			addGamePlus.style.display = 'none'
       selectTeamPluses.forEach(svgBtn => svgBtn.style.display = 'none')
+      removeTeamBtns.forEach(svgBtn => svgBtn.style.display = 'none')
+      removeGameBtns.forEach(svgBtn => svgBtn.style.display = 'none')
       const games = filteredGames.map(gameEle => {
         const game = {}
         game.team1 = { 
@@ -205,21 +262,21 @@ if(editTour) {
           teamId: gameEle.children[0].children[2].children[1].getAttribute('href').split('/')[2], 
           name: gameEle.children[0].children[2].children[1].children[0].innerHTML 
         }
-        game.dateTime = { 
-          date: gameEle.children[2].children[0].value, 
-          time: gameEle.children[2].children[1].value 
-        }
+        game.dateTime = gameEle.children[2].children[0].value
         return game
       })
-
-      // Sending new data to server
+      // console.log(games);
       const formData = new FormData()
 			formData.append('name', nameInput.value)
-			formData.append('startDate', dateInput.value)
+			formData.append('startDate', dateDiv.children[2].value)
 			formData.append('description', descriptionText.value)
+			formData.append('bo3', boRadios[1].checked)
+			formData.append('prize', prizeInput.value)
+			formData.append('teamCount', maxEle.children[1].value)
+			formData.append('minMMR', mmrSelects[0].value)
+			formData.append('maxMMR', mmrSelects[1].value)
 			formData.append('tournamentId', window.location.href.split('/')[4])
 			formData.append('image', imageContainer.children[1].firstElementChild.files[0])
-      //  minMMR maxMMR selects
 			formData.append('games', JSON.stringify(games))
 			fetch('/edit-tournament', {
 				method: 'POST',
@@ -228,6 +285,29 @@ if(editTour) {
 			})
 		}
   })
+  // Remove team confirmation button
+  const count = document.querySelector('.count')
+  const cross = document.querySelectorAll('.dh')
+  const closeButton = document.querySelector('.close-button')
+  function toggleModal() {
+    count.classList.toggle('show-modal')
+  }
+
+  for (i = 0; i < cross.length; i++) {
+    cross[i].addEventListener('click', function() {
+      deletedTeam = this.parentElement.parentElement
+      count.children[0].children[3].children[0].value = this.nextElementSibling.value
+      return toggleModal()
+    })
+  }
+
+  function windowOnClick(event) {
+    if (event.target === count) {
+      toggleModal()
+    }
+  }
+  closeButton.addEventListener('click', toggleModal)
+  window.addEventListener('click', windowOnClick)
 }
 
 // Join tour req

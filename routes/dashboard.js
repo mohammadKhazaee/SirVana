@@ -53,6 +53,9 @@ Router.post('/accept-team', dashboardController.postAccTeam)
 // /dashboard/reject-team => POST
 Router.post('/reject-team', dashboardController.postRejTeam)
 
+// /dashboard/remove-from-tour => POST
+Router.post('/remove-from-tour', dashboardController.postRemoveTeam)
+
 // /dashboard/delete-req => POST
 Router.post('/delete-req', dashboardController.postDeleteReq)
 

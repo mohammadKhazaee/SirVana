@@ -181,12 +181,12 @@ const recruitReq = document.getElementsByName('recruitReq')[0]
 
 if (recruitReq) {
 	recruitReq.addEventListener('click', () => {
-    fetch('/dashboard/recruit-req', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
-      body: JSON.stringify({ playerId: window.location.href.split('/')[4] }),
-    }).then(res => window.location.replace('/dashboard/notif')).catch(err => console.log(err))
-  })
+		fetch('/dashboard/recruit-req', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
+		body: JSON.stringify({ playerId: window.location.href.split('/')[4] }),
+		}).then(res => window.location.replace('/dashboard/notif')).catch(err => console.log(err))
+	})
 }
 
 // Remove notif

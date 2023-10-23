@@ -127,15 +127,6 @@
 											<div class="in-messages__bot--box">
 												<div class="specific">
 													<p><a href="/player/<%= req.sender.id %>" class="specific-player"><%= req.sender.name %></a>درخواست عضویت در تیم شما را دارد.</p>
-										<% } else if (req.type == 'accRecruit') { %>
-											<div class="in-messages__bot--box">
-												<div class="specific">
-													<p><a href="/team/<%= req.sender.id %>" class="specific-team"><%= req.sender.name %></a>شما را دعوت به عضویت کرد.</p>
-										<% } else { %>
-											<div class="in-messages__bot--box">
-												<div class="specific">
-													<p><a href="/tournament/<%= req.receiver.id %>" class="specific-team"><%= req.receiver.name %></a>درخواست ثبت نام در تورنومنت<a href="/team/<%= req.sender.id %>" class="specific-tour"><%= req.sender.name %></a> را دارد.</p>
-										<% } %>
 												</div>
 												<div class="conditions">
 													<input type="hidden" value="<%= req.sender.id %>">
@@ -147,6 +138,47 @@
 													<a name="rejNotif" class="condition"><i class="bx bx-message-square-x"></i></a>
 												</div>
 											</div>
+										<% } else if (req.type == 'accRecruit') { %>
+											<div class="in-messages__bot--box">
+												<div class="specific">
+													<p><a href="/team/<%= req.sender.id %>" class="specific-team"><%= req.sender.name %></a>شما را دعوت به عضویت کرد.</p>
+												</div>
+												<div class="conditions">
+													<input type="hidden" value="<%= req.sender.id %>">
+													<input type="hidden" value="<%= req.type %>">
+													<input type="hidden" value="<%= req.relativeReq.userId %>">
+													<input type="hidden" value="<%= req.relativeReq.reqId %>">
+													<input type="hidden" value="<%= req._id %>">
+													<a name="accNotif" class="condition"><i class="bx bx-message-square-check"></i></a>
+													<a name="rejNotif" class="condition"><i class="bx bx-message-square-x"></i></a>
+												</div>
+											</div>
+										<% } else if (req.type == 'accTeam') { %>
+											<div class="in-messages__bot--box">
+												<div class="specific">
+													<p><a href="/team/<%= req.sender.id %>" class="specific-tour"><%= req.sender.name %></a>درخواست ثبت نام در تورنومنت<a href="/tournament/<%= req.receiver.id %>" class="specific-team"><%= req.receiver.name %></a> را دارد.</p>
+												</div>
+												<div class="conditions">
+													<input type="hidden" value="<%= req.sender.id %>">
+													<input type="hidden" value="<%= req.type %>">
+													<input type="hidden" value="<%= req.relativeReq.userId %>">
+													<input type="hidden" value="<%= req.relativeReq.reqId %>">
+													<input type="hidden" value="<%= req._id %>">
+													<a name="accNotif" class="condition"><i class="bx bx-message-square-check"></i></a>
+													<a name="rejNotif" class="condition"><i class="bx bx-message-square-x"></i></a>
+												</div>
+											</div>
+										<% } else { %>
+											<div class="out-messages__bot--box">
+												<div class="specific">
+													<p>تیم شما از تورنومنت<a href="/tournament/<%= req.sender.id %>" class="specific-team"><%= req.sender.name %></a>حذف شد</p>
+												</div>
+												<input type="hidden" value="<%= req.receiver.id %>">
+												<input type="hidden" value="<%= req.receiver.id %>">
+												<input type="hidden" value="<%= req._id %>">
+												<a class="delete">حذف</a>
+											</div>
+										<% } %>
 									<% }) %>
 								</div>
 							</div>

@@ -16,7 +16,7 @@
 	</head>
 	<body>
 		<!-- Navbar -->
-		<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName, navSearch: true, subpath: true}) %>
+		<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName, navSearch: false, subpath: true}) %>
 
 		<!-- background -->
 		<div class="teams-page">
@@ -82,17 +82,17 @@
 												<div class="members-specific">
 													<img src="../<%= member.imageUrl %>" alt="" />
 													<a href="/player/<%= member.userId._id %>" dir="ltr"><%= member.name %></a>
-													<!-- <div class="role">
-														<span>پوز‌ :</span>
-														<select>
-															<option selected>1</option>
-															<option>2</option>
-															<option>3</option>
-															<option>4</option>
-															<option>5</option>
+													<div class="role">
+														<span style="display: none;">پوز‌ :</span>
+														<select style="display: none;">
+															<option value="1" <%= member.pos.toString().includes('1')? 'selected':'' %>>1</option>
+															<option value="2" <%= member.pos.toString().includes('2')? 'selected':'' %>>2</option>
+															<option value="3" <%= member.pos.toString().includes('3')? 'selected':'' %>>3</option>
+															<option value="4" <%= member.pos.toString().includes('4')? 'selected':'' %>>4</option>
+															<option value="5" <%= member.pos.toString().includes('5')? 'selected':'' %>>5</option>
 														</select>
-													</div> -->
-													<span class="pos">پوز: <%= member.pos %></span>
+														<span>پوز: <%= member.pos %></span>
+													</div>
 													<img src="../img/<%= member.userId.mmr %>_medal.webp" alt="" />
 												</div>
 											</div>

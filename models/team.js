@@ -114,6 +114,19 @@ teamSchema.methods.recruitMember = function (user) {
 	return this.save()
 }
 
+teamSchema.methods.leaveTournament = function (tournamentId) {
+	this.tournaments = this.tournaments.filter(
+		(tour) => tour.tournamentId.toString() !== tournamentId.toString()
+	)
+
+	this.members.forEach(async (player) => {
+		const playerDoc = await User.findById(player.userId)
+		await playerDoc.leaveTour(tournamentId)
+	})
+
+	return this.save()
+}
+
 teamSchema.methods.joinToTournament = function (tournament) {
 	const updatedTournaments = [
 		...this.tournaments,

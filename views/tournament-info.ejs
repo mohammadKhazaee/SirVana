@@ -17,7 +17,7 @@
 
 	<body>
 		<!-- Navbar -->
-		<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName, navSearch: true, subpath: true}) %>
+		<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName, navSearch: false, subpath: true}) %>
 
 		<!-- background -->
 		<div class="tournament-page">
@@ -45,11 +45,12 @@
 							<div class="close-btn">
 								<p class="close-button">&times;</p>
 							</div>
-							<p>آیا مطمعن هستید ؟</p>
+							<p>آیا مطمئن هستید ؟</p>
 							<div class="mid-note3"></div>
 							<div class="options">
-								<a>خیر</a>
-								<a>بله</a>
+								<!-- <a>خیر</a> -->
+								<input type="hidden">
+								<a name="deleteFromTour">بله</a>
 							</div>
 						</div>
 					</div>
@@ -66,54 +67,55 @@
 								<input name="name" type="text" value="<%= tournament.name %>" dir="ltr" disabled />
 								<div class="info-header__data--details">
 									<span>شروع تورنومنت :</span>
-									<span dir="ltr"><%= tournament.startDate %></span>
-									<input type="datetime-local" name="startDate" value="<%= tournament.startDate %>" disabled>
+									<span dir="ltr"><%= tournament.startDate.span %></span>
+									<input style="display: none;" type="datetime-local" name="startDate" value="<%= tournament.startDate.input %>">
 								</div>
-
 								<div class="bracketmax">
 									<div class="prize">
 										<span>جایزه :</span>
-										<input type="number" />
+										<input name="prizeInput" type="number" value="<%= tournament.prize %>" disabled/>
 									</div>
 									<div class="bracket">
 										<label for="bo1">
-											<input type="radio" id="bo1" name="drone" checked />
+											<input disabled type="radio" id="bo1" name="boRadio" value="1" <%= tournament.bo3? '':'checked' %> />
 											<span>bo1</span>
 										</label>
 										<label for="bo3">
-											<input type="radio" id="bo3" name="drone" />
+											<input disabled type="radio" id="bo3" name="boRadio" value="3" <%= tournament.bo3? 'checked':'' %>/>
 											<span>bo3</span>
 										</label>
 									</div>
 								</div>
 							</div>
-							<div class="mmr">
-								<!-- <img src="../img/<%= tournament.minMMR.slice(2) %>_medal.webp" alt="" />
+							<div class="mmr2">
+								<img src="../img/<%= tournament.minMMR.slice(2) %>_medal.webp" alt="" />
 								<span>تا</span>
-								<img src="../img/<%= tournament.maxMMR.slice(2) %>_medal.webp" alt="" /> -->
+								<img src="../img/<%= tournament.maxMMR.slice(2) %>_medal.webp" alt="" />
+							</div>
+							<div style="display: none;" class="mmr">
 								<p>محدوده رنک :</p>
 								<div class="menu">
 									<span>از</span>
 									<select>
-										<option selected>Herald</option>
-										<option>Guardian</option>
-										<option>Crusader</option>
-										<option>Archon</option>
-										<option>Legend</option>
-										<option>Ancient</option>
-										<option>Divine</option>
-										<option>Immortal</option>
+										<option value="Herald" <%= tournament.minMMR === '1.Herald'? 'selected':'' %>>Herald</option>
+										<option value="Guardian" <%= tournament.minMMR === '2.Guardian'? 'selected':'' %>>Guardian</option>
+										<option value="Crusader" <%= tournament.minMMR === '3.Crusader'? 'selected':'' %>>Crusader</option>
+										<option value="Archon" <%= tournament.minMMR === '4.Archon'? 'selected':'' %>>Archon</option>
+										<option value="Legend" <%= tournament.minMMR === '5.Legend'? 'selected':'' %>>Legend</option>
+										<option value="Ancient" <%= tournament.minMMR === '6.Ancient'? 'selected':'' %>>Ancient</option>
+										<option value="Divine" <%= tournament.minMMR === '7.Divine'? 'selected':'' %>>Divine</option>
+										<option value="Immortal" <%= tournament.minMMR === '8.Immortal'? 'selected':'' %>>Immortal</option>
 									</select>
 									<span>تا</span>
 									<select>
-										<option>Herald</option>
-										<option>Guardian</option>
-										<option>Crusader</option>
-										<option>Archon</option>
-										<option>Legend</option>
-										<option>Ancient</option>
-										<option>Divine</option>
-										<option selected>Immortal</option>
+										<option value="Herald" <%= tournament.maxMMR === '1.Herald'? 'selected':'' %>>Herald</option>
+										<option value="Guardian" <%= tournament.maxMMR === '2.Guardian'? 'selected':'' %>>Guardian</option>
+										<option value="Crusader" <%= tournament.maxMMR === '3.Crusader'? 'selected':'' %>>Crusader</option>
+										<option value="Archon" <%= tournament.maxMMR === '4.Archon'? 'selected':'' %>>Archon</option>
+										<option value="Legend" <%= tournament.maxMMR === '5.Legend'? 'selected':'' %>>Legend</option>
+										<option value="Ancient" <%= tournament.maxMMR === '6.Ancient'? 'selected':'' %>>Ancient</option>
+										<option value="Divine" <%= tournament.maxMMR === '7.Divine'? 'selected':'' %>>Divine</option>
+										<option value="Immortal" <%= tournament.maxMMR === '8.Immortal'? 'selected':'' %>>Immortal</option>
 									</select>
 								</div>
 							</div>
@@ -125,10 +127,10 @@
 								<div class="members__box">
 									<div class="top-title">
 										<p>تیم های انتخابی:</p>
-										<!-- <p>16/<span><%= tournament.teams.length %></span></p> -->
-										<div class="max">
+										<p><span><%= tournament.teamCount %></span>/<span><%= tournament.teams.length %></span></p>
+										<div style="display: none;" class="max">
 											<span>تعداد تیم ها :</span>
-											<input type="number" />
+											<input class="editable" type="number" value="<%= tournament.teamCount %>"/>
 										</div>
 									</div>
 									<div class="mid-note"></div>
@@ -141,11 +143,12 @@
 													</svg>
 													<div class="members-specific">
 														<img src="../<%= team.teamId.imageUrl %>"/>
-														<a dir="ltr"><%= team.teamId.name %></a>
+														<a href="/team/<%= team.teamId._id %>" dir="ltr"><%= team.teamId.name %></a>
 														<img src="../img/<%= team.teamId.avgMMR %>_medal.webp" alt="" />
-														<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 dh">
+														<svg name="removeTeamBtns" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 dh">
 															<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
 														</svg>
+														<input type="hidden" value="<%= team.teamId.leader.userId %>">
 													</div>
 												</div>
 											<% }) %>
@@ -173,38 +176,34 @@
 									<!-- <div class="members__box--notyet1">
 										<span>هنوز تیمی اضافه نشده است .</span>
 									</div> -->
-									<div class="block1">
-										<% tournament.games.forEach(game => { %>
-											<div class="details">
-												<div class="teams-match">
-													<div class="team1">
-														<svg name="selectTeamPlus" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-															<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-														</svg>
-														<a href="/team/<%= game.team1.teamId  %>">تیم 1 : <span><%= game.team1.name %></span></a>
+									<% tournament.games.forEach(game => { %>
+											<div class="block1">
+												<div class="details">
+													<div class="teams-match">
+														<div class="team1">
+															<svg name="selectTeamPlus" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+																<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+															</svg>
+															<a href="/team/<%= game.team1.teamId  %>">تیم 1 : <span><%= game.team1.name %></span></a>
+														</div>
+														<span class="vs">Vs</span>
+														<div class="team1">
+															<svg name="selectTeamPlus" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+																<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+															</svg>
+															<a href="/team/<%= game.team2.teamId  %>">تیم 2 : <span><%= game.team2.name %></span></a>
+														</div>
 													</div>
-													<span class="vs">Vs</span>
-													<div class="team1">
-														<svg name="selectTeamPlus" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-															<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-														</svg>
-														<a href="/team/<%= game.team2.teamId  %>">تیم 2 : <span><%= game.team2.name %></span></a>
+													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 fh">
+														<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
+													</svg>
+													<div class="timedate">
+														<input type="datetime-local" value="<%= game.dateTime %>" disabled>
 													</div>
+													<svg name="removeGameBtns" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 gh">
+														<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+													</svg>
 												</div>
-												<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 fh">
-													<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
-												</svg>
-												<div class="timedate">
-													<input type="datetime-local" />
-												</div>
-												<!-- <div class="timedate">
-													<input type="text" value="<%= game.dateTime.date  %>" dir="ltr" disabled />
-													<input type="text" value="<%= game.dateTime.time  %>" dir="ltr" disabled />
-												</div> -->
-												<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 gh">
-													<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-												</svg>
-											</div>
 											</div>
 										<% }) %>
 										<div name="addGamePlus" style="display: none;" class="plus-svg">
@@ -214,22 +213,22 @@
 										</div>
 									</div>
 								</div>
-							</div>
-						</div>
-						<div class="left-block">
-							<div href="/player/<%= tournament.organizer.userId._id %>" class="tournament-leader">
-								<p>برگذارکننده تورنومنت :</p>
-								<div class="mid-note"></div>
-								<a class="leader">
-									<img src="../<%= tournament.organizer.userId.imageUrl %>" alt="" />
-									<span dir="ltr"><%= tournament.organizer.userId.name %></span>
-									<img src="../img/<%= tournament.organizer.userId.mmr %>_medal.webp" alt="" />
-								</a>
-							</div>
-							<div class="descrip">
-								<p>توضیحات تورنومنت :</p>
-								<div class="mid-note"></div>
-								<textarea name="description" cols="30" rows="10" disabled><%= tournament.description %></textarea>
+								<div class="left-block">
+									<div href="/player/<%= tournament.organizer.userId._id %>" class="tournament-leader">
+										<p>برگذارکننده تورنومنت :</p>
+										<div class="mid-note"></div>
+										<a href="/player/<%= tournament.organizer.userId._id %>" class="leader">
+											<img src="../<%= tournament.organizer.userId.imageUrl %>" alt="" />
+											<span dir="ltr"><%= tournament.organizer.userId.name %></span>
+											<img src="../img/<%= tournament.organizer.userId.mmr %>_medal.webp" alt="" />
+										</a>
+									</div>
+									<div class="descrip">
+										<p>توضیحات تورنومنت :</p>
+										<div class="mid-note"></div>
+										<textarea name="description" cols="30" rows="10" disabled><%= tournament.description %></textarea>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -243,6 +242,5 @@
 		<!-- scripts -->
 		<script src="../js/tournament.js"></script>
 		<script src="../js/main.js"></script>
-		<script src="js/areusure.js"></script>
 	</body>
 </html>

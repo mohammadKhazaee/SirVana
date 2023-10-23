@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator')
 const { format } = require('date-fns-tz')
-const { add } = require('date-fns')
+const { add, sub } = require('date-fns')
 
 const User = require('../models/user')
 const Team = require('../models/team')
@@ -8,6 +8,7 @@ const Tournament = require('../models/tournament')
 const Message = require('../models/message')
 const Socket = require('../models/socket')
 const rank = require('../utils/rank')
+const posUtil = require('../utils/pos')
 const io = require('../socket')
 
 const TEAM_PER_PAGE = 15
@@ -96,9 +97,7 @@ exports.getTeam = async (req, res, next) => {
 			members: team.members.map((member) => {
 				let renderPos
 				if (member.pos) renderPos = member.pos
-				else renderPos = member.userId.pos.join('-')
-				if (renderPos === '1-2-3-4-5') renderPos = 'همه'
-				if (renderPos === '') renderPos = 'ثبت نشده'
+				else renderPos = posUtil.toString(member.userId.pos)
 				return {
 					...member._doc,
 					pos: renderPos,
@@ -134,42 +133,42 @@ exports.getTeam = async (req, res, next) => {
 }
 
 exports.postTeam = async (req, res, next) => {
-	const name = req.body.name
-	const nameTag = req.body.nameTag
-	const description = req.body.description
-
-	const errors = validationResult(req).array()
-	if (errors.length > 0) {
-		const oldInput = {
-			name: name,
-			nameTag: nameTag,
-			description: description,
-		}
-		const nameError = errors.find((error) => error.param === 'name')
-		const nameTagError = errors.find((error) => error.param === 'nameTag')
-		const descError = errors.find((error) => error.param === 'description')
-		let nameTagMessage, nameMessage, descMessage
-		if (nameError) nameMessage = nameError.msg
-		if (nameTagError) nameTagMessage = nameTagError.msg
-		if (descError) descMessage = descError.msg
-
-		const teams = await Team.find().collation({ locale: 'en' }).limit(TEAM_PER_PAGE)
-		const renderTeams = teams.map((team) => ({ ...team._doc, avgMMR: Math.floor(team.avgMMR) }))
-		return res.status(422).render('teams', {
-			pageTitle: 'SirVana · تیم ها',
-			teams: renderTeams,
-			lfpCheck: false,
-			sortType: '',
-			searchInput: '',
-			noFilter: true,
-			oldInput: oldInput,
-			openModal: true,
-			isNameValid: !nameError,
-			isNameTagValid: !nameTagError,
-			isDescValid: !descError,
-		})
-	}
 	try {
+		const name = req.body.name
+		const nameTag = req.body.nameTag
+		const description = req.body.description
+
+		const errors = validationResult(req).array()
+		if (errors.length > 0) {
+			const oldInput = {
+				name: name,
+				nameTag: nameTag,
+				description: description,
+			}
+			const nameError = errors.find((error) => error.param === 'name')
+			const nameTagError = errors.find((error) => error.param === 'nameTag')
+			const descError = errors.find((error) => error.param === 'description')
+			let nameTagMessage, nameMessage, descMessage
+			if (nameError) nameMessage = nameError.msg
+			if (nameTagError) nameTagMessage = nameTagError.msg
+			if (descError) descMessage = descError.msg
+
+			const teams = await Team.find().collation({ locale: 'en' }).limit(TEAM_PER_PAGE)
+			const renderTeams = teams.map((team) => ({ ...team._doc, avgMMR: Math.floor(team.avgMMR) }))
+			return res.status(422).render('teams', {
+				pageTitle: 'SirVana · تیم ها',
+				teams: renderTeams,
+				lfpCheck: false,
+				sortType: '',
+				searchInput: '',
+				noFilter: true,
+				oldInput: oldInput,
+				openModal: true,
+				isNameValid: !nameError,
+				isNameTagValid: !nameTagError,
+				isDescValid: !descError,
+			})
+		}
 		const imageUrl = req.file ? req.file.path.replace('\\', '/') : 'img/default-team-picture.jpg'
 		const team = new Team({
 			name: name,
@@ -205,16 +204,45 @@ exports.postEditTeam = async (req, res, next) => {
 		const name = req.body.name
 		const nameTag = req.body.nameTag
 		const description = req.body.description
+		const membersPos = req.body.membersPos
 		const imageUrl = req.file ? req.file.path.replace('\\', '/') : null
 		const teamId = req.body.teamId
-		const updatedTeam = {
-			name: name,
-			nameTag: nameTag,
-			description: description,
+		const team = await Team.findById(teamId)
+		team.name = name
+		team.nameTag = nameTag
+		team.description = description
+		team.members = team.members.map((member, i) => ({ ...member._doc, pos: membersPos[2 * i] }))
+		let updateOwnedTeam = { 'teams.$.name': name, 'ownedTeam.name': name },
+			updateObj = { 'teams.$[docX].name': name }
+		if (imageUrl) {
+			updatedTeam.imageUrl = imageUrl
+			updateObj = { ...updateObj, 'teams.$[docX].imageUrl': imageUrl }
+			updateOwnedTeam = {
+				...updateOwnedTeam,
+				'ownedTeam.imageUrl': imageUrl,
+				'teams.$.imageUrl': imageUrl,
+			}
 		}
-		// etelaate team too baghie jaha avaz she(eg. esm, ax)
-		if (imageUrl) updatedTeam.imageUrl = imageUrl
-		await Team.updateOne({ _id: teamId }, { $set: updatedTeam })
+		// change all refrences when user update
+		await team.save()
+		await User.updateMany({ 'teams.teamId': req.body.teamId }, { $set: updateOwnedTeam })
+		await Tournament.updateMany(
+			{ 'teams.teamId': req.body.teamId },
+			{
+				$set: {
+					...updateObj,
+					'games.$[docY].team1.name': name,
+					'games.$[docZ].team2.name': name,
+				},
+			},
+			{
+				arrayFilters: [
+					{ 'docX.teamId': req.body.teamId },
+					{ 'docY.team1.teamId': req.body.teamId },
+					{ 'docZ.team2.teamId': req.body.teamId },
+				],
+			}
+		)
 		res.sendStatus(200)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -308,7 +336,10 @@ exports.getTournament = async (req, res, next) => {
 		)
 		const renderTournament = {
 			...tournament._doc,
-			startDate: format(tournament.startDate, 'MMM.d.yyyy'),
+			startDate: {
+				span: format(sub(tournament.startDate, { hours: 3, minutes: 30 }), 'd.MMM.yyyy - HH:mm'),
+				input: tournament.startDate.toISOString().slice(0, 16),
+			},
 			teams: tournament.teams.map((team) => ({
 				...team._doc,
 				teamId: {
@@ -325,10 +356,7 @@ exports.getTournament = async (req, res, next) => {
 			},
 			games: tournament.games.map((game) => ({
 				...game._doc,
-				dateTime: {
-					date: format(game.dateTime, 'd/M/yyyy'),
-					time: format(game.dateTime, 'HH:mm'),
-				},
+				dateTime: game.dateTime.toISOString().slice(0, 16),
 			})),
 		}
 		// console.log(renderTournament.games)
@@ -433,30 +461,45 @@ exports.postTournament = async (req, res, next) => {
 exports.postEditTournament = async (req, res, next) => {
 	try {
 		const name = req.body.name
+		const bo3 = req.body.bo3 === 'true'
 		const startDate = req.body.startDate
+		const prize = Number(req.body.prize)
+		const teamCount = Number(req.body.teamCount)
+		const minMMR = rank.giveNumberedMedal(req.body.minMMR)
+		const maxMMR = rank.giveNumberedMedal(req.body.maxMMR)
 		const description = req.body.description
-		const imageUrl = req.file ? '/' + req.file.path.replace('\\', '/').slice(1) : null
+		const imageUrl = req.file ? req.file.path.replace('\\', '/') : null
 		const games = JSON.parse(req.body.games).map((game) => ({
 			...game,
-			dateTime: new Date(
-				game.startDate.date.split('/')[2],
-				game.startDate.date.split('/')[1],
-				game.startDate.date.split('/')[0],
-				game.startDate.time.split(':')[0],
-				game.startDate.time.split(':')[1]
-			),
+			dateTime: add(new Date(game.dateTime), { hours: 3, minutes: 30 }),
 		}))
 		const updatedTournament = {
 			name: name,
+			prize: prize,
+			teamCount: teamCount,
 			description: description,
+			bo3: bo3,
+			minMMR: minMMR,
+			maxMMR: maxMMR,
 			games: games,
 		}
-		if (imageUrl) updatedTournament.imageUrl = imageUrl.slice(1)
-		if (startDate) updatedTournament.startDate = startDate
+		let updateObj = { 'tournaments.$.name': name }
+		if (imageUrl) {
+			updatedTournament.imageUrl = imageUrl.slice(1)
+			updateObj = { ...updateObj, 'tournaments.$.imageUrl': imageUrl }
+		}
+		if (startDate) updatedTournament.startDate = add(new Date(startDate), { hours: 3, minutes: 30 })
 		// console.log(updatedTournament)
-		// etelaate Tournament too baghie model ha avaz she(eg. esm, ax)
 		await Tournament.updateOne({ _id: req.body.tournamentId }, { $set: updatedTournament })
 		res.sendStatus(200)
+		await User.updateMany(
+			{ 'tournaments.tournamentId': req.body.tournamentId },
+			{ $set: updateObj }
+		)
+		await Team.updateMany(
+			{ 'tournaments.tournamentId': req.body.tournamentId },
+			{ $set: updateObj }
+		)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)

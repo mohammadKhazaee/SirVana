@@ -5,6 +5,7 @@ const Team = require('../models/team')
 const Tournament = require('../models/tournament')
 const Socket = require('../models/socket')
 const rank = require('../utils/rank')
+const posUtil = require('../utils/pos')
 const io = require('../socket')
 
 exports.getDashboard = async (req, res, next) => {
@@ -27,9 +28,7 @@ exports.getDashboard = async (req, res, next) => {
 					return { name: 'تورنومت لیدر', color: 'tournament' }
 			}
 		})
-		renderUser.pos = user.pos.join('-')
-		if (renderUser.pos === '1-2-3-4-5') renderUser.pos = 'همه'
-		if (renderUser.pos === '') renderUser.pos = 'ثبت نشده'
+		renderUser.pos = posUtil.toString(renderUser.pos)
 		renderUser.mmr = { number: renderUser.mmr, medal: rank.numberToMedal(renderUser.mmr) }
 		renderUser.createdAt = renderUser.createdAt.toISOString().split('T')[0].replaceAll('-', '/')
 		if (req.originalUrl !== '/dashboard' && isOwner) return res.redirect('/dashboard')
@@ -61,6 +60,7 @@ exports.getDashboardTeam = async (req, res, next) => {
 			return team
 		})
 		renderUser.ownedTournaments = [...renderUser.tournaments.filter((tour) => tour.owned)]
+		// console.log(renderUser.tournaments)
 		res.render('dashboard-team', {
 			pageTitle: 'SirVana · داشبورد',
 			user: renderUser,
@@ -76,9 +76,9 @@ exports.getDashboardNotif = async (req, res, next) => {
 		let inReqs = [],
 			outReqs = []
 		req.user.requests.forEach((request) => {
-			if (request.type == 'accPlayer' || request.type == 'accRecruit' || request.type == 'accTeam')
-				inReqs = [...inReqs, request]
-			else outReqs = [...outReqs, request]
+			if (request.type == 'join' || request.type == 'recruit' || request.type == 'joinTour')
+				outReqs = [...outReqs, request]
+			else inReqs = [...inReqs, request]
 		})
 		// console.log(req.user.chatFriends[0].userId)
 		res.render('dashboard-notif', {
@@ -108,8 +108,7 @@ exports.getDashboardSettings = async (req, res, next) => {
 exports.postEditProfile = async (req, res, next) => {
 	try {
 		const name = req.body.name
-		const pos =
-			req.body.pos !== 'ثبت نشده' && req.body.pos !== 'مثال: 4-5' ? req.body.pos.split('-') : []
+		const pos = posUtil.toArray(req.body.pos)
 		const inputRank = Number(req.body.rank)
 		const discordId = req.body.discordId !== 'ثبت نشده' ? req.body.discordId : ''
 		const dota2Id = req.body.dota2Id !== 'ثبت نشده' ? req.body.dota2Id : ''
@@ -126,6 +125,32 @@ exports.postEditProfile = async (req, res, next) => {
 		req.user.lft = lft
 		req.user.bio = bio
 		await req.user.save()
+		let updateMembers = { 'members.$[docX].name': name },
+			updatedChatFriends = { 'chatFriends.$[docX].name': name },
+			updateOrg = { 'organizer.name': name }
+		if (req.file) {
+			updateOrg = { ...updateOrg, 'organizer.imageUrl': imageUrl }
+			updateMembers = {
+				...updateMembers,
+				'members.$[docX].imageUrl': imageUrl,
+			}
+			updatedChatFriends = {
+				...updatedChatFriends,
+				'chatFriends.$[docX].imageUrl': imageUrl,
+			}
+		}
+		await Tournament.updateMany({ 'organizer.userId': req.user._id }, { $set: updateOrg })
+		await User.updateMany(
+			{ 'chatFriends.userId': req.user._id },
+			{ $set: { ...updatedChatFriends } },
+			{ arrayFilters: [{ 'docX.userId': req.user._id }] }
+		)
+		await Team.updateMany(
+			{ 'members.userId': req.user._id },
+			{ $set: { ...updateMembers } },
+			{ arrayFilters: [{ 'docX.userId': req.user._id }] }
+		)
+		await Team.updateMany({ 'leader.userId': req.user._id }, { $set: { 'leader.name': name } })
 		res.status(200).send({ medal: rank.numberToMedal(inputRank) })
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -311,6 +336,23 @@ exports.postRejTeam = async (req, res, next) => {
 		const teamLeader = await User.findById(reqInfo.userId)
 		const wrong = req.user.handleReq(reqId, teamLeader, reqInfo.reqId, 'Rejected')
 		if (wrong === 'wrong') return res.sendStatus(404)
+		res.sendStatus(200)
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
+}
+
+exports.postRemoveTeam = async (req, res, next) => {
+	try {
+		const { leaderId } = req.body
+		const teamLeader = await User.findById(leaderId).populate('ownedTeam.teamId')
+		const team = teamLeader.ownedTeam.teamId
+		const tournaments = req.user.tournaments.filter((tour) => tour.owned)
+		const tournament = await Tournament.findOne(tournaments[tournaments.length - 1].tournamentId)
+		await teamLeader.exchangeReq('teamRemoved', teamLeader, tournament)
+		await tournament.removeTeam(team._id)
+		await team.leaveTournament(tournament._id)
 		res.sendStatus(200)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500

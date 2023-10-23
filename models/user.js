@@ -152,7 +152,7 @@ const userSchema = new Schema(
 			type: [
 				{
 					type: {
-						//  out: 'join', 'recruit', 'joinTour'/ in: 'accPlayer', 'accRecruit', 'accTeam'
+						//  out: 'join', 'recruit', 'joinTour'/ in: 'teamRemoved', 'accPlayer', 'accRecruit', 'accTeam'
 						type: String,
 						require: true,
 					},
@@ -358,6 +358,13 @@ userSchema.methods.joinToTour = function (tournament) {
 	}
 	this.tournaments = updatedTournaments
 
+	return this.save()
+}
+
+userSchema.methods.leaveTour = function (tournamentId) {
+	this.tournaments = this.tournaments.filter(
+		(tour) => tour.tournamentId.toString() !== tournamentId.toString()
+	)
 	return this.save()
 }
 

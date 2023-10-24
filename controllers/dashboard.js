@@ -33,7 +33,7 @@ exports.getDashboard = async (req, res, next) => {
 		renderUser.createdAt = renderUser.createdAt.toISOString().split('T')[0].replaceAll('-', '/')
 		if (req.originalUrl !== '/dashboard' && isOwner) return res.redirect('/dashboard')
 		res.render('dashboard', {
-			pageTitle: 'SirVana · داشبورد',
+			pageTitle: `SirVana · ${req.originalUrl === '/dashboard' ? 'داشبورد' : req.user.name}`,
 			user: renderUser,
 			isOwner: isOwner,
 			isLeader: req.user && req.user.ownedTeam,
@@ -60,6 +60,7 @@ exports.getDashboardTeam = async (req, res, next) => {
 			return team
 		})
 		renderUser.ownedTournaments = [...renderUser.tournaments.filter((tour) => tour.owned)]
+		renderUser.tournaments = [...renderUser.tournaments.filter((tour) => !tour.owned)]
 		// console.log(renderUser.tournaments)
 		res.render('dashboard-team', {
 			pageTitle: 'SirVana · داشبورد',
@@ -97,7 +98,7 @@ exports.getDashboardNotif = async (req, res, next) => {
 exports.getDashboardSettings = async (req, res, next) => {
 	try {
 		res.render('dashboard-settings', {
-			pageTitle: 'SirVana · داشبورد',
+			pageTitle: 'SirVana · تنظیمات داشبورد',
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -114,7 +115,7 @@ exports.postEditProfile = async (req, res, next) => {
 		const dota2Id = req.body.dota2Id !== 'ثبت نشده' ? req.body.dota2Id : ''
 		const bio = req.body.bio !== 'یه چیزی بنویس حالا. . .' ? req.body.bio : ''
 		const lft = req.body.lft
-		const imageUrl = req.file ? req.file.path.replace('\\', '/') : req.user.imageUrl
+		const imageUrl = req.file ? req.file.path.replace('\\', '/') : null
 
 		req.user.imageUrl = imageUrl
 		req.user.name = name
@@ -124,11 +125,14 @@ exports.postEditProfile = async (req, res, next) => {
 		req.user.dota2Id = dota2Id
 		req.user.lft = lft
 		req.user.bio = bio
-		await req.user.save()
+
 		let updateMembers = { 'members.$[docX].name': name },
 			updatedChatFriends = { 'chatFriends.$[docX].name': name },
 			updateOrg = { 'organizer.name': name }
-		if (req.file) {
+		if (imageUrl) {
+			const fileError = fileHelper.deleteFile(req.user.imageUrl)
+			if (fileError) throw fileError
+			req.user.imageUrl = imageUrl
 			updateOrg = { ...updateOrg, 'organizer.imageUrl': imageUrl }
 			updateMembers = {
 				...updateMembers,
@@ -139,6 +143,7 @@ exports.postEditProfile = async (req, res, next) => {
 				'chatFriends.$[docX].imageUrl': imageUrl,
 			}
 		}
+		await req.user.save()
 		await Tournament.updateMany({ 'organizer.userId': req.user._id }, { $set: updateOrg })
 		await User.updateMany(
 			{ 'chatFriends.userId': req.user._id },

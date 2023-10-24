@@ -148,19 +148,43 @@
             <!-- <h1 class="header1">جستجو موردنظر یافت نشد...</h1> -->
         </div>
     </div>
-    <div class="center">
-        <div class="pagination">
-            <a href="#">&raquo;</a>
-            <a href="#"  class="active">1</a>
-            <a href="#">2</a>
-            <a href="#">3</a>
-            <a href="#">...</a>
-            <a href="#">4</a>
-            <a href="#">5</a>
-            <a href="#">6</a>
-            <a href="#">&laquo;</a>
+    <% if (page.multiple) { %>
+        <div class="center">
+            <div class="pagination">
+                <% if (page.hasPrev) { %>
+                    <a href="/teams<%= query %>p=<%= page.prev %>">&raquo;</a>
+                <% } %>
+                <% if (page.current !== 1) { %>
+                    <a href="/teams<%= query %>p=1">1</a>
+                <% } %>
+                <% if (page.current - 3 > 1) { %>
+                    <a>...</a>
+                <% } %>
+                <% if (page.current - 2 > 1) { %>
+                    <a href="/teams<%= query %>p=<%= page.current - 2 %>"><%= page.current - 2 %></a>
+                <% } %>
+                <% if (page.current - 1 > 1) { %>
+                    <a href="/teams<%= query %>p=<%= page.current - 1 %>"><%= page.current - 1 %></a>
+                <% } %>
+                <a href="/teams<%= query %>p=<%= page.current %>" class="active"><%= page.current %></a>
+                <% if (page.current + 1 < page.last) { %>
+                    <a href="/teams<%= query %>p=<%= page.current + 1 %>"><%= page.current + 1 %></a>
+                <% } %>
+                <% if (page.current + 2 < page.last) { %>
+                    <a href="/teams<%= query %>p=<%= page.current + 2 %>"><%= page.current + 2 %></a>
+                <% } %>
+                <% if (page.current + 3 < page.last) { %>
+                    <a>...</a>
+                <% } %>
+                <% if (page.current !== page.last) { %>
+                    <a href="/teams<%= query %>p=<%= page.last %>"><%= page.last %></a>
+                <% } %>
+                <% if (page.hasNext) { %>
+                    <a href="/teams<%= query %>p=<%= page.next %>">&laquo;</a>
+                <% } %>
+            </div>
         </div>
-    </div>
+    <% } %>
     <!-- Footer -->
     <%- include('./includes/footer') %>
 

@@ -8,12 +8,19 @@ const Tournament = require('../models/tournament')
 const Message = require('../models/message')
 const Socket = require('../models/socket')
 const rank = require('../utils/rank')
+const fileHelper = require('../utils/file')
 const posUtil = require('../utils/pos')
 const io = require('../socket')
 
 const TEAM_PER_PAGE = 15
 const TOURNAMENT_PER_PAGE = 11
 const PLAYER_PER_PAGE = 16
+
+const prevQuery = (query) => {
+	if (!query) return ''
+	if (query.indexOf('&p=') === -1) return query
+	return query.slice(0, query.indexOf('&p='))
+}
 
 exports.getIndex = async (req, res, next) => {
 	const tournaments = await Tournament.find()
@@ -43,30 +50,36 @@ exports.getIndex = async (req, res, next) => {
 }
 
 exports.getTeams = async (req, res, next) => {
-	const sortType = req.sortType
-	const lfpCheck = req.query.lfp === 'on'
-	const searchInput = req.query.search || ''
-	let noFilter, dbQuery
-	if (searchInput !== '')
-		if (lfpCheck)
-			dbQuery = {
-				name: { $regex: new RegExp(`.*${searchInput}.*`, 'i') },
-				lfp: true,
-			}
-		else dbQuery = { name: { $regex: new RegExp(`.*${searchInput}.*`, 'i') } }
-	else if (lfpCheck) dbQuery = { lfp: true }
-	else {
-		noFilter = true
-		dbQuery = {}
-	}
 	try {
+		const sortType = req.sortType
+		const lfpCheck = req.query.lfp === 'on'
+		const searchInput = req.query.search || ''
+		const page = Number(req.query.p || 1)
+		const query = prevQuery(req.originalUrl.split('?')[1])
+
+		let noFilter, dbQuery
+		if (searchInput !== '')
+			if (lfpCheck)
+				dbQuery = {
+					name: { $regex: new RegExp(`.*${searchInput}.*`, 'i') },
+					lfp: true,
+				}
+			else dbQuery = { name: { $regex: new RegExp(`.*${searchInput}.*`, 'i') } }
+		else if (lfpCheck) dbQuery = { lfp: true }
+		else {
+			noFilter = true
+			dbQuery = {}
+		}
+		const teamsCount = await Team.countDocuments(dbQuery)
 		const teams = await Team.find(dbQuery)
+			.skip((page - 1) * TEAM_PER_PAGE)
 			.collation({ locale: 'en' }) // searching case insensitive
 			.sort(sortType)
 			.limit(TEAM_PER_PAGE)
 		const renderTeams = teams.map((team) => ({ ...team._doc, avgMMR: Math.floor(team.avgMMR) }))
 		res.render('teams', {
 			pageTitle: 'SirVana · تیم ها',
+			query: '?' + query + '&',
 			teams: renderTeams,
 			lfpCheck: lfpCheck,
 			sortType: req.query.sortType,
@@ -77,6 +90,15 @@ exports.getTeams = async (req, res, next) => {
 			isNameValid: true,
 			isNameTagValid: true,
 			isDescValid: true,
+			page: {
+				multiple: teamsCount > TEAM_PER_PAGE,
+				current: page,
+				last: Math.ceil(teamsCount / TEAM_PER_PAGE),
+				hasPrev: page > 1,
+				prev: page - 1,
+				hasNext: page < Math.ceil(teamsCount / TEAM_PER_PAGE),
+				next: page + 1,
+			},
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -120,7 +142,7 @@ exports.getTeam = async (req, res, next) => {
 			).length > 0
 		const isLead = req.user && renderTeam.leader.userId.toString() === req.user._id.toString()
 		res.render('team-info', {
-			pageTitle: 'SirVana · مسابقات',
+			pageTitle: 'SirVana · ' + team.name,
 			team: renderTeam,
 			userId: req.user ? req.user._id : undefined,
 			isMember: isMember,
@@ -215,7 +237,9 @@ exports.postEditTeam = async (req, res, next) => {
 		let updateOwnedTeam = { 'teams.$.name': name, 'ownedTeam.name': name },
 			updateObj = { 'teams.$[docX].name': name }
 		if (imageUrl) {
-			updatedTeam.imageUrl = imageUrl
+			const fileError = fileHelper.deleteFile(team.imageUrl)
+			if (fileError) throw fileError
+			team.imageUrl = imageUrl
 			updateObj = { ...updateObj, 'teams.$[docX].imageUrl': imageUrl }
 			updateOwnedTeam = {
 				...updateOwnedTeam,
@@ -223,7 +247,6 @@ exports.postEditTeam = async (req, res, next) => {
 				'teams.$.imageUrl': imageUrl,
 			}
 		}
-		// change all refrences when user update
 		await team.save()
 		await User.updateMany({ 'teams.teamId': req.body.teamId }, { $set: updateOwnedTeam })
 		await Tournament.updateMany(
@@ -276,19 +299,22 @@ exports.postTeamChat = async (req, res, next) => {
 }
 
 exports.getTournaments = async (req, res, next) => {
-	const marginLeft = req.marginLeft
-	const rankFilter = req.rankFilter
-	const slided = req.query.slided === 'true'
-	const searchInput = req.query.search
-	const isFiltered = req.query.filter
-
-	let dbQuery = {}
-	if (searchInput !== '') dbQuery.name = { $regex: new RegExp(`.*${searchInput}.*`, 'i') }
-	if (rankFilter && slided) {
-		dbQuery.minMMR = { $lte: rankFilter }
-		dbQuery.maxMMR = { $gte: rankFilter }
-	}
 	try {
+		const marginLeft = req.marginLeft
+		const rankFilter = req.rankFilter
+		const slided = req.query.slided === 'true'
+		const searchInput = req.query.search
+		const isFiltered = req.query.filter
+		const page = Number(req.query.p || 1)
+		const query = prevQuery(req.originalUrl.split('?')[1])
+
+		let dbQuery = {}
+		if (searchInput !== '') dbQuery.name = { $regex: new RegExp(`.*${searchInput}.*`, 'i') }
+		if (rankFilter && slided) {
+			dbQuery.minMMR = { $lte: rankFilter }
+			dbQuery.maxMMR = { $gte: rankFilter }
+		}
+		const tournamentsCount = await Tournament.countDocuments(dbQuery)
 		const tournaments = await Tournament.find(dbQuery)
 			.collation({ locale: 'en' }) // searching case insensitive
 			.limit(TOURNAMENT_PER_PAGE)
@@ -322,6 +348,16 @@ exports.getTournaments = async (req, res, next) => {
 			isRankValid: true,
 			isDateValid: true,
 			isPrizeValid: true,
+			query: '?' + query + '&',
+			page: {
+				multiple: tournamentsCount > TOURNAMENT_PER_PAGE,
+				current: page,
+				last: Math.ceil(tournamentsCount / TOURNAMENT_PER_PAGE),
+				hasPrev: page > 1,
+				prev: page - 1,
+				hasNext: page < Math.ceil(tournamentsCount / TOURNAMENT_PER_PAGE),
+				next: page + 1,
+			},
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -364,7 +400,7 @@ exports.getTournament = async (req, res, next) => {
 			req.user && renderTournament.organizer.userId._id.toString() === req.user._id.toString()
 		const isLeader = !(!req.user || !req.user.ownedTeam.teamId)
 		res.render('tournament-info', {
-			pageTitle: 'SirVana · مسابقات',
+			pageTitle: 'SirVana · ' + tournament.name,
 			tournament: renderTournament,
 			isOrganizer: isOrganizer,
 			isLeader: isLeader,
@@ -473,25 +509,26 @@ exports.postEditTournament = async (req, res, next) => {
 			...game,
 			dateTime: add(new Date(game.dateTime), { hours: 3, minutes: 30 }),
 		}))
-		const updatedTournament = {
-			name: name,
-			prize: prize,
-			teamCount: teamCount,
-			description: description,
-			bo3: bo3,
-			minMMR: minMMR,
-			maxMMR: maxMMR,
-			games: games,
-		}
+		const tournament = await Tournament.findById(req.body.tournamentId)
+		tournament.name = name
+		tournament.prize = prize
+		tournament.teamCount = teamCount
+		tournament.description = description
+		tournament.bo3 = bo3
+		tournament.minMMR = minMMR
+		tournament.maxMMR = maxMMR
+		tournament.games = games
+
 		let updateObj = { 'tournaments.$.name': name }
 		if (imageUrl) {
-			updatedTournament.imageUrl = imageUrl.slice(1)
+			const fileError = fileHelper.deleteFile(tournament.imageUrl)
+			if (fileError) throw fileError
+			tournament.imageUrl = imageUrl
 			updateObj = { ...updateObj, 'tournaments.$.imageUrl': imageUrl }
 		}
-		if (startDate) updatedTournament.startDate = add(new Date(startDate), { hours: 3, minutes: 30 })
+		if (startDate) tournament.startDate = add(new Date(startDate), { hours: 3, minutes: 30 })
 		// console.log(updatedTournament)
-		await Tournament.updateOne({ _id: req.body.tournamentId }, { $set: updatedTournament })
-		res.sendStatus(200)
+		await tournament.save()
 		await User.updateMany(
 			{ 'tournaments.tournamentId': req.body.tournamentId },
 			{ $set: updateObj }
@@ -500,6 +537,7 @@ exports.postEditTournament = async (req, res, next) => {
 			{ 'tournaments.tournamentId': req.body.tournamentId },
 			{ $set: updateObj }
 		)
+		res.sendStatus(200)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)
@@ -507,22 +545,26 @@ exports.postEditTournament = async (req, res, next) => {
 }
 
 exports.getPlayers = async (req, res, next) => {
-	const lft = req.query.lft === 'on'
-	const minMMR = req.minMMR
-	const maxMMR = req.maxMMR
-	const searchInput = req.query.search
-	const pos = req.query.pos
-
-	let dbQuery = {}
-	if (searchInput !== '') dbQuery.name = { $regex: new RegExp(`.*${searchInput}.*`, 'i') }
-	if (minMMR || maxMMR) dbQuery.mmr = {}
-	if (minMMR) dbQuery.mmr.$gte = rank.giveNumber(minMMR)
-	if (maxMMR) dbQuery.mmr.$lte = rank.giveNumber(maxMMR)
-	if (pos) dbQuery.pos = { $regex: new RegExp(`${pos}`) }
-	if (lft) dbQuery.lft = lft
-
 	try {
+		const lft = req.query.lft === 'on'
+		const minMMR = req.minMMR
+		const maxMMR = req.maxMMR
+		const searchInput = req.query.search
+		const pos = req.query.pos
+		const page = Number(req.query.p || 1)
+		const query = prevQuery(req.originalUrl.split('?')[1])
+
+		let dbQuery = {}
+		if (searchInput !== '') dbQuery.name = { $regex: new RegExp(`.*${searchInput}.*`, 'i') }
+		if (minMMR || maxMMR) dbQuery.mmr = {}
+		if (minMMR) dbQuery.mmr.$gte = rank.giveNumber(minMMR)
+		if (maxMMR) dbQuery.mmr.$lte = rank.giveNumber(maxMMR)
+		if (pos) dbQuery.pos = { $regex: new RegExp(`${pos}`) }
+		if (lft) dbQuery.lft = lft
+
+		const playersCount = await User.countDocuments(dbQuery)
 		const users = await User.find(dbQuery)
+			.skip((page - 1) * PLAYER_PER_PAGE)
 			.collation({ locale: 'en' }) // searching case insensitive
 			.select('_id name pos mmr imageUrl lft')
 			.limit(PLAYER_PER_PAGE)
@@ -536,6 +578,7 @@ exports.getPlayers = async (req, res, next) => {
 				pos: renderPos,
 			}
 		})
+		console.log(query)
 		res.render('players', {
 			pageTitle: 'SirVana · بازیکنان',
 			users: modifiedUsers,
@@ -544,6 +587,16 @@ exports.getPlayers = async (req, res, next) => {
 			maxMMR: rank.giveMedal(maxMMR),
 			pos: pos,
 			lft: lft,
+			query: '?' + query + '&',
+			page: {
+				multiple: playersCount > PLAYER_PER_PAGE,
+				current: page,
+				last: Math.ceil(playersCount / PLAYER_PER_PAGE),
+				hasPrev: page > 1,
+				prev: page - 1,
+				hasNext: page < Math.ceil(playersCount / PLAYER_PER_PAGE),
+				next: page + 1,
+			},
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500

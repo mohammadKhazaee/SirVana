@@ -117,7 +117,7 @@ if (sendFeedBtn) {
 							</div>
 							<div class="comments__box--bot">
 								<div class="comments__box--bot-comment">
-									<p>${data.feeds.pop().content}</p>
+									<p>${data.feeds[0].content}</p>
 								</div>
 							</div>
 						</div>
@@ -135,18 +135,18 @@ if (sendFeedBtn) {
 		
 // send Comment
 const sendCommentBtns = document.getElementsByName('sendCommentBtn')
+const userId = document.getElementsByName('userId')[0]
 
 for (let i = 0; i < sendCommentBtns.length; i++) {
 	sendCommentBtns[i].addEventListener('click', function() {
 		const commentInput = this.parentElement.children[0]
 		const feedId = this.parentElement.children[2]
-		const userId = '6513fb260f1a160fd02ecd1e'
 		fetch('/dashboard/send-feed-comment', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
 			body: JSON.stringify({ 
 				commentContent: commentInput.value, 
-				userId: userId, 
+				userId: userId.value, 
 				feedId: feedId.value
 			}),
 		}).then((res) => res.json())
@@ -171,6 +171,7 @@ for (let i = 0; i < sendCommentBtns.length; i++) {
 					</div>
 				</div>`
 			)
+			this.parentElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
 		})
 		.catch((err) => console.log(err))
 	})

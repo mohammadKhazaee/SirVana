@@ -33,7 +33,7 @@ exports.getDashboard = async (req, res, next) => {
 		renderUser.createdAt = renderUser.createdAt.toISOString().split('T')[0].replaceAll('-', '/')
 		if (req.originalUrl !== '/dashboard' && isOwner) return res.redirect('/dashboard')
 		res.render('dashboard', {
-			pageTitle: `SirVana · ${req.originalUrl === '/dashboard' ? 'داشبورد' : req.user.name}`,
+			pageTitle: `SirVana · ${req.originalUrl === '/dashboard' ? 'داشبورد' : renderUser.name}`,
 			user: renderUser,
 			isOwner: isOwner,
 			isLeader: req.user && req.user.ownedTeam,

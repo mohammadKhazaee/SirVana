@@ -2,63 +2,69 @@
 const socket = io();
 const lfpDiv = document.getElementsByClassName('looking-for__player')[0]
 const lftDiv = document.getElementsByClassName('looking-for__team')[0]
-
-const lfpSendBtn = document.getElementById('lfpSend')
-const teamSelect = lfpSendBtn.parentNode.getElementsByTagName('select')[0]
-const posSelect = lfpSendBtn.parentNode.getElementsByTagName('select')[1]
-const rankSelect = lfpSendBtn.parentNode.getElementsByTagName('select')[2]
-
-const lftSendBtn = document.getElementById('lftSend')
-const posSelectT = lftSendBtn.parentNode.getElementsByTagName('select')[0]
-const rankSelectT = lftSendBtn.parentNode.getElementsByTagName('select')[1]
-
 const canSend = document.getElementsByName('canSend')[0]
 
-window.addEventListener('load', () => {
-    for (let i = 0; i < lfpSendBtn.parentNode.getElementsByTagName('select').length; i++) {
+if(lfpDiv) {
+  window.addEventListener('load', () => {
+    const lfpSendBtn = document.getElementById('lfpSend')
+    const ownedTeam = document.getElementsByName('ownedTeam')[0]
+
+    let posSelect, rankSelect
+    if (lfpSendBtn) {
+      posSelect = lfpSendBtn.parentNode.getElementsByTagName('select')[0]
+      rankSelect = lfpSendBtn.parentNode.getElementsByTagName('select')[1]
+      for (let i = 0; i < lfpSendBtn.parentNode.getElementsByTagName('select').length; i++) {
         lfpSendBtn.parentNode.getElementsByClassName('select-selected')[i].addEventListener('click', () => {
-            if(canSend.value === 'true' && teamSelect.value !== 'null' && posSelect.value !== 'null' && rankSelect.value !== 'null') {
-                lfpSendBtn.classList.add('active-btn')
-            }
-        })        
+          if(canSend.value === 'true' && posSelect.value !== 'null' && rankSelect.value !== 'null') {
+            lfpSendBtn.classList.add('active-btn')
+          }
+        })
+      }
+      lfpSendBtn.addEventListener('click', function(e) {
+        if(canSend.value === 'true' && posSelect.value !== 'null' && rankSelect.value !== 'null'){
+          lftSendBtn.classList.remove('active-btn')
+          lfpSendBtn.classList.remove('active-btn')
+          canSend.value = 'false'
+          fetch('/lf-message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
+            body: JSON.stringify({
+              content: { name: ownedTeam.value, pos: posSelect.value, rank: rankSelect.value },
+              type: 'lfp',
+            })
+          })
+        }
+      })
     }
-    for (let i = 0; i < lftSendBtn.parentNode.getElementsByTagName('select').length; i++) {
+    
+    const lftSendBtn = document.getElementById('lftSend')
+    let posSelectT, rankSelectT
+    if (lftSendBtn) {
+      posSelectT = lftSendBtn.parentNode.getElementsByTagName('select')[0]
+      rankSelectT = lftSendBtn.parentNode.getElementsByTagName('select')[1]
+      for (let i = 0; i < lftSendBtn.parentNode.getElementsByTagName('select').length; i++) {
         lftSendBtn.parentNode.getElementsByClassName('select-selected')[i].addEventListener('click', () => {
-            if(canSend.value === 'true' && posSelectT.value !== 'null' && rankSelectT.value !== 'null') {
-                lftSendBtn.classList.add('active-btn')
-            }
-        })        
-    }
-    lfpSendBtn.addEventListener('click', function(e) {
-        if(canSend.value === 'true' && teamSelect.value !== 'null' && posSelect.value !== 'null' && rankSelect.value !== 'null'){
-            lftSendBtn.classList.remove('active-btn')
-            lfpSendBtn.classList.remove('active-btn')
-            canSend.value = 'false'
-            fetch('/lf-message', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
-                body: JSON.stringify({
-                    content: { name: teamSelect.value, pos: posSelect.value, rank: rankSelect.value },
-                    type: 'lfp',
-                })
-            })
-        }
-    })
-    lftSendBtn.addEventListener('click', function(e) {
+          if(canSend.value === 'true' && posSelectT.value !== 'null' && rankSelectT.value !== 'null') {
+            lftSendBtn.classList.add('active-btn')
+          }
+        })
+      }
+      lftSendBtn.addEventListener('click', function(e) {
         if(canSend.value === 'true' && posSelectT.value !== 'null' && rankSelectT.value !== 'null'){
-            lftSendBtn.classList.remove('active-btn')
-            lfpSendBtn.classList.remove('active-btn')
-            canSend.value = 'false'
-            fetch('/lf-message', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
-                body: JSON.stringify({
-                    content: { name: undefined, pos: posSelectT.value, rank: rankSelectT.value },
-                    type: 'lft',
-                })
+          lftSendBtn.classList.remove('active-btn')
+          lfpSendBtn.classList.remove('active-btn')
+          canSend.value = 'false'
+          fetch('/lf-message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
+            body: JSON.stringify({
+              content: { name: undefined, pos: posSelectT.value, rank: rankSelectT.value },
+              type: 'lft',
             })
+          })
         }
-    })
+      })
+    }
     fetch('/lf-messages', {
         method: 'GET',
     }).then(res => res.json()).then(data => {
@@ -66,46 +72,47 @@ window.addEventListener('load', () => {
             addMessage(data.messages[i])
         }
     })
-})
-
-socket.on('lf-message', message => {
-    addMessage(message)
-})
-
-function addMessage(message){
-    const type = message.type
-    const pos = message.content.split(' ')[0]
-    const rank = message.content.split(' ')[1]
-    const sender = message.sender
-    if(type === 'lfp') {
-        lfpDiv.insertAdjacentHTML( 'afterbegin', `<a href="#" class="team">
-						<div class="team-name">
-							<p>${sender.name}</p>
-						</div>
-						<div class="more-of-team">
-							<div class="player-rol">
-								<p>پوز ${pos}</p>
-							</div>
-							<div class="player-rank">
-								<img src="img/${rank}_medal.webp" alt="" />
-							</div>
-						</div>
-					</a>`)
-    } else {
-        lftDiv.insertAdjacentHTML( 'afterbegin', `<a href="#" class="player">
-						<div class="player-name">
-							<p>${sender.name}</p>
-						</div>
-						<div class="more-of-player">
-							<div class="rol">
-								<p>پوز ${pos}</p>
-							</div>
-							<div class="rank">
-								<img src="img/${rank}_medal.webp" alt="" />
-							</div>
-						</div>
-					</a>` )
-    }
+  })
+  
+  socket.on('lf-message', message => {
+      addMessage(message)
+  })
+  
+  function addMessage(message){
+      const type = message.type
+      const pos = message.content.split(' ')[0]
+      const rank = message.content.split(' ')[1]
+      const sender = message.sender
+      if(type === 'lfp') {
+          lfpDiv.insertAdjacentHTML( 'afterbegin', `<a href="/team/${sender.userId}" class="team">
+              <div class="team-name">
+                <p>${sender.name}</p>
+              </div>
+              <div class="more-of-team">
+                <div class="player-rol">
+                  <p>پوز ${pos}</p>
+                </div>
+                <div class="player-rank">
+                  <img src="img/${rank}_medal.webp" alt="" />
+                </div>
+              </div>
+            </a>`)
+      } else {
+          lftDiv.insertAdjacentHTML( 'afterbegin', `<a href="/player/${sender.userId}" class="player">
+              <div class="player-name">
+                <p>${sender.name}</p>
+              </div>
+              <div class="more-of-player">
+                <div class="rol">
+                  <p>پوز ${pos}</p>
+                </div>
+                <div class="rank">
+                  <img src="img/${rank}_medal.webp" alt="" />
+                </div>
+              </div>
+            </a>` )
+      }
+  }
 }
 
 // Slider picture change
@@ -173,6 +180,7 @@ for (let i = 0; i < customSelects.length; i++) {
       this.classList.toggle("select-arrow-active");
     });
 }
+
 function closeAllSelect(elmnt) {
   /*a function that will close all select boxes in the document,
   except the current select box:*/

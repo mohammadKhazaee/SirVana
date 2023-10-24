@@ -13,6 +13,7 @@
 		<link rel="stylesheet" href="<%= path %>css/dashboard.css" />
 	</head>
 	<body>
+		<input type="hidden" name="userId" value="<%= user._id %>">
 		<div class="container" style='background-image: url(<%= path %>img/dashboard-bg.jpg)'>
 			<div class="container2">
 				<a href="/" class="exit"><img src="<%= path %>img/shortcut icon.png"></a>
@@ -30,7 +31,7 @@
 						<input type="text" name="name" value="<%= user.name %>" disabled dir="ltr" />
 						<div class="topblock__team">
 							<span><%= user.createdAt %></span>
-							<% if(user.ownedTeam){ %><span><%= user.ownedTeam.name %></span><% } %>
+							<% if(user.ownedTeam){ %><a href="/team/<%= user.ownedTeam.teamId %>"><%= user.ownedTeam.name %></a><% } %>
 						</div>
 					</div>
 				</div>

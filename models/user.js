@@ -224,12 +224,11 @@ userSchema.methods.sendFeed = function (feedContent) {
 		sendAt: add(new Date(), { hours: 3, minutes: 30 }),
 	}
 	if (this.feeds) {
-		updatedFeeds = [...this.feeds, newFeed]
+		updatedFeeds = [newFeed, ...this.feeds]
 	} else {
 		updatedFeeds = [newFeed]
 	}
 	this.feeds = updatedFeeds
-	console.log(this.feeds)
 	// return
 	return this.save()
 }
@@ -242,8 +241,7 @@ userSchema.methods.sendFeedComment = function (commentContent, receiver, feedId)
 	const updatedFeeds = [
 		...receiver.feeds.slice(0, feedIndex),
 		{
-			content: receiver.feeds[feedIndex].content,
-			sentAt: receiver.feeds[feedIndex].sendAt,
+			...receiver.feeds[feedIndex]._doc,
 			comments: [
 				...receiver.feeds[feedIndex].comments,
 				{

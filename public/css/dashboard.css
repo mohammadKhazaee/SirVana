@@ -189,11 +189,11 @@ body {
 	justify-content: flex-end;
 	background-color: rgba(0, 0, 0, 0.6);
 }
-.topblock__team span {
+.topblock__team span, .topblock__team a{
 	font: bold 1.5rem 'Lato', sans-serif;
 	color: #02fa0a;
 }
-.topblock__team span:first-child {
+.topblock__team span:first-child, .topblock__team a:first-child {
 	margin-left: 30rem;
 }
 /* -------------------------------------- */

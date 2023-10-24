@@ -42,8 +42,8 @@ exports.getIndex = async (req, res, next) => {
 	res.render('index', {
 		pageTitle: 'SirVana',
 		user: req.user
-			? { userName: req.user.name, teams: [req.user.ownedTeam, ...req.user.teams] }
-			: { userName: '', teams: [] },
+			? { userName: req.user.name, ownedTeam: req.user.ownedTeam.name }
+			: { userName: '', ownedTeam: '' },
 		tournaments: modifiedTournaments,
 		canSend: canSend,
 	})
@@ -657,7 +657,7 @@ exports.postLfMessages = async (req, res, next) => {
 		const recievedMsg = req.body
 		let message
 		if (recievedMsg.type === 'lfp') {
-			const sender = req.user.teams.find((team) => team.name === recievedMsg.content.name)
+			const sender = req.user.ownedTeam
 			message = new Message({
 				sender: { userId: sender.teamId, name: recievedMsg.content.name },
 				content: `${recievedMsg.content.pos} ${recievedMsg.content.rank}`,

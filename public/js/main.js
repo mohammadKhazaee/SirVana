@@ -136,3 +136,12 @@ if(isIndex) liveSearchInput.addEventListener('keyup', () => {
         if (watchAllBtn) watchAllBtn.remove()
     }
 })
+
+// Alert box close btn
+const alertDiv = document.getElementsByClassName('alert')[0]
+
+if(alertDiv) {
+    alertDiv.children[0].addEventListener('click', function() {
+        alertDiv.style.visibility = 'hidden'
+    })
+}

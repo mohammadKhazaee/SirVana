@@ -34,58 +34,96 @@ if (editProfile) {
 		}
 	})
 	editProfile.addEventListener('click', () => {
-		const inputArray = [...inputEles]
-		if (!inputEles[0].disabled) {
+		const inputArray = [...inputEles]		
+		if (detailsEle.style.display === 'none') {
+			editProfile.children[1].innerText =
+				editProfile.children[1].innerText === 'ثبت تغییرات' ? 'تغییر پروفایل' : 'ثبت تغییرات'
+			textEle.disabled = !textEle.disabled
+			textEle.classList.toggle('editable')
+			detailsEle.removeAttribute('open')
+			detailsEle.style.display = 'block'
+			posP.style.display = 'none'
+			profileAvatarDiv.children[0].style.display = 'none'
+			profileAvatarDiv.children[1].style.display = 'block'
+			inputArray.forEach((inputEle) => {
+				if (inputEle.name === 'name' || inputEle.name === 'discordId' || inputEle.name === 'dota2Id' || inputEle.name === 'mmr' || inputEle.name === 'lftCheck')
+					inputEle.disabled = !inputEle.disabled
+				if (inputEle.name === 'name' || inputEle.name === 'discordId' || inputEle.name === 'dota2Id' || inputEle.name === 'mmr')
+					inputEle.classList.toggle('editable')
+				if (inputEle.name === 'lftCheck')
+					lftCheckEle.style.cursor = lftCheckEle.style.cursor === 'default' ? 'pointer' : 'default'
+			})
+		} else {
 			const pos = inputArray
 			.filter((input) => input.checked && input.name !== 'lftCheck')
 			.map((input) => input.value)
 			.join('-')
 			const formData = new FormData()
 			formData.append('name', nameEle.value)
-			formData.append('pos', pos)
-			formData.append('rank', mmrEle.value)
 			formData.append('discordId', discordIdEle.value)
 			formData.append('dota2Id', dota2IdEle.value)
-			formData.append('lft', lftCheckEle.checked ? true : false)
 			formData.append('bio', textEle.value)
+			formData.append('pos', pos)
+			formData.append('rank', mmrEle.value)
+			formData.append('lft', lftCheckEle.checked ? true : false)
 			formData.append('image', imageEle.files[0])
 			fetch('/dashboard/edit-profile', {
 				method: 'POST',
 				headers: { 'csrf-token': csrf.value },
 				body: formData,
-			})
-			.then((res) => res.json())
-			.then((data) => {
-				medalImg.src = `img/${data.medal}_medal.webp`
-			})
-			.catch((err) => console.log(err))
+			}).then(res => {
+				if (res.status === 200 || res.status === 422 || res.status === 500 ) return res.json()
+			}).then(data => {
+				const alertEle = document.querySelector('.alert')
+				alertEle.children[1].innerHTML = `
+				<div class="alert-box__top">
+					<p></p>
+				</div>`
+				alertEle.style.visibility = 'visible'
+				alertEle.style.backgroundColor = '#FF2F3D'
+				alertEle.children[0].style.backgroundColor = '#FF2F3D'
+				alertEle.children[1].children[0].children[0].innerHTML = 'عملیات انجام نشد. لطفا بعدا امتحان کنید !'
+				if(data.status === '422') {
+					alertEle.children[1].children[0].children[0].innerHTML = 'اطلاعات وارد شده اشتباه بود !'
+					const nameError = data.errors.find((error) => error.param === 'name')
+					const lftError = data.errors.find((error) => error.param === 'lft')
+					const rankError = data.errors.find((error) => error.param === 'rank')
+					const dota2IdError = data.errors.find((error) => error.param === 'dota2Id')
+					if (nameError) alertEle.children[1].children[0].insertAdjacentHTML('afterend', `<p>${nameError.msg}</p>`)
+					if (lftError) alertEle.children[1].children[0].insertAdjacentHTML('afterend', `<p>${lftError.msg}</p>`)
+					if (rankError) alertEle.children[1].children[0].insertAdjacentHTML('afterend', `<p>${rankError.msg}</p>`)
+					if (dota2IdError) alertEle.children[1].children[0].insertAdjacentHTML('afterend', `<p>${dota2IdError.msg}</p>`)
+					return
+				}
+				if(data.status === '200') {
+					alertEle.children[1].children[0].children[0].innerHTML = 'ویرایش اطلاعات تیم با موفقیت انجام شد‌ !'
+					alertEle.style.backgroundColor = '#3DFF2F'
+					alertEle.children[0].style.backgroundColor = '#3DFF2F'
+
+					editProfile.children[1].innerText =
+						editProfile.children[1].innerText === 'ثبت تغییرات' ? 'تغییر پروفایل' : 'ثبت تغییرات'
+					textEle.disabled = !textEle.disabled
+					textEle.classList.toggle('editable')
+					detailsEle.removeAttribute('open')
+					detailsEle.style.display = 'none'
+					posP.style.display = 'block'
+					profileAvatarDiv.children[0].style.display = 'block'
+					profileAvatarDiv.children[1].style.display = 'none'
+					inputArray.forEach((inputEle) => {
+						if (inputEle.name === 'name' || inputEle.name === 'discordId' || inputEle.name === 'dota2Id' || inputEle.name === 'mmr' || inputEle.name === 'lftCheck')
+							inputEle.disabled = !inputEle.disabled
+						if (inputEle.name === 'name' || inputEle.name === 'discordId' || inputEle.name === 'dota2Id' || inputEle.name === 'mmr')
+							inputEle.classList.toggle('editable')
+						if (inputEle.name === 'lftCheck')
+							lftCheckEle.style.cursor = lftCheckEle.style.cursor === 'default' ? 'pointer' : 'default'
+					})
+					medalImg.src = `img/${data.medal}_medal.webp`
+					imageEle.parentElement.previousElementSibling.src = data.imageUrl
+					return
+				}
+			}).catch(err => console.log(err))
 		}
-		editProfile.children[1].innerText =
-		editProfile.children[1].innerText === 'ثبت تغییرات' ? 'تغییر پروفایل' : 'ثبت تغییرات'
-		textEle.disabled = !textEle.disabled
-		textEle.classList.toggle('editable')
-		detailsEle.removeAttribute('open')
-		
-		if (detailsEle.style.display === 'none') {
-			detailsEle.style.display = 'block'
-			posP.style.display = 'none'
-			profileAvatarDiv.children[0].style.display = 'none'
-			profileAvatarDiv.children[1].style.display = 'block'
-		} else {
-			detailsEle.style.display = 'none'
-			posP.style.display = 'block'
-			profileAvatarDiv.children[0].style.display = 'block'
-			profileAvatarDiv.children[1].style.display = 'none'
-		}
-		inputArray.forEach((inputEle) => {
-			if (inputEle.name === 'name' || inputEle.name === 'discordId' || inputEle.name === 'dota2Id' || inputEle.name === 'mmr' || inputEle.name === 'lftCheck')
-			inputEle.disabled = !inputEle.disabled
-		if (inputEle.name === 'name' || inputEle.name === 'discordId' || inputEle.name === 'dota2Id' || inputEle.name === 'mmr')
-		inputEle.classList.toggle('editable')
-	if (inputEle.name === 'lftCheck')
-	lftCheckEle.style.cursor = lftCheckEle.style.cursor === 'default' ? 'pointer' : 'default'
-})
-})
+	})
 }
 
 // Send feed

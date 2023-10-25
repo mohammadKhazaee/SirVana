@@ -18,7 +18,7 @@ Router.get('/notif', dashboardController.getDashboardNotif)
 Router.get('/settings', dashboardController.getDashboardSettings)
 
 // /dashboard/edit-profile => POST
-Router.post('/edit-profile', dashboardController.postEditProfile)
+Router.post('/edit-profile', validator.postEditProfile, dashboardController.postEditProfile)
 
 // /dashboard/send-feed => POST
 Router.post('/send-feed', dashboardController.postSendFeed)

@@ -42,7 +42,8 @@
 							<label for="name">اسم تورنومنت‌ :</label>
 							<input <% if(oldInput){ %> value="<%= oldInput.name %>"<% } %> type="text" id="name" name="name" autofocus />
 							<% if (!isNameValid) { %>
-								<span class="wrong-input-alrt">* اسم تورنومنتت یادت رفت</span>
+								<span class="wrong-input-alrt"><%= nameMessage %></span>
+								<!-- <span class="wrong-input-alrt">* اسم تورنومنتت یادت رفت</span> -->
 							<% } %>
 						</div>
 						<div class="mmr-control">
@@ -88,7 +89,8 @@
 								</div>
 							</div>
 							<% if (!isRankValid) { %>
-								<span class="wrong-input-alrt"> * رنک تورنومنتت رو انتخاب نکردی!</span>
+								<span class="wrong-input-alrt"><%= rankMessage %></span>
+								<!-- <span class="wrong-input-alrt"> * رنک تورنومنتت رو انتخاب نکردی!</span> -->
 							<% } %>
 						</div>
 						<div class="bracket"></div>
@@ -96,14 +98,16 @@
 							<label for="date">تاریخ شروع :</label>
 							<input <% if(oldInput){ %> value="<%= oldInput.startDate %>"<% } %> type="datetime-local" name="startDate" id="date" autocomplete="off" />
 							<% if (!isDateValid) { %>
-								<span class="wrong-input-alrt">* تورنومنتت سال بعد شروع میشه مگه‌؟</span>
+								<span class="wrong-input-alrt"><%= dateMessage %></span>
+								<!-- <span class="wrong-input-alrt">* تورنومنتت سال بعد شروع میشه مگه‌؟</span> -->
 							<% } %>
 						</div>
 						<div class="prize">
 							<label for="prize">جایزه :</label>
 							<input <% if(oldInput){ %> value="<%= oldInput.prize %>"<% } %> type="number" name="prize" id="prize" />
 							<% if (!isPrizeValid) { %>
-								<span class="wrong-input-alrt">* مسابقه بدون جایزه حال نمیده!</span>
+								<span class="wrong-input-alrt"><%= prizeMessage %></span>
+								<!-- <span class="wrong-input-alrt">* مسابقه بدون جایزه حال نمیده!</span> -->
 							<% } %>
 						</div>
 					</div>

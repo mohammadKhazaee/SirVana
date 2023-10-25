@@ -23,7 +23,16 @@
 			<div class="dark-box"></div>
 		</div>
 		<!--  -->
-
+		<div style="visibility: hidden;" class="alert">
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+			</svg>
+			<div class="alert-box">
+				<div class="alert-box__top">
+					<p></p>
+				</div>
+			</div>
+		</div>
 		<!-- filter box -->
 		<div class="team-box">
 			<div class="shadow-box">
@@ -41,7 +50,7 @@
 						<div class="info-header__image">
 							<img src="../<%= team.imageUrl %>" />
 							<div class="image-upload" style="display: none;">
-								<input type="file">
+								<input accept="image/*" type="file">
 								<a><i class="bx bx-plus"></i></a>
 							</div>
 						</div>

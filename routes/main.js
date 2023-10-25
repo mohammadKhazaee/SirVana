@@ -19,7 +19,7 @@ Router.get('/team/:teamId', mainController.getTeam)
 Router.post('/team', validator.postTeam, mainController.postTeam)
 
 // /edit-team => POST
-Router.post('/edit-team', mainController.postEditTeam)
+Router.post('/edit-team', validator.postEditTeam, mainController.postEditTeam)
 
 // /team-chat => POST
 Router.post('/team-chat', mainController.postTeamChat)
@@ -34,7 +34,7 @@ Router.get('/tournament/:tournamentId', mainController.getTournament)
 Router.post('/tournament', validator.postTournament, mainController.postTournament)
 
 // /edit-tournament => POST
-Router.post('/edit-tournament', mainController.postEditTournament)
+Router.post('/edit-tournament', validator.postEditTournament, mainController.postEditTournament)
 
 // /players => GET
 Router.get('/players', validator.getPlayers, mainController.getPlayers)

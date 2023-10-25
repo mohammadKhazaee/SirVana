@@ -169,11 +169,9 @@ exports.postTeam = async (req, res, next) => {
 			}
 			const nameError = errors.find((error) => error.param === 'name')
 			const nameTagError = errors.find((error) => error.param === 'nameTag')
-			const descError = errors.find((error) => error.param === 'description')
-			let nameTagMessage, nameMessage, descMessage
+			let nameTagMessage, nameMessage
 			if (nameError) nameMessage = nameError.msg
 			if (nameTagError) nameTagMessage = nameTagError.msg
-			if (descError) descMessage = descError.msg
 
 			const teams = await Team.find().collation({ locale: 'en' }).limit(TEAM_PER_PAGE)
 			const renderTeams = teams.map((team) => ({ ...team._doc, avgMMR: Math.floor(team.avgMMR) }))
@@ -188,7 +186,9 @@ exports.postTeam = async (req, res, next) => {
 				openModal: true,
 				isNameValid: !nameError,
 				isNameTagValid: !nameTagError,
-				isDescValid: !descError,
+				nameTagMessage: nameTagMessage,
+				nameMessage: nameMessage,
+				page: { multiple: false },
 			})
 		}
 		const imageUrl = req.file ? req.file.path.replace('\\', '/') : 'img/default-team-picture.jpg'
@@ -223,17 +223,25 @@ exports.postTeam = async (req, res, next) => {
 
 exports.postEditTeam = async (req, res, next) => {
 	try {
+		const errors = validationResult(req).array()
+		if (errors.length > 0) {
+			return res.status(422).send({ status: '422', errors: errors })
+		}
 		const name = req.body.name
 		const nameTag = req.body.nameTag
 		const description = req.body.description
 		const membersPos = req.body.membersPos
+		const lfp = req.lfp
 		const imageUrl = req.file ? req.file.path.replace('\\', '/') : null
 		const teamId = req.body.teamId
 		const team = await Team.findById(teamId)
+
 		team.name = name
+		team.lfp = lfp
 		team.nameTag = nameTag
 		team.description = description
 		team.members = team.members.map((member, i) => ({ ...member._doc, pos: membersPos[2 * i] }))
+
 		let updateOwnedTeam = { 'teams.$.name': name, 'ownedTeam.name': name },
 			updateObj = { 'teams.$[docX].name': name }
 		if (imageUrl) {
@@ -266,10 +274,10 @@ exports.postEditTeam = async (req, res, next) => {
 				],
 			}
 		)
-		res.sendStatus(200)
+		res.status(200).send({ status: '200', imageUrl: team.imageUrl })
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
-		next(error)
+		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })
 	}
 }
 
@@ -448,11 +456,27 @@ exports.postTournament = async (req, res, next) => {
 		const tournaments = await Tournament.find()
 			.collation({ locale: 'en' })
 			.limit(TOURNAMENT_PER_PAGE)
+		const modifiedTournaments = tournaments.map((tournament) => {
+			const dateTime = tournament.startDate
+				.toISOString()
+				.slice(0, 16)
+				.replaceAll('-', '/')
+				.split('T')
+			const { _id, name, minMMR, maxMMR, imageUrl } = tournament
+			return {
+				_id: _id,
+				name,
+				startDate: `${dateTime[1]} - ${dateTime[0]}`,
+				minMMR: minMMR.split('.')[1],
+				maxMMR: maxMMR.split('.')[1],
+				imageUrl: imageUrl,
+			}
+		})
 		return res.status(422).render('tournaments', {
 			pageTitle: 'SirVana · مسابقات',
 			path: '/tournaments',
 			oldInput: oldInput,
-			tournaments: tournaments,
+			tournaments: modifiedTournaments,
 			marginLeft: '-4%',
 			rankFilter: '0',
 			rankIcon: 'Herald',
@@ -463,12 +487,15 @@ exports.postTournament = async (req, res, next) => {
 			isRankValid: !(!freeMMRBox && rankError),
 			isDateValid: !dateError,
 			isPrizeValid: !prizeError,
+			prizeMessage: prizeMessage,
+			nameMessage: nameMessage,
+			dateMessage: dateMessage,
+			rankMessage: rankMessage,
+			page: { multiple: false },
 		})
 	}
 	try {
-		const imageUrl = req.file
-			? '/' + req.file.path.replace('\\', '/').slice(1)
-			: 'img/tourcards.png'
+		const imageUrl = req.file ? req.file.path.replace('\\', '/') : 'img/tourcards.png'
 
 		const tournament = new Tournament({
 			name: name,
@@ -496,6 +523,10 @@ exports.postTournament = async (req, res, next) => {
 
 exports.postEditTournament = async (req, res, next) => {
 	try {
+		const errors = validationResult(req).array()
+		if (errors.length > 0) {
+			return res.status(422).send({ status: '422', errors: errors })
+		}
 		const name = req.body.name
 		const bo3 = req.body.bo3 === 'true'
 		const startDate = req.body.startDate
@@ -537,10 +568,10 @@ exports.postEditTournament = async (req, res, next) => {
 			{ 'tournaments.tournamentId': req.body.tournamentId },
 			{ $set: updateObj }
 		)
-		res.sendStatus(200)
+		res.status(200).send({ status: '200', imageUrl: tournament.imageUrl })
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
-		next(error)
+		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })
 	}
 }
 

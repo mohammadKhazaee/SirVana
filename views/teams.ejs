@@ -39,12 +39,14 @@
                             <label for="name">اسم کامل تیم :</label>
                             <input <% if(oldInput){ %> value="<%= oldInput.name %>"<% } %> type="text" name="name" id="name" autofocus required />
                             <% if (!isNameValid) { %>
-								<span class="wrong-input-alrt">* اسم تیم یادت رفت</span>
+								<span class="wrong-input-alrt"><%= nameMessage %></span>
+								<!-- <span class="wrong-input-alrt">* اسم تیم یادت رفت</span> -->
 							<% } %>
                             <label for="tag">تگ تیم :</label>
                             <input <% if(oldInput){ %> value="<%= oldInput.nameTag %>"<% } %> type="text" name="nameTag" id="tag" placeholder="تگ مخفف اسم تیم است ." required/>
                             <% if (!isNameTagValid) { %>
-                                <span class="wrong-input-alrt">* تگ تیم یادت رفت</span>
+                                <span class="wrong-input-alrt"><%= nameTagMessage %></span>
+                                <!-- <span class="wrong-input-alrt">* تگ تیم یادت رفت</span> -->
 							<% } %>
                         </div>
                     </div>

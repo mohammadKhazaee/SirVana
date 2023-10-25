@@ -82,7 +82,6 @@ exports.postSignup = [
 		.isNumeric()
 		.isLength(9),
 	body('discordId').trim().escape(),
-	body('tos').trim().escape(),
 ]
 
 exports.postResetPass = [
@@ -124,6 +123,41 @@ exports.postNewPass = [
 		.withMessage('Please enter a password!')
 		.isLength({ min: 8, max: 32 })
 		.withMessage('Password should be 8 to 32 characters!'),
+]
+
+exports.postEditProfile = [
+	body('name')
+		.trim()
+		.escape()
+		.notEmpty()
+		.withMessage('please enter your name!')
+		.isLength({ min: 3 })
+		.withMessage('name should be atleast 3 characters!'),
+	body('dota2Id', 'Wrong dota2 id is a 9-digit number!')
+		.trim()
+		.escape()
+		.notEmpty()
+		.withMessage('Please enter your dota2 id!')
+		.isNumeric()
+		.isLength(9),
+	body('rank')
+		.trim()
+		.escape()
+		.notEmpty()
+		.withMessage('rank was empty!')
+		.isInt({ min: 0, max: 13000 })
+		.withMessage('rank is a number less than 13k!'),
+	body('lft')
+		.trim()
+		.custom((lfp, { req }) => {
+			if (lfp === 'true' || lfp === 'false') {
+				req.lfp = lfp === 'true'
+				return true
+			}
+			throw 'Wrong lft input!'
+		}),
+	body('discordId').trim().escape(),
+	body('bio').trim().escape(),
 ]
 
 exports.getTeams = [
@@ -169,13 +203,37 @@ exports.postTeam = [
 		.withMessage('name tag should be 2 or 3 characters')
 		.isAlpha('en-US')
 		.withMessage('name tag should only contain english letters'),
-	body('description')
+	body('description').trim(),
+]
+
+exports.postEditTeam = [
+	body('name')
 		.trim()
-		.custom((description, { req }) => {
-			if (description.match(descRegex)[0] !== description)
-				throw "description can't contain < or > character"
+		.notEmpty()
+		.withMessage('Enter name please!')
+		.custom((name, { req }) => {
+			if (name.match(nameRegex)[0] !== name)
+				throw 'name should only contain english letters or numbers'
 			return true
 		}),
+	body('nameTag')
+		.trim()
+		.notEmpty()
+		.withMessage('Enter you team tag please!')
+		.isLength({ min: 2, max: 3 })
+		.withMessage('name tag should be 2 or 3 characters')
+		.isAlpha('en-US')
+		.withMessage('name tag should only contain english letters'),
+	body('lfp')
+		.trim()
+		.custom((lfp, { req }) => {
+			if (lfp === 'true' || lfp === 'false') {
+				req.lfp = lfp === 'true'
+				return true
+			}
+			throw 'Wrong lfp input!'
+		}),
+	body('description').trim(),
 ]
 
 exports.getTournaments = [
@@ -241,6 +299,65 @@ exports.postTournament = [
 		.withMessage('Enter prize please!')
 		.isNumeric()
 		.withMessage('prize should only contain number'),
+	body('description').trim().escape(),
+]
+
+exports.postEditTournament = [
+	body('name')
+		.trim()
+		.escape()
+		.notEmpty()
+		.withMessage('Enter name please!')
+		.custom((name, { req }) => {
+			if (name.match(nameRegex)[0] !== name)
+				throw 'name should only contain english letters or numbers'
+			return true
+		}),
+	body('minMMR')
+		.trim()
+		.escape()
+		.custom((minMMR, { req }) => {
+			if (minMMR === '') throw 'please choose a min mmr!'
+			req.minMMR = rank.giveNumberedMedal(minMMR)
+			if (req.minMMR) return true
+			throw 'Wrong min mmr!'
+		}),
+	body('maxMMR')
+		.trim()
+		.escape()
+		.custom((maxMMR, { req }) => {
+			if (maxMMR === '') throw 'please choose a max mmr!'
+			req.maxMMR = rank.giveNumberedMedal(maxMMR)
+			if (!req.maxMMR) throw 'Wrong max mmr!'
+			if (req.maxMMR.split('.')[0] < req.minMMR.split('.')[0]) {
+				throw 'max mmr should be greater than min mmr!'
+			} else return true
+		}),
+	body('bo3').custom((boRadio, { req }) => {
+		if (boRadio === 'true' || boRadio === 'false') return true
+		throw 'unexpected value!'
+	}),
+	body('startDate')
+		.notEmpty()
+		.withMessage('Choose a date please!')
+		.isISO8601()
+		.withMessage('date is in wrong format'),
+	body('prize')
+		.trim()
+		.escape()
+		.notEmpty()
+		.withMessage('Enter prize please!')
+		.isNumeric()
+		.withMessage('prize should only contain number'),
+	body('teamCount')
+		.trim()
+		.escape()
+		.notEmpty()
+		.withMessage('Enter teamCount please!')
+		.isNumeric()
+		.withMessage('teamCount should only contain number')
+		.isInt({ min: 4, max: 64 })
+		.withMessage('tournament participants should be between 4 and 64 team'),
 	body('description').trim().escape(),
 ]
 

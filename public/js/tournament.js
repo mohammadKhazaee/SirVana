@@ -189,18 +189,6 @@ if(editTour) {
     }).catch(err => console.log(err))
   })
   editTour.addEventListener('click', () => {
-    nameInput.classList.toggle('editable')
-    nameInput.disabled = !nameInput.disabled
-    descriptionText.classList.toggle('editable')
-    descriptionText.disabled = !descriptionText.disabled
-    prizeInput.classList.toggle('editable')
-    prizeInput.disabled = !prizeInput.disabled
-    boRadios[0].disabled = !boRadios[0].disabled
-    boRadios[1].disabled = !boRadios[1].disabled
-    ;[...gameEles].forEach(gameEle => {
-      gameEle.children[2].children[0].disabled = !gameEle.children[2].children[0].disabled
-      gameEle.children[2].children[0].classList.toggle('editable')
-    })
     const filteredGames = [...document.getElementsByClassName('details')]
       .filter(gameEle => {
         const validGame = gameEle.children[0].children[0].children[1].getAttribute('href') && 
@@ -209,7 +197,7 @@ if(editTour) {
         if (!validGame) gameEle.remove()
         return validGame
       })
-    if (nameInput.classList.contains('editable')) {
+    if (!nameInput.classList.contains('editable')) {
       // Edit mode here
       mmrdrops.style.display = 'flex'
       mmrMedals.style.display = 'none'
@@ -226,18 +214,20 @@ if(editTour) {
       selectTeamPluses.forEach(svgBtn => svgBtn.style.display = 'block')
       removeTeamBtns.forEach(svgBtn => svgBtn.style.display = 'block')
       removeGameBtns.forEach(svgBtn => svgBtn.style.display = 'block')
+      nameInput.classList.toggle('editable')
+      nameInput.disabled = !nameInput.disabled
+      descriptionText.classList.toggle('editable')
+      descriptionText.disabled = !descriptionText.disabled
+      prizeInput.classList.toggle('editable')
+      prizeInput.disabled = !prizeInput.disabled
+      boRadios[0].disabled = !boRadios[0].disabled
+      boRadios[1].disabled = !boRadios[1].disabled
+      ;[...gameEles].forEach(gameEle => {
+        gameEle.children[2].children[0].disabled = !gameEle.children[2].children[0].disabled
+        gameEle.children[2].children[0].classList.toggle('editable')
+      })
 		} else {
-      mmrdrops.style.display = 'none'
-      mmrMedals.style.display = 'flex'
-      boRadios[0].nextElementSibling.style.cursor = 'default'
-      boRadios[1].nextElementSibling.style.cursor = 'default'
-      imageContainer.children[0].style.display = 'block'
-			imageContainer.children[1].style.display = 'none'
-      maxEle.style.display = 'none'
       maxEle.previousElementSibling.children[0].innerHTML = maxEle.children[1].value
-      maxEle.previousElementSibling.style.display = 'block'
-			dateDiv.children[1].style.display = 'block'
-			dateDiv.children[2].style.display = 'none'
       if (dateDiv.children[2].value !== '') {
         const newDate = new Date(dateDiv.children[2].value).toLocaleString('en-GB', {
           year: "numeric",
@@ -248,10 +238,6 @@ if(editTour) {
         })
         dateDiv.children[1].innerHTML = newDate.replaceAll(' ', '.').replaceAll(',.', ' - ')
       }
-			addGamePlus.style.display = 'none'
-      selectTeamPluses.forEach(svgBtn => svgBtn.style.display = 'none')
-      removeTeamBtns.forEach(svgBtn => svgBtn.style.display = 'none')
-      removeGameBtns.forEach(svgBtn => svgBtn.style.display = 'none')
       const games = filteredGames.map(gameEle => {
         const game = {}
         game.team1 = { 
@@ -282,7 +268,71 @@ if(editTour) {
 				method: 'POST',
 				headers: { 'csrf-token': csrf.value },
 				body: formData,
-			})
+			}).then(res => {
+        if (res.status === 200 || res.status === 422 || res.status === 500) return res.json()
+      }).then(data => {
+        const alertEle = document.querySelector('.alert')
+        alertEle.children[1].innerHTML = `
+        <div class="alert-box__top">
+					<p></p>
+				</div>`
+        alertEle.style.visibility = 'visible'
+        alertEle.style.backgroundColor = '#FF2F3D'
+        alertEle.children[0].style.backgroundColor = '#FF2F3D'
+        alertEle.children[1].children[0].children[0].innerHTML = 'عملیات انجام نشد. لطفا بعدا امتحان کنید !'
+        if(data.status === '422') {
+          alertEle.children[1].children[0].children[0].innerHTML = 'اطلاعات وارد شده اشتباه بود !'
+          const nameError = data.errors.find((error) => error.param === 'name')
+          const startDateError = data.errors.find((error) => error.param === 'startDate')
+          const bo3Error = data.errors.find((error) => error.param === 'bo3')
+          const minMMRError = data.errors.find((error) => error.param === 'minMMR')
+          const maxMMRError = data.errors.find((error) => error.param === 'maxMMR')
+          const prizeError = data.errors.find((error) => error.param === 'prize')
+          const teamCountError = data.errors.find((error) => error.param === 'teamCount')
+          if (nameError) alertEle.children[1].children[0].insertAdjacentHTML('afterend', `<p>${nameError.msg}</p>`)
+          if (startDateError) alertEle.children[1].children[0].insertAdjacentHTML('afterend', `<p>${startDateError.msg}</p>`)
+          if (bo3Error) alertEle.children[1].children[0].insertAdjacentHTML('afterend', `<p>${bo3Error.msg}</p>`)
+          if (minMMRError) alertEle.children[1].children[0].insertAdjacentHTML('afterend', `<p>${minMMRError.msg}</p>`)
+          if (maxMMRError) alertEle.children[1].children[0].insertAdjacentHTML('afterend', `<p>${maxMMRError.msg}</p>`)
+          if (prizeError) alertEle.children[1].children[0].insertAdjacentHTML('afterend', `<p>${prizeError.msg}</p>`)
+          if (teamCountError) alertEle.children[1].children[0].insertAdjacentHTML('afterend', `<p>${teamCountError.msg}</p>`)
+          return
+        }
+        if(data.status === '200') {
+          alertEle.children[1].children[0].children[0].innerHTML = 'ویرایش اطلاعات مسابقه با موفقیت انجام شد‌ !'
+          alertEle.style.backgroundColor = '#3DFF2F'
+          alertEle.children[0].style.backgroundColor = '#3DFF2F'
+
+          mmrdrops.style.display = 'none'
+          mmrMedals.style.display = 'flex'
+          boRadios[0].nextElementSibling.style.cursor = 'default'
+          boRadios[1].nextElementSibling.style.cursor = 'default'
+          imageContainer.children[0].style.display = 'block'
+          imageContainer.children[1].style.display = 'none'
+          maxEle.style.display = 'none'
+          maxEle.previousElementSibling.style.display = 'block'
+          dateDiv.children[1].style.display = 'block'
+          dateDiv.children[2].style.display = 'none'
+          addGamePlus.style.display = 'none'
+          selectTeamPluses.forEach(svgBtn => svgBtn.style.display = 'none')
+          removeTeamBtns.forEach(svgBtn => svgBtn.style.display = 'none')
+          removeGameBtns.forEach(svgBtn => svgBtn.style.display = 'none')
+          nameInput.classList.toggle('editable')
+          nameInput.disabled = !nameInput.disabled
+          descriptionText.classList.toggle('editable')
+          descriptionText.disabled = !descriptionText.disabled
+          prizeInput.classList.toggle('editable')
+          prizeInput.disabled = !prizeInput.disabled
+          boRadios[0].disabled = !boRadios[0].disabled
+          boRadios[1].disabled = !boRadios[1].disabled
+          ;[...gameEles].forEach(gameEle => {
+            gameEle.children[2].children[0].disabled = !gameEle.children[2].children[0].disabled
+            gameEle.children[2].children[0].classList.toggle('editable')
+          })
+          imageContainer.children[0].src = '../'+data.imageUrl
+          return
+        }
+      }).catch(err => console.log(err))
 		}
   })
   // Remove team confirmation button

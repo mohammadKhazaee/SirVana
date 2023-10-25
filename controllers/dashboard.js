@@ -6,6 +6,7 @@ const Tournament = require('../models/tournament')
 const Socket = require('../models/socket')
 const rank = require('../utils/rank')
 const posUtil = require('../utils/pos')
+const fileHelper = require('../utils/file')
 const io = require('../socket')
 
 exports.getDashboard = async (req, res, next) => {
@@ -108,6 +109,10 @@ exports.getDashboardSettings = async (req, res, next) => {
 
 exports.postEditProfile = async (req, res, next) => {
 	try {
+		const errors = validationResult(req).array()
+		if (errors.length > 0) {
+			return res.status(422).send({ status: '422', errors: errors })
+		}
 		const name = req.body.name
 		const pos = posUtil.toArray(req.body.pos)
 		const inputRank = Number(req.body.rank)
@@ -117,7 +122,6 @@ exports.postEditProfile = async (req, res, next) => {
 		const lft = req.body.lft
 		const imageUrl = req.file ? req.file.path.replace('\\', '/') : null
 
-		req.user.imageUrl = imageUrl
 		req.user.name = name
 		req.user.pos = pos
 		req.user.mmr = inputRank
@@ -156,10 +160,12 @@ exports.postEditProfile = async (req, res, next) => {
 			{ arrayFilters: [{ 'docX.userId': req.user._id }] }
 		)
 		await Team.updateMany({ 'leader.userId': req.user._id }, { $set: { 'leader.name': name } })
-		res.status(200).send({ medal: rank.numberToMedal(inputRank) })
+		res
+			.status(200)
+			.send({ status: '200', medal: rank.numberToMedal(inputRank), imageUrl: req.user.imageUrl })
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
-		next(error)
+		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })
 	}
 }
 

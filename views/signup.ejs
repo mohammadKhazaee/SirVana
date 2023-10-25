@@ -31,14 +31,16 @@
 									<label for="name">نام :</label>
 									<input <% if(oldInput){ %> value="<%= oldInput.name %>"<% } %> type="text" name="name" required id="name"/>
 									<% if (!isNameValid) { %>
-										<span class="wrong-input-alrt"> * اسمتو پیشی خورد ؟ </span>
+										<span class="wrong-input-alrt"><%= nameMessage %></span>
+										<!-- <span class="wrong-input-alrt"> * اسمتو پیشی خورد ؟ </span> -->
 									<% } %>
 								</div>
 								<div class="signup-email">
 									<label for="signup-email">ایمیل :</label>
-									<input <% if(oldInput){ %> value="<%= oldInput.email2 %>"<% } %> type="email"
-									name="email" required id="signup-email"/> <% if (!isEmail2Valid) { %>
-									<span class="wrong-input-alrt">* ایمیل یادت رفت !</span>
+									<input <% if(oldInput){ %> value="<%= oldInput.email2 %>"<% } %> type="email" name="email" required id="signup-email"/>
+									<% if (!isEmail2Valid) { %>
+										<span class="wrong-input-alrt"><%= emailMessage %></span>
+										<!-- <span class="wrong-input-alrt">* ایمیل یادت رفت !</span> -->
 									<% } %>
 								</div>
 								<div class="need-password">
@@ -46,7 +48,8 @@
 									<input type="password" name="password" id="need-password" required />
 									<i class="bx bx-hide" id="icon"></i>
 									<% if (!isPassword2Valid) { %>
-									<span class="wrong-input-alrt"> * الو ؟ رمزت کو ؟! </span>
+										<span class="wrong-input-alrt"><%= passMessage %></span>
+										<!-- <span class="wrong-input-alrt"> * الو ؟ رمزت کو ؟! </span> -->
 									<% } %>
 								</div>
 							</div>
@@ -57,7 +60,8 @@
 									<input type="password" name="confirmPass" id="need-password2" required />
 									<i class="bx bx-hide" id="icon2"></i>
 									<% if (!isConfirmPassValid) { %>
-									<span class="wrong-input-alrt">* رمزو زدی . تکرارشم بزن !</span>
+										<span class="wrong-input-alrt"><%= confirmPassMessage %></span>
+									<!-- <span class="wrong-input-alrt">* رمزو زدی . تکرارشم بزن !</span> -->
 									<!-- <span class="wrong-input-alrt">* رمزهات یکی نیستن !</span> -->
 									<% } %>
 								</div>
@@ -66,13 +70,13 @@
 									<input <% if(oldInput){ %> value="<%= oldInput.dota2Id %>"<% } %> type="number"
 									name="dota2Id" id="dota-id" placeholder="برای ارتباط بهتر با تیم ها و پلیر ها"
 									required/> <% if (!isDota2IdValid) { %>
-									<span class="wrong-input-alrt"> * آیدی خیلی بدردت میخوره ! </span>
+										<span class="wrong-input-alrt"><%= dota2IdMessage %></span>
+									<!-- <span class="wrong-input-alrt"> * آیدی خیلی بدردت میخوره ! </span> -->
 									<% } %>
 								</div>
 								<div class="id2">
 									<label for="discord-id">آیدی دیسکورد :</label>
-									<input <% if(oldInput){ %> value="<%= oldInput.discordId %>"<% } %> type="text"
-									name="discordId" id="discord-id"/>
+									<input <% if(oldInput){ %> value="<%= oldInput.discordId %>"<% } %> type="text" name="discordId" id="discord-id"/>
 								</div>
 							</div>
 						</div>
@@ -98,7 +102,8 @@
 							<label for="email">ایمیل :</label>
 							<input type="text" <% if(oldInput){ %> value="<%= oldInput.email %>"<% } %>
 							name="email" id="email" /> <% if (!isEmailValid) { %>
-							<span class="wrong-input-alrt">* ایمیل یادت رفت !</span>
+								<span class="wrong-input-alrt"><%= emailMessage %></span>
+							<!-- <span class="wrong-input-alrt">* ایمیل یادت رفت !</span> -->
 							<% } %>
 						</div>
 						<div class="password-box">
@@ -106,7 +111,8 @@
 							<input type="password" name="password" id="password" />
 							<i class="bx bx-hide" id="icon3"></i>
 							<% if (!isPasswordValid) { %>
-							<span class="wrong-input-alrt">* رمزو نمیخوای بزنی ؟!</span>
+								<span class="wrong-input-alrt"><%= passMessage %></span>
+							<!-- <span class="wrong-input-alrt">* رمزو نمیخوای بزنی ؟!</span> -->
 							<% } %>
 						</div>
 						<div class="text-box">
@@ -120,7 +126,7 @@
 						</div>
 						<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 						<input type="submit" value="ورود" />
-						<p class="create">عضو نیستید؟<a id="registerbtn">اینجا</a> کلیک کنید.</p>
+						<p class="create">عضو نیستید؟ <a id="registerbtn">اینجا</a> را کلیک کنید.</p>
 					</form>
 				</div>
 
@@ -134,9 +140,10 @@
 						</div>
 						<div class="forgot-box">
 							<label for="forgot-email">ایمیل خود را وارد نمایید :</label>
-							<input type="email" <% if(oldInput){ %> value="<%= oldInput.email3 %>"<% } %>
-							name="email" id="forgot-email" required/> <% if (!isEmail3Valid) { %>
-							<span class="wrong-input-alrt">* ایمیل یادت رفت !</span>
+							<input type="email" <% if(oldInput){ %> value="<%= oldInput.email3 %>"<% } %> name="email" id="forgot-email" required/> 
+							<% if (!isEmail3Valid) { %>
+								<span class="wrong-input-alrt"><%= emailMessage %></span>
+								<!-- <span class="wrong-input-alrt">* ایمیل یادت رفت !</span> -->
 							<% } %>
 						</div>
 						<input type="hidden" name="_csrf" value="<%= csrfToken %>" />

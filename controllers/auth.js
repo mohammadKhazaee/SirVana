@@ -130,7 +130,7 @@ exports.postSignup = async (req, res, next) => {
 			discordId: discordId,
 		})
 		await user.save()
-		res.redirect('/auth/')
+		res.status(201).redirect('/auth/')
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)
@@ -189,8 +189,7 @@ exports.postResetPass = async (req, res, next) => {
 			<p>Click this <a href="http://localhost:${process.env.PORT}/auth/new-password/${token}">link</a> to set a new password</p>
 		`,
 		})
-		console.log(result)
-		res.redirect('/auth')
+		res.status(200).redirect('/auth')
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)
@@ -199,7 +198,7 @@ exports.postResetPass = async (req, res, next) => {
 
 exports.getNewPass = async (req, res, next) => {
 	const user = req.newPassUser
-	res.render('new-password', {
+	res.status(200).render('new-password', {
 		path: '/new-password',
 		pageTitle: 'New Password',
 		userId: user._id.toString(),
@@ -217,7 +216,7 @@ exports.postNewPass = async (req, res, next) => {
 			{ _id: userId, resetToken: token, resetTokenExpiry: { $gt: Date.now() } },
 			{ $set: { password: hashedpass, resetToken: undefined, resetTokenExpiry: undefined } }
 		)
-		res.redirect('/auth')
+		res.status(200).redirect('/auth')
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)

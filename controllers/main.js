@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator')
 const { format } = require('date-fns-tz')
-const { add, sub } = require('date-fns')
+const { add, sub, compareAsc } = require('date-fns')
 
 const User = require('../models/user')
 const Team = require('../models/team')
@@ -39,7 +39,7 @@ exports.getIndex = async (req, res, next) => {
 		}
 	})
 	const canSend = req.user ? (req.user.lfMsgCd ? req.user.lfMsgCd < Date.now() : true) : false
-	res.render('index', {
+	res.status(200).render('index', {
 		pageTitle: 'SirVana',
 		user: req.user
 			? { userName: req.user.name, ownedTeam: req.user.ownedTeam.name }
@@ -77,7 +77,7 @@ exports.getTeams = async (req, res, next) => {
 			.sort(sortType)
 			.limit(TEAM_PER_PAGE)
 		const renderTeams = teams.map((team) => ({ ...team._doc, avgMMR: Math.floor(team.avgMMR) }))
-		res.render('teams', {
+		res.status(200).render('teams', {
 			pageTitle: 'SirVana · تیم ها',
 			query: '?' + query + '&',
 			teams: renderTeams,
@@ -99,6 +99,7 @@ exports.getTeams = async (req, res, next) => {
 				hasNext: page < Math.ceil(teamsCount / TEAM_PER_PAGE),
 				next: page + 1,
 			},
+			hasTeam: req.user && req.user.ownedTeam.teamId,
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -112,6 +113,7 @@ exports.getTeam = async (req, res, next) => {
 			path: 'members.userId',
 			select: 'mmr _id pos',
 		})
+		if (!team) return res.status(404).redirect('/404')
 		const renderTeam = {
 			...team._doc,
 			createdAt: team.createdAt.toISOString().split('T')[0].replaceAll('-', '/'),
@@ -141,7 +143,7 @@ exports.getTeam = async (req, res, next) => {
 				(member) => member.userId._id.toString() === req.user._id.toString()
 			).length > 0
 		const isLead = req.user && renderTeam.leader.userId.toString() === req.user._id.toString()
-		res.render('team-info', {
+		res.status(200).render('team-info', {
 			pageTitle: 'SirVana · ' + team.name,
 			team: renderTeam,
 			userId: req.user ? req.user._id : undefined,
@@ -160,6 +162,10 @@ exports.postTeam = async (req, res, next) => {
 		const nameTag = req.body.nameTag
 		const description = req.body.description
 
+		if (req.user.ownedTeam.teamId) {
+			req.flash('error', 'You already have your own team!')
+			return res.status(403).redirect('/teams')
+		}
 		const errors = validationResult(req).array()
 		if (errors.length > 0) {
 			const oldInput = {
@@ -189,6 +195,7 @@ exports.postTeam = async (req, res, next) => {
 				nameTagMessage: nameTagMessage,
 				nameMessage: nameMessage,
 				page: { multiple: false },
+				hasTeam: false,
 			})
 		}
 		const imageUrl = req.file ? req.file.path.replace('\\', '/') : 'img/default-team-picture.jpg'
@@ -211,10 +218,9 @@ exports.postTeam = async (req, res, next) => {
 			avgMMR: req.user.mmr,
 			lfp: false,
 		})
-		await team.save()
+		const teamDoc = await team.save()
 		await req.user.joinToTeam(team, 'Team Leader')
-		// have to change redirection to /team/:teamId probably
-		res.redirect('/teams')
+		res.status(201).redirect('/team/' + teamDoc._id)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)
@@ -223,6 +229,14 @@ exports.postTeam = async (req, res, next) => {
 
 exports.postEditTeam = async (req, res, next) => {
 	try {
+		if (
+			!req.user.ownedTeam.teamId ||
+			(req.user.ownedTeam.teamId && req.user.ownedTeam.teamId.toString() !== req.body.teamId)
+		) {
+			const error = new Error('شما سازنده این تیم نیستید')
+			error.statusCode = 403
+			throw error
+		}
 		const errors = validationResult(req).array()
 		if (errors.length > 0) {
 			return res.status(422).send({ status: '422', errors: errors })
@@ -285,6 +299,8 @@ exports.postTeamChat = async (req, res, next) => {
 	try {
 		const chatContent = req.body.chatContent
 		const team = await Team.findById(req.body.teamId)
+		if (!team.members.find((member) => member.userId.toString() === req.user._id.toString()))
+			return res.status(403).send({ status: '403', errors: 'Not authorized!' })
 		const message = {
 			content: chatContent.trim(),
 			sentAt: add(new Date(), { hours: 3, minutes: 30 }),
@@ -297,12 +313,11 @@ exports.postTeamChat = async (req, res, next) => {
 			.emit('team-chat', {
 				...message,
 				sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
-				// incomming: message.sender.userId.toString() !== req.user._id.toString(),
 			})
-		res.sendStatus(200)
+		res.sendStatus(201)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
-		next(error)
+		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })
 	}
 }
 
@@ -342,7 +357,7 @@ exports.getTournaments = async (req, res, next) => {
 				imageUrl: imageUrl,
 			}
 		})
-		res.render('tournaments', {
+		res.status(200).render('tournaments', {
 			pageTitle: 'SirVana · مسابقات',
 			tournaments: modifiedTournaments,
 			marginLeft: marginLeft || '-4%',
@@ -366,6 +381,13 @@ exports.getTournaments = async (req, res, next) => {
 				hasNext: page < Math.ceil(tournamentsCount / TOURNAMENT_PER_PAGE),
 				next: page + 1,
 			},
+			hasTour:
+				req.user &&
+				req.user.tournaments.find(
+					(tour) =>
+						tour.owned &&
+						compareAsc(add(new Date(), { hours: 3, minutes: 30 }), tour.startDate) === -1
+				),
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -378,6 +400,7 @@ exports.getTournament = async (req, res, next) => {
 		const tournament = await Tournament.findById(req.params.tournamentId).populate(
 			'teams.teamId organizer.userId'
 		)
+		if (!tournament) return res.status(404).redirect('/404')
 		const renderTournament = {
 			...tournament._doc,
 			startDate: {
@@ -407,7 +430,7 @@ exports.getTournament = async (req, res, next) => {
 		const isOrganizer =
 			req.user && renderTournament.organizer.userId._id.toString() === req.user._id.toString()
 		const isLeader = !(!req.user || !req.user.ownedTeam.teamId)
-		res.render('tournament-info', {
+		res.status(200).render('tournament-info', {
 			pageTitle: 'SirVana · ' + tournament.name,
 			tournament: renderTournament,
 			isOrganizer: isOrganizer,
@@ -420,81 +443,92 @@ exports.getTournament = async (req, res, next) => {
 }
 
 exports.postTournament = async (req, res, next) => {
-	const name = req.body.name
-	const freeMMRBox = req.body.freeMMRBox === 'on'
-	const minMMR = freeMMRBox ? '1.Herald' : req.minMMR
-	const maxMMR = freeMMRBox ? '8.Immortal' : req.maxMMR
-	const boRadio = req.body.boRadio
-	const startDate = req.body.startDate
-	const prize = req.body.prize
-	const description = req.body.description
-
-	const errors = validationResult(req).array()
-	if (errors.length > 0) {
-		const oldInput = {
-			name: name,
-			freeMMRBox: freeMMRBox,
-			minMMR: minMMR,
-			maxMMR: maxMMR,
-			boRadio: boRadio,
-			startDate: startDate,
-			prize: prize,
-			description: description,
-		}
-		const nameError = errors.find((error) => error.param === 'name')
-		const minMMRError = errors.find((error) => error.param === 'minMMR')
-		const maxMMRError = errors.find((error) => error.param === 'maxMMR')
-		const rankError = [minMMRError, maxMMRError][0]
-		const dateError = errors.find((error) => error.param === 'startDate')
-		const prizeError = errors.find((error) => error.param === 'prize')
-		let rankMessage, nameMessage, dateMessage, prizeMessage
-		if (nameError) nameMessage = nameError.msg
-		if (!freeMMRBox && rankError) rankMessage = rankError.msg
-		if (dateError) dateMessage = dateError.msg
-		if (prizeError) prizeMessage = prizeError.msg
-
-		const tournaments = await Tournament.find()
-			.collation({ locale: 'en' })
-			.limit(TOURNAMENT_PER_PAGE)
-		const modifiedTournaments = tournaments.map((tournament) => {
-			const dateTime = tournament.startDate
-				.toISOString()
-				.slice(0, 16)
-				.replaceAll('-', '/')
-				.split('T')
-			const { _id, name, minMMR, maxMMR, imageUrl } = tournament
-			return {
-				_id: _id,
-				name,
-				startDate: `${dateTime[1]} - ${dateTime[0]}`,
-				minMMR: minMMR.split('.')[1],
-				maxMMR: maxMMR.split('.')[1],
-				imageUrl: imageUrl,
-			}
-		})
-		return res.status(422).render('tournaments', {
-			pageTitle: 'SirVana · مسابقات',
-			path: '/tournaments',
-			oldInput: oldInput,
-			tournaments: modifiedTournaments,
-			marginLeft: '-4%',
-			rankFilter: '0',
-			rankIcon: 'Herald',
-			searchInput: '',
-			noFilter: true,
-			openModal: true,
-			isNameValid: !nameError,
-			isRankValid: !(!freeMMRBox && rankError),
-			isDateValid: !dateError,
-			isPrizeValid: !prizeError,
-			prizeMessage: prizeMessage,
-			nameMessage: nameMessage,
-			dateMessage: dateMessage,
-			rankMessage: rankMessage,
-			page: { multiple: false },
-		})
-	}
 	try {
+		const name = req.body.name
+		const freeMMRBox = req.body.freeMMRBox === 'on'
+		const minMMR = freeMMRBox ? '1.Herald' : req.minMMR
+		const maxMMR = freeMMRBox ? '8.Immortal' : req.maxMMR
+		const boRadio = req.body.boRadio
+		const startDate = req.body.startDate
+		const prize = req.body.prize
+		const description = req.body.description
+
+		if (
+			req.user.tournaments.find(
+				(tour) =>
+					tour.owned &&
+					compareAsc(add(new Date(), { hours: 3, minutes: 30 }), tour.startDate) === -1
+			)
+		) {
+			req.flash('error', 'You already have an ongoing tounament!')
+			return res.status(403).redirect('/tournaments')
+		}
+		const errors = validationResult(req).array()
+		if (errors.length > 0) {
+			const oldInput = {
+				name: name,
+				freeMMRBox: freeMMRBox,
+				minMMR: minMMR,
+				maxMMR: maxMMR,
+				boRadio: boRadio,
+				startDate: startDate,
+				prize: prize,
+				description: description,
+			}
+			const nameError = errors.find((error) => error.param === 'name')
+			const minMMRError = errors.find((error) => error.param === 'minMMR')
+			const maxMMRError = errors.find((error) => error.param === 'maxMMR')
+			const rankError = [minMMRError, maxMMRError][0]
+			const dateError = errors.find((error) => error.param === 'startDate')
+			const prizeError = errors.find((error) => error.param === 'prize')
+			let rankMessage, nameMessage, dateMessage, prizeMessage
+			if (nameError) nameMessage = nameError.msg
+			if (!freeMMRBox && rankError) rankMessage = rankError.msg
+			if (dateError) dateMessage = dateError.msg
+			if (prizeError) prizeMessage = prizeError.msg
+
+			const tournaments = await Tournament.find()
+				.collation({ locale: 'en' })
+				.limit(TOURNAMENT_PER_PAGE)
+			const modifiedTournaments = tournaments.map((tournament) => {
+				const dateTime = tournament.startDate
+					.toISOString()
+					.slice(0, 16)
+					.replaceAll('-', '/')
+					.split('T')
+				const { _id, name, minMMR, maxMMR, imageUrl } = tournament
+				return {
+					_id: _id,
+					name,
+					startDate: `${dateTime[1]} - ${dateTime[0]}`,
+					minMMR: minMMR.split('.')[1],
+					maxMMR: maxMMR.split('.')[1],
+					imageUrl: imageUrl,
+				}
+			})
+			return res.status(422).render('tournaments', {
+				pageTitle: 'SirVana · مسابقات',
+				path: '/tournaments',
+				oldInput: oldInput,
+				tournaments: modifiedTournaments,
+				marginLeft: '-4%',
+				rankFilter: '0',
+				rankIcon: 'Herald',
+				searchInput: '',
+				noFilter: true,
+				openModal: true,
+				isNameValid: !nameError,
+				isRankValid: !(!freeMMRBox && rankError),
+				isDateValid: !dateError,
+				isPrizeValid: !prizeError,
+				prizeMessage: prizeMessage,
+				nameMessage: nameMessage,
+				dateMessage: dateMessage,
+				rankMessage: rankMessage,
+				page: { multiple: false },
+				hasTour: false,
+			})
+		}
 		const imageUrl = req.file ? req.file.path.replace('\\', '/') : 'img/tourcards.png'
 
 		const tournament = new Tournament({
@@ -502,7 +536,7 @@ exports.postTournament = async (req, res, next) => {
 			prize: prize,
 			description: description,
 			imageUrl: imageUrl,
-			startDate: startDate,
+			startDate: add(new Date(startDate), { hours: 3, minutes: 30 }),
 			bo3: boRadio === 'true',
 			minMMR: minMMR,
 			maxMMR: maxMMR,
@@ -511,10 +545,9 @@ exports.postTournament = async (req, res, next) => {
 				name: req.user.name,
 			},
 		})
-		// have to change redirection to /tournament/:tournamentId probably
 		const createdTournament = await tournament.save()
 		await req.user.createTour(tournament, 'Organizer')
-		res.redirect('/tournaments')
+		res.status(201).redirect('/tournament/' + createdTournament._id)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)
@@ -523,6 +556,15 @@ exports.postTournament = async (req, res, next) => {
 
 exports.postEditTournament = async (req, res, next) => {
 	try {
+		if (
+			!req.user.tournaments.find(
+				(tour) => tour.owned && tour.tournamentId.toString() === req.body.tournamentId
+			)
+		) {
+			const error = new Error('شما سازنده این مسابقه نیستید')
+			error.statusCode = 403
+			throw error
+		}
 		const errors = validationResult(req).array()
 		if (errors.length > 0) {
 			return res.status(422).send({ status: '422', errors: errors })
@@ -550,24 +592,26 @@ exports.postEditTournament = async (req, res, next) => {
 		tournament.maxMMR = maxMMR
 		tournament.games = games
 
-		let updateObj = { 'tournaments.$.name': name }
+		let updateTeamObj = { 'teams.$.name': name },
+			updateTourObj = { 'tournaments.$.name': name }
 		if (imageUrl) {
 			const fileError = fileHelper.deleteFile(tournament.imageUrl)
 			if (fileError) throw fileError
 			tournament.imageUrl = imageUrl
-			updateObj = { ...updateObj, 'tournaments.$.imageUrl': imageUrl }
+			updateTeamObj = { ...updateTeamObj, 'teams.$.imageUrl': imageUrl }
+			updateTourObj = { ...updateTourObj, 'tournaments.$.imageUrl': imageUrl }
 		}
-		if (startDate) tournament.startDate = add(new Date(startDate), { hours: 3, minutes: 30 })
+		if (startDate) {
+			tournament.startDate = add(new Date(startDate), { hours: 3, minutes: 30 })
+			updateTourObj = { ...updateTourObj, 'tournaments.$.startDate': startDate }
+		}
 		// console.log(updatedTournament)
 		await tournament.save()
 		await User.updateMany(
 			{ 'tournaments.tournamentId': req.body.tournamentId },
-			{ $set: updateObj }
+			{ $set: updateTourObj }
 		)
-		await Team.updateMany(
-			{ 'tournaments.tournamentId': req.body.tournamentId },
-			{ $set: updateObj }
-		)
+		await Team.updateMany({ 'teams.tournamentId': req.body.tournamentId }, { $set: updateTeamObj })
 		res.status(200).send({ status: '200', imageUrl: tournament.imageUrl })
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -610,7 +654,7 @@ exports.getPlayers = async (req, res, next) => {
 			}
 		})
 		console.log(query)
-		res.render('players', {
+		res.status(200).render('players', {
 			pageTitle: 'SirVana · بازیکنان',
 			users: modifiedUsers,
 			searchInput: searchInput,
@@ -636,50 +680,53 @@ exports.getPlayers = async (req, res, next) => {
 }
 
 exports.postSearchResult = async (req, res, next) => {
-	const searchInput = req.body.searchInput.trim()
-	const dbQuery = { name: { $regex: new RegExp('.*' + searchInput + '.*', 'i') } }
-	const searchType = req.body.searchType
-	const searchLimit = req.body.searchLimit ? Number(req.body.searchLimit) : 5
-	let searchResult
+	try {
+		const searchInput = req.body.searchInput.trim()
+		const dbQuery = { name: { $regex: new RegExp('.*' + searchInput + '.*', 'i') } }
+		const searchType = req.body.searchType
+		const searchLimit = req.body.searchLimit ? Number(req.body.searchLimit) : 5
+		let searchResult
 
-	if (searchType === 'tournament') {
-		searchResult = await Tournament.find(dbQuery)
-			.select('_id name minMMR maxMMR')
-			.limit(searchLimit)
-		searchResult = searchResult.map((tournament) => {
-			return {
-				...tournament._doc,
-				maxMMR: rank.giveMedal(tournament.maxMMR),
-				minMMR: rank.giveMedal(tournament.minMMR),
-			}
-		})
-	} else if (searchType === 'team') {
-		searchResult = await Team.find(dbQuery).select('_id name avgMMR').limit(searchLimit)
-		searchResult = searchResult.map((team) => {
-			return { ...team._doc, avgMMR: rank.numberToMedal(team.avgMMR) }
-		})
-	} else if (searchType === 'player') {
-		searchResult = await User.find(dbQuery).select('_id imageUrl name pos mmr').limit(searchLimit)
-		searchResult = searchResult.map((player) => {
-			return {
-				...player._doc,
-				pos: player.pos.length !== 5 ? player.pos.join('-') : 'همه',
-				mmr: rank.numberToMedal(player.mmr),
-			}
-		})
+		if (searchType === 'tournament') {
+			searchResult = await Tournament.find(dbQuery)
+				.select('_id name minMMR maxMMR')
+				.limit(searchLimit)
+			searchResult = searchResult.map((tournament) => {
+				return {
+					...tournament._doc,
+					maxMMR: rank.giveMedal(tournament.maxMMR),
+					minMMR: rank.giveMedal(tournament.minMMR),
+				}
+			})
+		} else if (searchType === 'team') {
+			searchResult = await Team.find(dbQuery).select('_id name avgMMR').limit(searchLimit)
+			searchResult = searchResult.map((team) => {
+				return { ...team._doc, avgMMR: rank.numberToMedal(team.avgMMR) }
+			})
+		} else if (searchType === 'player') {
+			searchResult = await User.find(dbQuery).select('_id imageUrl name pos mmr').limit(searchLimit)
+			searchResult = searchResult.map((player) => {
+				return {
+					...player._doc,
+					pos: player.pos.length !== 5 ? player.pos.join('-') : 'همه',
+					mmr: rank.numberToMedal(player.mmr),
+				}
+			})
+		}
+		res.status(200).send({ searchResult: searchResult, searchType: searchType })
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })
 	}
-
-	// console.log(searchInput, searchResult)
-	res.send({ searchResult: searchResult, searchType: searchType })
 }
 
 exports.getLfMessages = async (req, res, next) => {
 	try {
 		const messages = await Message.find().sort('createdAt').limit(20)
-		res.send({ messages: messages })
+		res.status(200).send({ messages: messages })
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
-		next(error)
+		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })
 	}
 }
 
@@ -705,15 +752,15 @@ exports.postLfMessages = async (req, res, next) => {
 		req.user.lfMsgCd = Date.now() + 1000 * 60 * 60 * 1
 		await req.user.save()
 		io.getIO().emit('lf-message', message)
-		res.sendStatus(200)
+		res.status(201).sendStatus(200)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
-		next(error)
+		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })
 	}
 }
 
 exports.getRahimi = (req, res, next) => {
-	res.render('rahimi', {
+	res.status(200).render('rahimi', {
 		pageTitle: 'SirVana · هوش مصنوعی',
 	})
 }

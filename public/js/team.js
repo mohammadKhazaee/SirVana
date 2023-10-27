@@ -60,9 +60,24 @@ if (chatInput && userId) {
         headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
         body: JSON.stringify({ chatContent: chatInput.value, teamId: window.location.href.split('/')[4] }),
       }).then(res => {
-        if (res.status === 200) {
-          
+        if (res.status === 422 || res.status === 500 || res.status === 403 ) return res.json()
+        if (res.status === 200 || res.status === 201) {
           chatInput.value = ''
+          throw 'success'
+        }
+      }).then(data => {
+        const alertEle = document.querySelector('.alert')
+        alertEle.children[1].innerHTML = `
+        <div class="alert-box__top">
+					<p></p>
+				</div>`
+        alertEle.style.visibility = 'visible'
+        alertEle.style.backgroundColor = '#FF2F3D'
+        alertEle.children[0].style.backgroundColor = '#FF2F3D'
+        alertEle.children[1].children[0].children[0].innerHTML = 'عملیات انجام نشد. لطفا بعدا امتحان کنید !'
+        if(data.status === '403') {
+          alertEle.children[1].children[0].children[0].innerHTML = data.errors
+          return
         }
       }).catch(err => console.log(err))
     }

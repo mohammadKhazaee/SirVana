@@ -75,7 +75,7 @@ if(isIndex) liveSearchInput.addEventListener('keyup', () => {
             if (watchAllBtn) watchAllBtn.remove()
             searchResult.forEach(item => {
                 if (data.searchType === 'team') {
-                    searchResultEle.insertAdjacentHTML( 'beforeend', `<a>
+                    searchResultEle.insertAdjacentHTML( 'beforeend', `<a href="/team/${item._id}">
                         <li>
                             <p>${item.name}</p>
                             <div class="class-p">
@@ -88,34 +88,38 @@ if(isIndex) liveSearchInput.addEventListener('keyup', () => {
                         </li>
                     </a>`)
                 } else if (data.searchType === 'tournament') {
-                    searchResultEle.insertAdjacentHTML( 'beforeend', `<li>
-                    <p>${item.name}</p>
-                    <div class="class-p">
-                        <div class="p-image">
-                            <p class="p-image--row">
-                                <img src="img/${item.minMMR}_medal.webp" alt="" />
-                            </p>
-                            <p style="margin:0 0.5rem;">تا</p>
-                            <p class="p-image--row">
-                                <img src="img/${item.maxMMR}_medal.webp" alt="" />
-                            </p>
-                        </div>
-                    </div>
-                    </li>`)
+                    searchResultEle.insertAdjacentHTML( 'beforeend', `<a href="/tournament/${item._id}">
+                        <li>
+                            <p>${item.name}</p>
+                            <div class="class-p">
+                                <div class="p-image">
+                                    <p class="p-image--row">
+                                        <img src="img/${item.minMMR}_medal.webp" alt="" />
+                                    </p>
+                                    <p style="margin:0 0.5rem;">تا</p>
+                                    <p class="p-image--row">
+                                        <img src="img/${item.maxMMR}_medal.webp" alt="" />
+                                    </p>
+                                </div>
+                            </div>
+                        </li>
+                    </a>`)
                 } else if (data.searchType === 'player') {
-                    searchResultEle.insertAdjacentHTML( 'beforeend', `<li>
-                    <p>${item.name}</p>
-                    <div class="class-p">
-                        <div class="p-pos">
-                            <p>پوز : ${item.pos? `${item.pos}`:'ثبت نشده'}</p>
-                        </div>
-                        <div class="p-image">
-                            <p class="p-image--row">
-                                ${item.mmr? `<img src="img/${item.mmr}_medal.webp" alt="" />`:'ثبت نشده'}
-                            </p>
-                        </div>
-                    </div>
-                    </li>`)
+                    searchResultEle.insertAdjacentHTML( 'beforeend', `<a href="/player/${item._id}">
+                        <li>
+                            <p>${item.name}</p>
+                            <div class="class-p">
+                                <div class="p-pos">
+                                    <p>پوز : ${item.pos? `${item.pos}`:'ثبت نشده'}</p>
+                                </div>
+                                <div class="p-image">
+                                    <p class="p-image--row">
+                                        ${item.mmr? `<img src="img/${item.mmr}_medal.webp" alt="" />`:'ثبت نشده'}
+                                    </p>
+                                </div>
+                            </div>
+                        </li>
+                    </a>`)
                 }
             })
             searchResultEle.parentNode.insertAdjacentHTML( 'afterend', `

@@ -24,7 +24,7 @@
 			<div class="dark-box"></div>
 		</div>
 		<!--  -->
-
+    
     <!-- create team modal box -->
     <div class="create-team<%= openModal? ' show-modal':'' %>">
         <div class="create-team__content">
@@ -69,6 +69,18 @@
         </div>
     </div>
     <!-- End of Modal -------------------------------------------------- -->
+    <% if(errorMessage || successMessage) { %>
+        <div style="background-color: <%= errorMessage? '#FF2F3D':'#3DFF2F' %>;" class="alert">
+            <svg style="background-color: <%= errorMessage? '#FF2F3D':'#3DFF2F' %>;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <div class="alert-box">
+                <div class="alert-box__top">
+                    <p><%= errorMessage || successMessage %></p>
+                </div>
+            </div>
+        </div>
+    <% } %>
     <!-- filter box -->
     <div class="team-box">
         <div class="shadow-box">
@@ -116,7 +128,7 @@
                 <!-- End of filter box ------------------------------->
                 <!-- Cards -->
                 <div class="teams-cards">
-                    <% if(noFilter) { %>
+                    <% if(noFilter && !hasTeam) { %>
                         <div class="team-card" id="create-button">
                             <a><i class="bx bx-plus-medical"></i></a>
                             <a><p>ایجاد تیم</p></a>

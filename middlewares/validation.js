@@ -1,4 +1,5 @@
 const { body, query, param } = require('express-validator')
+const { add, compareAsc } = require('date-fns')
 const bcrypt = require('bcryptjs')
 
 const User = require('../models/user')
@@ -291,7 +292,11 @@ exports.postTournament = [
 		.notEmpty()
 		.withMessage('Choose a date please!')
 		.isISO8601()
-		.withMessage('date is in wrong format'),
+		.withMessage('date is in wrong format')
+		.custom((startDate, { req }) => {
+			if (compareAsc(add(new Date(), { hours: 1 }), new Date(startDate)) === -1) return true
+			throw 'start date cant be earlier than today!'
+		}),
 	body('prize')
 		.trim()
 		.escape()
@@ -341,7 +346,11 @@ exports.postEditTournament = [
 		.notEmpty()
 		.withMessage('Choose a date please!')
 		.isISO8601()
-		.withMessage('date is in wrong format'),
+		.withMessage('date is in wrong format')
+		.custom((startDate, { req }) => {
+			if (compareAsc(add(new Date(), { hours: 1 }), new Date(startDate)) === -1) return true
+			throw 'start date cant be earlier than today!'
+		}),
 	body('prize')
 		.trim()
 		.escape()

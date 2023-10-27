@@ -3,6 +3,7 @@ const express = require('express')
 const mainController = require('../controllers/main')
 const dashboardController = require('../controllers/dashboard')
 const validator = require('../middlewares/validation')
+const isAuth = require('../middlewares/isAuth')
 
 const Router = express.Router()
 
@@ -16,13 +17,13 @@ Router.get('/teams', validator.getTeams, mainController.getTeams)
 Router.get('/team/:teamId', mainController.getTeam)
 
 // /team => POST
-Router.post('/team', validator.postTeam, mainController.postTeam)
+Router.post('/team', isAuth, validator.postTeam, mainController.postTeam)
 
 // /edit-team => POST
-Router.post('/edit-team', validator.postEditTeam, mainController.postEditTeam)
+Router.post('/edit-team', isAuth, validator.postEditTeam, mainController.postEditTeam)
 
 // /team-chat => POST
-Router.post('/team-chat', mainController.postTeamChat)
+Router.post('/team-chat', isAuth, mainController.postTeamChat)
 
 // /tournaments => GET
 Router.get('/tournaments', validator.getTournaments, mainController.getTournaments)
@@ -31,10 +32,15 @@ Router.get('/tournaments', validator.getTournaments, mainController.getTournamen
 Router.get('/tournament/:tournamentId', mainController.getTournament)
 
 // /tournament => POST
-Router.post('/tournament', validator.postTournament, mainController.postTournament)
+Router.post('/tournament', isAuth, validator.postTournament, mainController.postTournament)
 
 // /edit-tournament => POST
-Router.post('/edit-tournament', validator.postEditTournament, mainController.postEditTournament)
+Router.post(
+	'/edit-tournament',
+	isAuth,
+	validator.postEditTournament,
+	mainController.postEditTournament
+)
 
 // /players => GET
 Router.get('/players', validator.getPlayers, mainController.getPlayers)
@@ -49,7 +55,7 @@ Router.post('/search-result', mainController.postSearchResult)
 Router.get('/lf-messages', mainController.getLfMessages)
 
 // /lfMessage => POST
-Router.post('/lf-message', mainController.postLfMessages)
+Router.post('/lf-message', isAuth, mainController.postLfMessages)
 
 // /rahimi-ai => GET
 Router.get('/rahimi-ai', mainController.getRahimi)

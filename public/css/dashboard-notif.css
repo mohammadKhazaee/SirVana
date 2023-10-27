@@ -748,7 +748,7 @@ body {
 	left: 50%;
 	transform: translateX(-50%);
 	z-index: 99;
-	background: rgb(61, 255, 47);
+	background: #3dff2f;
 	border-radius: 1.5rem;
 }
 .alert > svg {
@@ -757,10 +757,13 @@ body {
 	margin-top: 0.5rem;
 	color: #333333;
 
-	background-color: rgb(61, 255, 47);
+	background-color: #3dff2f;
 	border-radius: 0 1.5rem 1.5rem 0;
 	cursor: pointer;
 	border-left: transparent;
+}
+.alert-red {
+	background-color: #ff2f3d
 }
 .alert > svg:hover {
 	color: #000;

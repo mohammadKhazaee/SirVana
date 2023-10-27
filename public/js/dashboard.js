@@ -96,7 +96,7 @@ if (editProfile) {
 					return
 				}
 				if(data.status === '200') {
-					alertEle.children[1].children[0].children[0].innerHTML = 'ویرایش اطلاعات تیم با موفقیت انجام شد‌ !'
+					alertEle.children[1].children[0].children[0].innerHTML = 'ویرایش پروفایل با موفقیت انجام شد‌ !'
 					alertEle.style.backgroundColor = '#3DFF2F'
 					alertEle.children[0].style.backgroundColor = '#3DFF2F'
 

@@ -9,3 +9,15 @@
         <p>شما میتوانید با مراجعه به بخش داشبورد ، تیم خود را مدیریت کنید.</p>
     </div>
 </div>
+<% if(errorMessage || successMessage) { %>
+    <div style="background-color: <%= errorMessage? '#FF2F3D':'#3DFF2F %>;" class="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        <div class="alert-box">
+            <div class="alert-box__top">
+                <p><%= errorMessage || successMessage %></p>
+            </div>
+        </div>
+    </div>
+<% } %>

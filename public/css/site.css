@@ -73,6 +73,9 @@ html {
 	cursor: pointer;
 	border-left: transparent;
 }
+.alert-red {
+	background-color: #ff2f3d
+}
 .alert > svg:hover {
 	color: #000;
 }

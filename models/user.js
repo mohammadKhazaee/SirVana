@@ -69,6 +69,7 @@ const userSchema = new Schema(
 						type: String,
 						require: true,
 					},
+					startDate: { type: Date, require: true },
 					imageUrl: String,
 					owned: {
 						type: Boolean,

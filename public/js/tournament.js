@@ -172,7 +172,7 @@ if(editTour) {
   })
   removeGameBtns.forEach(svgBtn => {
     svgBtn.addEventListener('click', () => {
-      svgBtn.parentElement.remove()
+      svgBtn.parentElement.parentElement.remove()
     })
   })
   let deletedTeam

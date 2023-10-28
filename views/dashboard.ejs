@@ -94,9 +94,13 @@
 														<div class="comments__box--top-name">
 															<span><%= user.name %></span>
 														</div>
-														<div class="comments__box--top-reply">
-															<a name="deleteFeedBtn">حذف</a>
-														</div>
+														<% if(isOwner) { %>
+															<div class="comments__box--top-reply">
+																<a name="deleteCommentBtn">حذف</a>
+																<input type="hidden" value="<%= feed._id %>">
+																<input type="hidden" value="false">
+															</div>
+														<% } %>
 													</div>
 													<div class="comments__box--bot">
 														<div class="comments__box--bot-comment">
@@ -112,9 +116,13 @@
 															<div class="comments__box--top-name">
 																<span><%= comment.sender.name %></span>
 															</div>
-															<div class="comments__box--top-reply">
-																<a name="deleteCommentBtn">حذف</a>
-															</div>
+															<% if(isOwner || comment.yours ) { %>
+																<div class="comments__box--top-reply">
+																	<a name="deleteCommentBtn">حذف</a>
+																	<input type="hidden" value="<%= comment._id %>">
+																	<input type="hidden" value="true">
+																</div>
+															<% } %>
 														</div>
 														<div class="comments__box--bot">
 															<div class="comments__box--bot-comment">

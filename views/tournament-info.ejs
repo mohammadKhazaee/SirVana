@@ -17,7 +17,7 @@
 
 	<body>
 		<!-- Navbar -->
-		<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName, navSearch: false, subpath: true}) %>
+		<%- include('./includes/navbar.ejs', {isLoggedIn: isLoggedIn, userName: userName, navSearch: false, subpath: true, notifCount: notifCount}) %>
 
 		<!-- background -->
 		<div class="tournament-page">
@@ -187,58 +187,57 @@
 										<span>هنوز تیمی اضافه نشده است .</span>
 									</div> -->
 									<% tournament.games.forEach(game => { %>
-											<div class="block1">
-												<div class="details">
-													<div class="teams-match">
-														<div class="team1">
-															<svg name="selectTeamPlus" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-																<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-															</svg>
-															<a href="/team/<%= game.team1.teamId  %>">تیم 1 : <span><%= game.team1.name %></span></a>
-														</div>
-														<span class="vs">Vs</span>
-														<div class="team1">
-															<svg name="selectTeamPlus" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-																<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-															</svg>
-															<a href="/team/<%= game.team2.teamId  %>">تیم 2 : <span><%= game.team2.name %></span></a>
-														</div>
+										<div class="block1">
+											<div class="details">
+												<div class="teams-match">
+													<div class="team1">
+														<svg name="selectTeamPlus" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+															<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+														</svg>
+														<a href="/team/<%= game.team1.teamId  %>">تیم 1 : <span><%= game.team1.name %></span></a>
 													</div>
-													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 fh">
-														<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
-													</svg>
-													<div class="timedate">
-														<input type="datetime-local" value="<%= game.dateTime %>" disabled>
+													<span class="vs">Vs</span>
+													<div class="team1">
+														<svg name="selectTeamPlus" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+															<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+														</svg>
+														<a href="/team/<%= game.team2.teamId  %>">تیم 2 : <span><%= game.team2.name %></span></a>
 													</div>
-													<svg name="removeGameBtns" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 gh">
-														<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-													</svg>
 												</div>
+												<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 fh">
+													<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
+												</svg>
+												<div class="timedate">
+													<input type="datetime-local" value="<%= game.dateTime %>" disabled>
+												</div>
+												<svg name="removeGameBtns" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 gh">
+													<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+												</svg>
 											</div>
-										<% }) %>
-										<div name="addGamePlus" style="display: none;" class="plus-svg">
-											<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-												<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-											</svg>
 										</div>
+									<% }) %>
+									<div name="addGamePlus" style="display: none;" class="plus-svg">
+										<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+											<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+										</svg>
 									</div>
 								</div>
-								<div class="left-block">
-									<div href="/player/<%= tournament.organizer.userId._id %>" class="tournament-leader">
-										<p>برگذارکننده تورنومنت :</p>
-										<div class="mid-note"></div>
-										<a href="/player/<%= tournament.organizer.userId._id %>" class="leader">
-											<img src="../<%= tournament.organizer.userId.imageUrl %>" alt="" />
-											<span dir="ltr"><%= tournament.organizer.userId.name %></span>
-											<img src="../img/<%= tournament.organizer.userId.mmr %>_medal.webp" alt="" />
-										</a>
-									</div>
-									<div class="descrip">
-										<p>توضیحات تورنومنت :</p>
-										<div class="mid-note"></div>
-										<textarea name="description" cols="30" rows="10" disabled><%= tournament.description %></textarea>
-									</div>
-								</div>
+							</div>
+						</div>
+						<div class="left-block">
+							<div href="/player/<%= tournament.organizer.userId._id %>" class="tournament-leader">
+								<p>برگذارکننده تورنومنت :</p>
+								<div class="mid-note"></div>
+								<a href="/player/<%= tournament.organizer.userId._id %>" class="leader">
+									<img src="../<%= tournament.organizer.userId.imageUrl %>" alt="" />
+									<span dir="ltr"><%= tournament.organizer.userId.name %></span>
+									<img src="../img/<%= tournament.organizer.userId.mmr %>_medal.webp" alt="" />
+								</a>
+							</div>
+							<div class="descrip">
+								<p>توضیحات تورنومنت :</p>
+								<div class="mid-note"></div>
+								<textarea name="description" cols="30" rows="10" disabled><%= tournament.description %></textarea>
 							</div>
 						</div>
 					</div>

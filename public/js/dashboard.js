@@ -132,7 +132,7 @@ const feedInput = document.getElementsByName('feedInput')[0]
 const feedsContainer = document.getElementsByClassName('scroll-box')[0]
 
 if (sendFeedBtn) {
-	sendFeedBtn.addEventListener('click', () => {
+	sendFeedBtn.addEventListener('click', function() {
 		fetch('/dashboard/send-feed', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
@@ -151,6 +151,8 @@ if (sendFeedBtn) {
 								</div>
 								<div class="comments__box--top-reply">
 									<a name="deleteFeedBtn">حذف</a>
+									<input type="hidden" value="${data.feedId}">
+									<input type="hidden" value="false">
 								</div>
 							</div>
 							<div class="comments__box--bot">
@@ -166,6 +168,36 @@ if (sendFeedBtn) {
 					</div>
 				</div>`
 			)
+			const deleteBtnEle = feedsContainer.children[0].children[0].children[0].children[0].children[1].children[0]	
+			deleteBtnEle.addEventListener('click', function() {
+				fetch('/dashboard/delete-feed', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
+					body: JSON.stringify({ 
+						url: window.location.href,
+						isComment: this.nextElementSibling.nextElementSibling.value === 'true',
+						userId: userId.value,
+						feedId: this.nextElementSibling.value
+					}),
+				}).then(res => res.json()).then(data => {
+					if(data.status === '200') {
+						return deleteBtnEle.parentElement.parentElement.parentElement.parentElement.parentElement.remove()
+					}
+					const alertEle = document.querySelector('.alert')
+					alertEle.children[1].innerHTML = `
+					<div class="alert-box__top">
+						<p></p>
+					</div>`
+					alertEle.style.visibility = 'visible'
+					alertEle.style.backgroundColor = '#FF2F3D'
+					alertEle.children[0].style.backgroundColor = '#FF2F3D'
+					alertEle.children[1].children[0].children[0].innerHTML = 'عملیات انجام نشد. لطفا بعدا امتحان کنید !'
+					if(data.status === '403' || data.status === '404') {
+						alertEle.children[1].children[0].children[0].innerHTML = data.errors
+						return
+					}
+				}).catch(err => console.log(err))
+			})
 		})
 		.catch((err) => console.log(err))
 	})
@@ -173,6 +205,7 @@ if (sendFeedBtn) {
 		
 // send Comment
 const sendCommentBtns = document.getElementsByName('sendCommentBtn')
+const deleteCommentBtns = document.getElementsByName('deleteCommentBtn')
 const userId = document.getElementsByName('userId')[0]
 
 for (let i = 0; i < sendCommentBtns.length; i++) {
@@ -199,6 +232,8 @@ for (let i = 0; i < sendCommentBtns.length; i++) {
 							</div>
 							<div class="comments__box--top-reply">
 								<a name="deleteCommentBtn">حذف</a>
+								<input type="hidden" value="${data.commentId}">
+								<input type="hidden" value="true">
 							</div>
 						</div>
 						<div class="comments__box--bot">
@@ -209,9 +244,74 @@ for (let i = 0; i < sendCommentBtns.length; i++) {
 					</div>
 				</div>`
 			)
+			const deleteBtnEle = this.parentElement.previousElementSibling.children[0].children[0].children[1].children[0]
+			deleteBtnEle.addEventListener('click', function() {
+				fetch('/dashboard/delete-feed', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
+					body: JSON.stringify({ 
+						url: window.location.href,
+						isComment: this.nextElementSibling.nextElementSibling.value === 'true',
+						userId: userId.value,
+						feedId: this.nextElementSibling.value
+					}),
+				}).then(res => res.json()).then(data => {
+					if(data.status === '200') {
+						return deleteBtnEle.parentElement.parentElement.parentElement.parentElement.remove()
+					}
+					const alertEle = document.querySelector('.alert')
+					alertEle.children[1].innerHTML = `
+					<div class="alert-box__top">
+						<p></p>
+					</div>`
+					alertEle.style.visibility = 'visible'
+					alertEle.style.backgroundColor = '#FF2F3D'
+					alertEle.children[0].style.backgroundColor = '#FF2F3D'
+					alertEle.children[1].children[0].children[0].innerHTML = 'عملیات انجام نشد. لطفا بعدا امتحان کنید !'
+					if(data.status === '403' || data.status === '404') {
+						alertEle.children[1].children[0].children[0].innerHTML = data.errors
+						return
+					}
+				}).catch(err => console.log(err))
+			})
 			this.parentElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
 		})
 		.catch((err) => console.log(err))
+	})
+}
+
+// Delete comment btn
+
+for (let i = 0; i < deleteCommentBtns.length; i++) {
+	deleteCommentBtns[i].addEventListener('click', function() {
+		fetch('/dashboard/delete-feed', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', 'csrf-token': csrf.value },
+			body: JSON.stringify({ 
+				url: window.location.href,
+				isComment: this.nextElementSibling.nextElementSibling.value === 'true',
+				userId: userId.value,
+				feedId: this.nextElementSibling.value
+			}),
+		}).then(res => res.json()).then(data => {
+			if(data.status === '200') {
+				if(data.isComment) return this.parentElement.parentElement.parentElement.parentElement.remove()
+				return this.parentElement.parentElement.parentElement.parentElement.parentElement.remove()
+			}
+			const alertEle = document.querySelector('.alert')
+			alertEle.children[1].innerHTML = `
+			<div class="alert-box__top">
+				<p></p>
+			</div>`
+			alertEle.style.visibility = 'visible'
+			alertEle.style.backgroundColor = '#FF2F3D'
+			alertEle.children[0].style.backgroundColor = '#FF2F3D'
+			alertEle.children[1].children[0].children[0].innerHTML = 'عملیات انجام نشد. لطفا بعدا امتحان کنید !'
+			if(data.status === '403' || data.status === '404') {
+				alertEle.children[1].children[0].children[0].innerHTML = data.errors
+				return
+			}
+		}).catch(err => console.log(err))
 	})
 }
 
@@ -340,6 +440,7 @@ if (isNotif) {
 				}).then(res => res.json()).then(mails => {
 					if(mails.length > 0)
 						mailBox.innerHTML = ''
+					friendEle.nextElementSibling.style.display = 'none'
 					responsorEle.setAttribute('href', '/player/'+friendEle.previousElementSibling.value)
 					responsorEle.style.display = 'flex'
 					responsorEle.children[0].innerHTML = friendEle.previousElementSibling.previousElementSibling.value
@@ -459,10 +560,13 @@ if (isNotif) {
 					resultItemsEle[j].addEventListener('click', () => {
 						liveSearchInput.value = resultItemsEle[j].children[0].children[2].innerHTML
 						friendsEle.insertAdjacentHTML('afterbegin',`
-							<input type="hidden" value="${ resultItemsEle[j].children[0].children[1].value }">
-							<input type="hidden" value="${ resultItemsEle[j].children[0].children[2].innerHTML }">
-							<input type="hidden" value="${ resultItemsEle[j].children[0].children[0].value }">
-							<a name="getPvMails" class="players">${ resultItemsEle[j].children[0].children[2].innerHTML }</a>
+							<div class="players">
+								<input type="hidden" value="${ resultItemsEle[j].children[0].children[1].value }">
+								<input type="hidden" value="${ resultItemsEle[j].children[0].children[2].innerHTML }">
+								<input type="hidden" value="${ resultItemsEle[j].children[0].children[0].value }">
+								<a name="getPvMails" class="player">${ resultItemsEle[j].children[0].children[2].innerHTML }</a>
+								<div style="display: none;" class="red-circle"></div>
+							</div>
 						`)
 						setFriendsListener()
 						searchResultEle.innerHTML = ''

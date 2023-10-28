@@ -58,10 +58,13 @@
 								<!-- -- -->
 								<div class="bot-box">
 									<% chatFriends.forEach(friend => { %>
-										<input type="hidden" value="<%= friend.imageUrl %>">
-										<input type="hidden" value="<%= friend.name %>">
-										<input type="hidden" value="<%= friend.userId %>">
-										<a name="getPvMails" class="players"><%= friend.name %></a>
+										<div class="players">
+											<input type="hidden" value="<%= friend.imageUrl %>">
+											<input type="hidden" value="<%= friend.name %>">
+											<input type="hidden" value="<%= friend.userId %>">
+											<a name="getPvMails" class="player"><%= friend.name %></a>
+											<div style="display: <%= friend.seen? 'none':'block' %>;" class="red-circle"></div>
+										</div>
 									<% }) %>
 								</div>
 							</div>

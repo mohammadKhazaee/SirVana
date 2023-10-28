@@ -26,6 +26,9 @@ Router.post('/send-feed', dashboardController.postSendFeed)
 // /dashboard/send-feed-comment => POST
 Router.post('/send-feed-comment', dashboardController.postSendFeedComment)
 
+// /dashboard/delete-feed => POST
+Router.post('/delete-feed', dashboardController.postDeleteFeed)
+
 // /dashboard/join-req => POST
 Router.post('/join-req', dashboardController.postJoinReq)
 

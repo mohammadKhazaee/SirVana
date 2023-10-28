@@ -1,4 +1,5 @@
 const { validationResult } = require('express-validator')
+const mongoose = require('mongoose')
 
 const User = require('../models/user')
 const Team = require('../models/team')
@@ -30,6 +31,14 @@ exports.getDashboard = async (req, res, next) => {
 		renderUser.pos = posUtil.toString(renderUser.pos)
 		renderUser.mmr = { number: renderUser.mmr, medal: rank.numberToMedal(renderUser.mmr) }
 		renderUser.createdAt = renderUser.createdAt.toISOString().split('T')[0].replaceAll('-', '/')
+		if (!isOwner)
+			renderUser.feeds = renderUser.feeds.map((feed) => ({
+				...feed._doc,
+				comments: feed.comments.map((cm) => ({
+					...cm._doc,
+					yours: cm.sender.userId.toString() === req.user._id.toString(),
+				})),
+			}))
 		if (req.originalUrl !== '/dashboard' && isOwner) return res.redirect('/dashboard')
 		res.status(200).render('dashboard', {
 			pageTitle: `SirVana · ${req.originalUrl === '/dashboard' ? 'داشبورد' : renderUser.name}`,
@@ -76,11 +85,13 @@ exports.getDashboardNotif = async (req, res, next) => {
 		let inReqs = [],
 			outReqs = []
 		req.user.requests.forEach((request) => {
+			request.seen = true
 			if (request.type == 'join' || request.type == 'recruit' || request.type == 'joinTour')
 				outReqs = [...outReqs, request]
 			else inReqs = [...inReqs, request]
 		})
-		// console.log(req.user.chatFriends[0].userId)
+		req.user.save()
+		// console.log(req.user.chatFriends[0])
 		res.status(200).render('dashboard-notif', {
 			pageTitle: 'SirVana · داشبورد',
 			userId: req.user._id,
@@ -169,8 +180,8 @@ exports.postEditProfile = async (req, res, next) => {
 
 exports.postSendFeed = async (req, res, next) => {
 	try {
-		await req.user.sendFeed(req.body.feedContent)
-		res.status(200).send({ feeds: req.user.feeds, name: req.user.name })
+		const feedId = await req.user.sendFeed(req.body.feedContent)
+		res.status(200).send({ feeds: req.user.feeds, name: req.user.name, feedId: feedId })
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })
@@ -181,13 +192,58 @@ exports.postSendFeedComment = async (req, res, next) => {
 	try {
 		const commentContent = req.body.commentContent
 		const receiver = await User.findById(req.body.userId)
-		req.user.sendFeedComment(commentContent, receiver, req.body.feedId)
-		res
-			.status(200)
-			.send({ sender: { name: req.user.name, userId: req.user._id }, content: commentContent })
+		const commentId = await req.user.sendFeedComment(commentContent, receiver, req.body.feedId)
+		res.status(200).send({
+			sender: { name: req.user.name, userId: req.user._id },
+			content: commentContent,
+			commentId: commentId,
+		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)
+	}
+}
+
+exports.postDeleteFeed = async (req, res, next) => {
+	try {
+		const { feedId, userId, url, isComment } = req.body
+		let ownerId
+		if (url.split('/')[3] === 'dashboard') ownerId = req.user._id.toString()
+		if (url.split('/')[3] === 'player') ownerId = url.split('/')[4]
+		if (
+			!ownerId ||
+			(ownerId && !mongoose.isValidObjectId(ownerId)) ||
+			!mongoose.isValidObjectId(userId) ||
+			!mongoose.isValidObjectId(feedId)
+		) {
+			const error = new Error('متن مورد نظر پیدا نشد')
+			error.statusCode = 404
+			throw error
+		}
+		let owner
+		if (url.split('/')[3] === 'dashboard') owner = req.user
+		else if (url.split('/')[3] === 'player') owner = await User.findById(ownerId)
+
+		if (!isComment && url.split('/')[3] === 'dashboard') {
+			owner.feeds = owner.feeds.filter((feed) => feed._id.toString() !== feedId)
+			await owner.save()
+		} else {
+			owner.feeds = owner.feeds.map((feed) => ({
+				...feed._doc,
+				comments: feed.comments.filter(
+					(cm) =>
+						!(
+							cm.sender.userId.toString() === req.user._id.toString() &&
+							cm._id.toString() === feedId
+						)
+				),
+			}))
+			await owner.save()
+		}
+		res.status(200).send({ status: '200', isComment: isComment })
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })
 	}
 }
 
@@ -512,47 +568,6 @@ exports.getPvMail = async (req, res, next) => {
 		})
 		req.user.chatFriends = updatedChatFriends
 		req.user.save()
-		// const testChats = [
-		// 		incomming: true,
-		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
-		// 		content: 'salam basani',
-		// 	},
-		// 	{
-		// 		incomming: false,
-		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
-		// 		content: 'khubi?',
-		// 	},
-		// 	{
-		// 		incomming: false,
-		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
-		// 		content: 'salam kooni',
-		// 	},
-		// 	{
-		// 		incomming: true,
-		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
-		// 		content: 'salam basani',
-		// 	},
-		// 	{
-		// 		incomming: false,
-		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
-		// 		content: 'khubi?',
-		// 	},
-		// 	{
-		// 		incomming: false,
-		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
-		// 		content: 'salam kooni',
-		// 	},
-		// 	{
-		// 		incomming: true,
-		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
-		// 		content: 'salam basani',
-		// 	},
-		// 	{
-		// 		incomming: false,
-		// 		sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
-		// 		content: 'khubi?',
-		// 	},
-		// ]
 		res.status(200).send(friendChats)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -570,12 +585,6 @@ exports.postPvMail = async (req, res, next) => {
 			error.statusCode = 403
 			throw error
 		}
-		// console.log(req.body)
-		// const message = {
-		// 	incomming: false,
-		// 	sentAt: format(new Date(), 'd.M.yyyy - HH:mm'),
-		// 	content: mailContent,
-		// }
 		const sockets = await Socket.find({ type: 'pvChat', userId: responsorId })
 		const inChat =
 			sockets.findIndex((socket) => socket.friendId.toString() === req.user._id.toString()) !== -1
@@ -583,7 +592,7 @@ exports.postPvMail = async (req, res, next) => {
 		if (sockets.length > 0) {
 			io.getIO()
 				.to(sockets[0].socketId)
-				.emit('sendPvMail', { ...message, inComming: true })
+				.emit('sendPvMail', { ...message, inComming: true, senderId: req.user._id })
 		}
 		res.status(201).send(message)
 	} catch (error) {

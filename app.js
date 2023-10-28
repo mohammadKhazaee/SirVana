@@ -112,6 +112,10 @@ app.use(async (req, res, next) => {
 	try {
 		const user = await User.findById(req.session.user._id)
 		res.locals.userName = user.name
+		let notifCount = 0
+		user.chatFriends.forEach((friend) => (notifCount = friend.seen ? notifCount : notifCount + 1))
+		user.requests.forEach((request) => (notifCount = request.seen ? notifCount : notifCount + 1))
+		res.locals.notifCount = notifCount > 9 ? '+9' : notifCount
 		req.user = user
 		next()
 	} catch (error) {

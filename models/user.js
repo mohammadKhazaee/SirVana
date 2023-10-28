@@ -167,6 +167,10 @@ const userSchema = new Schema(
 						id: Schema.Types.ObjectId,
 						name: String,
 					},
+					seen: {
+						type: Boolean,
+						default: false,
+					},
 					sentAt: {
 						type: Date,
 						require: true,
@@ -219,7 +223,9 @@ const userSchema = new Schema(
 
 userSchema.methods.sendFeed = function (feedContent) {
 	let updatedFeeds
+	const commentId = new mongoose.mongo.ObjectId()
 	const newFeed = {
+		_id: commentId,
 		content: feedContent,
 		comments: [],
 		sendAt: add(new Date(), { hours: 3, minutes: 30 }),
@@ -230,8 +236,8 @@ userSchema.methods.sendFeed = function (feedContent) {
 		updatedFeeds = [newFeed]
 	}
 	this.feeds = updatedFeeds
-	// return
-	return this.save()
+	this.save()
+	return commentId
 }
 
 userSchema.methods.sendFeedComment = function (commentContent, receiver, feedId) {
@@ -239,6 +245,7 @@ userSchema.methods.sendFeedComment = function (commentContent, receiver, feedId)
 	if (feedIndex === -1) {
 		return Promise.reject('No feed to send the comment for!')
 	}
+	const commentId = new mongoose.mongo.ObjectId()
 	const updatedFeeds = [
 		...receiver.feeds.slice(0, feedIndex),
 		{
@@ -246,6 +253,7 @@ userSchema.methods.sendFeedComment = function (commentContent, receiver, feedId)
 			comments: [
 				...receiver.feeds[feedIndex].comments,
 				{
+					_id: commentId,
 					content: commentContent,
 					sentAt: add(new Date(), { hours: 3, minutes: 30 }),
 					sender: { userId: this._id, name: this.name },
@@ -255,7 +263,8 @@ userSchema.methods.sendFeedComment = function (commentContent, receiver, feedId)
 		...receiver.feeds.slice(feedIndex + 1),
 	]
 	receiver.feeds = updatedFeeds
-	return receiver.save()
+	receiver.save()
+	return commentId
 }
 
 userSchema.methods.sendMail = async function (responsor, mailContent, inChat) {
@@ -422,6 +431,7 @@ userSchema.methods.handleReq = async function (reqId, responsorUser, relativeReq
 					let updatedReq = { ...req._doc }
 					if (req._id.toString() === relativeReqId) {
 						updatedReq.state = state
+						updatedReq.seen = false
 						changed = true
 					}
 					return updatedReq
@@ -450,6 +460,7 @@ userSchema.methods.exchangeReq = async function (type, receiver, sender, relativ
 		newReq = {
 			type: type,
 			state: 'Unseen',
+			seen: true,
 			relativeReq: relativeReq,
 			receiver: {
 				id: receiver._id,
@@ -482,7 +493,7 @@ userSchema.methods.exchangeReq = async function (type, receiver, sender, relativ
 	}
 	const updatedReqs = [...this.requests, newReq]
 	this.requests = updatedReqs
-	await this.save()
+	this.save()
 	return this.requests.slice(-1)[0]._id
 }
 

@@ -582,6 +582,7 @@ exports.postEditTournament = async (req, res, next) => {
 			...game,
 			dateTime: add(new Date(game.dateTime), { hours: 3, minutes: 30 }),
 		}))
+		// console.log(games)
 		const tournament = await Tournament.findById(req.body.tournamentId)
 		tournament.name = name
 		tournament.prize = prize

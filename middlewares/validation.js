@@ -10,15 +10,16 @@ const nameRegex = /[a-zA-Z0-9'\s]+/
 const descRegex = /[^<>]+/
 
 exports.postLogin = [
-	body('email', 'Please enter email in right format!')
+	body('email', 'ایمیلت یه مشکلی داره !')
 		.trim()
 		.escape()
 		.normalizeEmail({ gmail_remove_dots: false })
 		.notEmpty()
+		.withMessage('* ایمیل یادت رفت !')
 		.isEmail()
 		.custom(async (email, { req }) => {
 			const user = await User.findOne({ email: email })
-			if (!user) throwError(`Couldn't find email!`, 404)
+			if (!user) throwError(`ایمیلت اشتباهه !`, 404)
 			req.user = user
 			return true
 		}),
@@ -26,12 +27,12 @@ exports.postLogin = [
 		.trim()
 		.escape()
 		.notEmpty()
-		.withMessage('Please enter a password!')
+		.withMessage('* رمزو نمیخوای بزنی ؟')
 		.isLength({ min: 8, max: 32 })
-		.withMessage('Password should be 8 to 32 characters!')
+		.withMessage('رمزت باید بین 8 تا 32 کاراکتر باشه!')
 		.custom(async (password, { req }) => {
 			const isMatch = await bcrypt.compareSync(password, req.user.password)
-			if (!isMatch) throwError(`Wrong password!`, 422)
+			if (!isMatch) throwError(`رمزت اشتباهه !`, 422)
 			return true
 		}),
 ]
@@ -41,61 +42,61 @@ exports.postSignup = [
 		.trim()
 		.escape()
 		.notEmpty()
-		.withMessage('please enter your name!')
+		.withMessage('* اسمتو پیشی خورد ؟')
 		.isLength({ min: 3 })
-		.withMessage('name should be atleast 3 characters!'),
-	body('email', 'Please enter email in right format!')
+		.withMessage('* اسمت کمتر از 3 حرفه!'),
+	body('email', 'ایمیلت یه مشکلی داره !')
 		.trim()
 		.escape()
 		.normalizeEmail({ gmail_remove_dots: false })
 		.notEmpty()
+		.withMessage('* ایمیل یادت رفت !')
 		.isEmail()
 		.custom(async (email, { req }) => {
 			const user = await User.findOne({ email: email })
-			if (user) throwError(`This email already exists!`, 422)
+			if (user) throwError(`* مطمئنی اینجا اکانت نداری؟`, 422)
 			return true
 		}),
 	body('password')
 		.trim()
 		.escape()
 		.notEmpty()
-		.withMessage('Please enter a password!')
+		.withMessage('* الو ؟ رمزت کو ؟')
 		.isLength({ min: 8, max: 32 })
-		.withMessage('Password should be 8 to 32 characters!'),
+		.withMessage('رمزت باید بین 8 تا 32 کاراکتر باشه!'),
 	body('confirmPass')
 		.trim()
 		.escape()
 		.notEmpty()
-		.withMessage('Please enter a password!')
-		.isLength({ min: 8, max: 32 })
-		.withMessage('Password should be 8 to 32 characters!')
+		.withMessage('* رمزو زدی . تکرارشم بزن !')
 		.custom((confirmPass, { req }) => {
 			const password = req.body.password
-			if (password !== confirmPass) throwError(`Passwords do not match!`, 422)
+			if (password !== confirmPass) throwError(`* رمزهات یکی نیستن !`, 422)
 			return true
 		}),
-	body('dota2Id', 'Wrong dota2 id!')
+	body('dota2Id', 'آیدیت یه مشکلی داره !')
 		.trim()
 		.escape()
 		.escape()
 		.notEmpty()
-		.withMessage('Please enter your dota2 id!')
+		.withMessage(' * آیدی خیلی بدردت میخوره ها !')
 		.isNumeric()
 		.isLength(9),
 	body('discordId').trim().escape(),
 ]
 
 exports.postResetPass = [
-	body('email', 'Please enter email in right format!')
+	body('email', 'ایمیلت یه مشکلی داره !')
 		.trim()
 		.escape()
 		.normalizeEmail({ gmail_remove_dots: false })
 		.notEmpty()
+		.withMessage('* ایمیل یادت رفت !')
 		.isEmail()
 		.custom(async (email, { req }) => {
 			const user = await User.findOne({ email: email })
 			req.resetPassUser = user
-			if (!user) throwError(`Email doesnt exist!`, 404)
+			if (!user) throwError(`اکانتی با این ایمیل نداریم !`, 404)
 			return true
 		}),
 ]
@@ -121,9 +122,9 @@ exports.postNewPass = [
 		.trim()
 		.escape()
 		.notEmpty()
-		.withMessage('Please enter a password!')
+		.withMessage('* الو ؟ رمزت کو ؟')
 		.isLength({ min: 8, max: 32 })
-		.withMessage('Password should be 8 to 32 characters!'),
+		.withMessage('رمزت باید بین 8 تا 32 کاراکتر باشه!'),
 ]
 
 exports.postEditProfile = [
@@ -131,23 +132,24 @@ exports.postEditProfile = [
 		.trim()
 		.escape()
 		.notEmpty()
-		.withMessage('please enter your name!')
+		.withMessage('* اسمتو پیشی خورد ؟')
 		.isLength({ min: 3 })
-		.withMessage('name should be atleast 3 characters!'),
-	body('dota2Id', 'Wrong dota2 id is a 9-digit number!')
+		.withMessage('* اسمت کمتر از 3 حرفه!'),
+	body('dota2Id', 'آیدیت یه مشکلی داره !')
 		.trim()
 		.escape()
+		.escape()
 		.notEmpty()
-		.withMessage('Please enter your dota2 id!')
+		.withMessage(' * آیدی خیلی بدردت میخوره ها !')
 		.isNumeric()
 		.isLength(9),
 	body('rank')
 		.trim()
 		.escape()
 		.notEmpty()
-		.withMessage('rank was empty!')
+		.withMessage('رنکت خالی باشه ؟')
 		.isInt({ min: 0, max: 13000 })
-		.withMessage('rank is a number less than 13k!'),
+		.withMessage('رنکت حداکثر 13000 عه !'),
 	body('lft')
 		.trim()
 		.custom((lfp, { req }) => {
@@ -155,10 +157,10 @@ exports.postEditProfile = [
 				req.lfp = lfp === 'true'
 				return true
 			}
-			throw 'Wrong lft input!'
+			throw 'تیم میخوای یا نه ؟'
 		}),
 	body('discordId').trim().escape(),
-	body('bio').trim().escape(),
+	body('bio').trim(),
 ]
 
 exports.getTeams = [
@@ -190,20 +192,19 @@ exports.postTeam = [
 	body('name')
 		.trim()
 		.notEmpty()
-		.withMessage('Enter name please!')
+		.withMessage('اسم تیم یادت رفت !')
 		.custom((name, { req }) => {
-			if (name.match(nameRegex)[0] !== name)
-				throw 'name should only contain english letters or numbers'
+			if (name.match(nameRegex)[0] !== name) throw 'اسم تیم باید انگلیسی باشه !'
 			return true
 		}),
 	body('nameTag')
 		.trim()
 		.notEmpty()
-		.withMessage('Enter you team tag please!')
+		.withMessage('شناسه تیم رو بنویس !')
 		.isLength({ min: 2, max: 3 })
-		.withMessage('name tag should be 2 or 3 characters')
+		.withMessage('شناسه تیمت 2 یا 3 تا کاراکتره ها !')
 		.isAlpha('en-US')
-		.withMessage('name tag should only contain english letters'),
+		.withMessage('اسم تیم باید انگلیسی باشه !'),
 	body('description').trim(),
 ]
 
@@ -211,20 +212,19 @@ exports.postEditTeam = [
 	body('name')
 		.trim()
 		.notEmpty()
-		.withMessage('Enter name please!')
+		.withMessage('اسم تیم یادت رفت !')
 		.custom((name, { req }) => {
-			if (name.match(nameRegex)[0] !== name)
-				throw 'name should only contain english letters or numbers'
+			if (name.match(nameRegex)[0] !== name) throw 'اسم تیم باید انگلیسی باشه !'
 			return true
 		}),
 	body('nameTag')
 		.trim()
 		.notEmpty()
-		.withMessage('Enter you team tag please!')
+		.withMessage('شناسه تیم رو بنویس !')
 		.isLength({ min: 2, max: 3 })
-		.withMessage('name tag should be 2 or 3 characters')
+		.withMessage('شناسه تیمت 2 یا 3 تا کاراکتره ها !')
 		.isAlpha('en-US')
-		.withMessage('name tag should only contain english letters'),
+		.withMessage('اسم تیم باید انگلیسی باشه !'),
 	body('lfp')
 		.trim()
 		.custom((lfp, { req }) => {
@@ -254,12 +254,10 @@ exports.getTournaments = [
 exports.postTournament = [
 	body('name')
 		.trim()
-		.escape()
 		.notEmpty()
-		.withMessage('Enter name please!')
+		.withMessage('اسم مسابقه یادت رفت !')
 		.custom((name, { req }) => {
-			if (name.match(nameRegex)[0] !== name)
-				throw 'name should only contain english letters or numbers'
+			if (name.match(nameRegex)[0] !== name) throw 'اسم مسابقه باید انگلیسی باشه !'
 			return true
 		}),
 	body('minMMR')
@@ -267,107 +265,107 @@ exports.postTournament = [
 		.escape()
 		.custom((minMMR, { req }) => {
 			if (req.body.freeMMRBox === 'on') return true
-			if (minMMR === '') throw 'please choose a min mmr!'
+			if (minMMR === '') throw 'حداقل رنکو انتخاب کن !'
 			req.minMMR = rank.giveNumberedMedal(minMMR)
 			if (req.minMMR) return true
-			throw 'Wrong min mmr!'
+			throw 'حداقل رنک مشکل داره !'
 		}),
 	body('maxMMR')
 		.trim()
 		.escape()
 		.custom((maxMMR, { req }) => {
 			if (req.body.freeMMRBox === 'on') return true
-			if (maxMMR === '') throw 'please choose a max mmr!'
+			if (maxMMR === '') throw 'حداکثر رنکو انتخاب کن !'
 			req.maxMMR = rank.giveNumberedMedal(maxMMR)
-			if (!req.maxMMR) throw 'Wrong max mmr!'
+			if (!req.maxMMR) throw 'حداکثر رنک مشکل داره !'
 			if (req.maxMMR.split('.')[0] < req.minMMR.split('.')[0]) {
-				throw 'max mmr should be greater than min mmr!'
+				throw 'حداقل رنکت از حداکثر رنکت بیشتره !'
 			} else return true
 		}),
-	body('boRadio').custom((boRadio, { req }) => {
-		if (boRadio === 'true' || boRadio === 'false') return true
+	body('bo3').custom((bo3, { req }) => {
+		if (bo3 === 'true' || bo3 === 'false') return true
 		throw 'unexpected value!'
 	}),
 	body('startDate')
 		.notEmpty()
-		.withMessage('Choose a date please!')
+		.withMessage('تاریخ شروع مسابقه رو ننوشتی !')
 		.isISO8601()
 		.withMessage('date is in wrong format')
 		.custom((startDate, { req }) => {
 			if (compareAsc(add(new Date(), { hours: 1 }), new Date(startDate)) === -1) return true
-			throw 'start date cant be earlier than today!'
+			throw 'مسابقه دیروز برگذار میشه ؟'
 		}),
 	body('prize')
 		.trim()
 		.escape()
 		.notEmpty()
-		.withMessage('Enter prize please!')
+		.withMessage('بدون جایزه که حال نمیده !')
 		.isNumeric()
-		.withMessage('prize should only contain number'),
-	body('description').trim().escape(),
+		.withMessage('جایزه ای که نوشتی یه مشکلی داره !'),
+	body('description').trim(),
 ]
 
 exports.postEditTournament = [
 	body('name')
 		.trim()
-		.escape()
 		.notEmpty()
-		.withMessage('Enter name please!')
+		.withMessage('اسم مسابقه یادت رفت !')
 		.custom((name, { req }) => {
-			if (name.match(nameRegex)[0] !== name)
-				throw 'name should only contain english letters or numbers'
+			if (name.match(nameRegex)[0] !== name) throw 'اسم مسابقه باید انگلیسی باشه !'
 			return true
 		}),
 	body('minMMR')
 		.trim()
 		.escape()
 		.custom((minMMR, { req }) => {
-			if (minMMR === '') throw 'please choose a min mmr!'
+			if (req.body.freeMMRBox === 'on') return true
+			if (minMMR === '') throw 'حداقل رنکو انتخاب کن !'
 			req.minMMR = rank.giveNumberedMedal(minMMR)
 			if (req.minMMR) return true
-			throw 'Wrong min mmr!'
+			throw 'حداقل رنک مشکل داره !'
 		}),
 	body('maxMMR')
 		.trim()
 		.escape()
 		.custom((maxMMR, { req }) => {
-			if (maxMMR === '') throw 'please choose a max mmr!'
+			if (req.body.freeMMRBox === 'on') return true
+			if (maxMMR === '') throw 'حداکثر رنکو انتخاب کن !'
 			req.maxMMR = rank.giveNumberedMedal(maxMMR)
-			if (!req.maxMMR) throw 'Wrong max mmr!'
+			if (!req.maxMMR) throw 'حداکثر رنک مشکل داره !'
 			if (req.maxMMR.split('.')[0] < req.minMMR.split('.')[0]) {
-				throw 'max mmr should be greater than min mmr!'
+				throw 'حداقل رنکت از حداکثر رنکت بیشتره !'
 			} else return true
 		}),
-	body('bo3').custom((boRadio, { req }) => {
-		if (boRadio === 'true' || boRadio === 'false') return true
+	body('bo3').custom((bo3, { req }) => {
+		if (bo3 === 'true' || bo3 === 'false') return true
 		throw 'unexpected value!'
 	}),
 	body('startDate')
 		.notEmpty()
-		.withMessage('Choose a date please!')
+		.withMessage('تاریخ شروع مسابقه رو ننوشتی !')
 		.isISO8601()
 		.withMessage('date is in wrong format')
 		.custom((startDate, { req }) => {
 			if (compareAsc(add(new Date(), { hours: 1 }), new Date(startDate)) === -1) return true
-			throw 'start date cant be earlier than today!'
+			throw 'مسابقه دیروز برگذار میشه ؟'
 		}),
 	body('prize')
 		.trim()
 		.escape()
 		.notEmpty()
-		.withMessage('Enter prize please!')
+		.withMessage('بدون جایزه که حال نمیده !')
 		.isNumeric()
-		.withMessage('prize should only contain number'),
+		.withMessage('جایزه ای که نوشتی یه مشکلی داره !'),
+	body('description').trim(),
 	body('teamCount')
 		.trim()
 		.escape()
 		.notEmpty()
-		.withMessage('Enter teamCount please!')
+		.withMessage('تعداد تیما رو یادت رفت !')
 		.isNumeric()
-		.withMessage('teamCount should only contain number')
+		.withMessage('تعداد تیم باید عدد باشه !')
 		.isInt({ min: 4, max: 64 })
-		.withMessage('tournament participants should be between 4 and 64 team'),
-	body('description').trim().escape(),
+		.withMessage('تعداد تیما باید بین 4 تا 64 تیم باشه !'),
 ]
 
 exports.getPlayers = [

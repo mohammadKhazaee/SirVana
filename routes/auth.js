@@ -22,7 +22,7 @@ Router.post('/logout', authController.postLogout)
 Router.post('/reset-password', isNotAuth, validator.postResetPass, authController.postResetPass)
 
 // /auth/new-password/:resetToken => GET
-Router.post('/new-password', isNotAuth, authController.getNewPass)
+Router.get('/new-password/:resetToken', isNotAuth, authController.getNewPass)
 
 // /auth/new-password => POST
 Router.post('/new-password', validator.postNewPass, authController.postNewPass)

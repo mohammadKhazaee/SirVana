@@ -179,7 +179,7 @@ exports.postResetPass = async (req, res, next) => {
 		const token = crypto.randomBytes(32).toString('hex')
 		user.resetToken = token
 		user.resetTokenExpiry = Date.now() + 3600000
-		user.save()
+		await user.save()
 		const result = await sendMail({
 			to: email,
 			from: `${process.env.EMAIL}`,
@@ -197,7 +197,8 @@ exports.postResetPass = async (req, res, next) => {
 }
 
 exports.getNewPass = async (req, res, next) => {
-	const user = req.newPassUser
+	const resetToken = req.params.resetToken
+	const user = await User.findOne({ resetToken: resetToken, resetTokenExpiry: { $gt: Date.now() } })
 	res.status(200).render('new-password', {
 		path: '/new-password',
 		pageTitle: 'New Password',
@@ -207,18 +208,26 @@ exports.getNewPass = async (req, res, next) => {
 }
 
 exports.postNewPass = async (req, res, next) => {
-	const password = req.body.password
-	const token = req.body.resetToken
-	const userId = req.body.userId
 	try {
+		const { password, userId, resetToken, confirmPass, other } = req.body
+		const errors = validationResult(req).array()
+		if (errors.length > 0) {
+			return res.status(422).send({ status: '422', errors: errors })
+		}
 		const hashedpass = await bcrypt.hash(password, 12)
-		const user = await User.updateOne(
-			{ _id: userId, resetToken: token, resetTokenExpiry: { $gt: Date.now() } },
-			{ $set: { password: hashedpass, resetToken: undefined, resetTokenExpiry: undefined } }
-		)
-		res.status(200).redirect('/auth')
+		if (!req.user) {
+			await User.updateOne(
+				{ _id: userId, resetToken: resetToken, resetTokenExpiry: { $gt: Date.now() } },
+				{ $set: { password: hashedpass, resetToken: undefined, resetTokenExpiry: undefined } }
+			)
+			return res.status(200).redirect('/auth')
+		}
+		req.user.password = hashedpass
+		req.user.save()
+		return res.status(200).send({ status: '200' })
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
-		next(error)
+		if (!req.is('application/json')) return next(error)
+		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })
 	}
 }

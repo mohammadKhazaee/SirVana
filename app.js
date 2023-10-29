@@ -18,10 +18,13 @@ const User = require('./models/user')
 const Team = require('./models/team')
 const Socket = require('./models/socket')
 
+const PORT = process.env.PORT
+const DATABASE_URI = process.env.DATABASE_URI
+
 const app = express()
 // The store that sessions will be store there
 const store = new MongoDBStore({
-	uri: process.env.DATABASE_URL,
+	uri: DATABASE_URI,
 	collection: 'sessions',
 	expires: 1000 * 60 * 60 * 2,
 })
@@ -104,6 +107,7 @@ app.use((req, res, next) => {
 	res.locals.prevAddress = req.headers.referer
 	res.locals.isLoggedIn = req.session.isLoggedIn
 	res.locals.userName = ''
+	res.locals.notifCount = ''
 	next()
 })
 // Chain user from previous request to current request with session
@@ -128,7 +132,7 @@ app.use(router)
 
 // Setup detabase and start app
 mongoose
-	.connect(process.env.DATABASE_URL, {
+	.connect(DATABASE_URI, {
 		authSource: 'admin',
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
@@ -136,7 +140,7 @@ mongoose
 		useFindAndModify: false,
 	})
 	.then((result) => {
-		const server = app.listen(process.env.PORT || 3000)
+		const server = app.listen(PORT || 3000)
 		Socket.deleteMany().then((data) => {})
 		const io = require('./socket').init(server)
 		io.on('connection', (socket) => {

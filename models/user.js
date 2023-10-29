@@ -89,6 +89,8 @@ const userSchema = new Schema(
 		},
 		bio: String,
 		discordId: String,
+		resetToken: String,
+		resetTokenExpiry: Date,
 		imageUrl: {
 			type: String,
 			default: 'img/default-player-dash.jpg',

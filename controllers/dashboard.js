@@ -108,8 +108,25 @@ exports.getDashboardNotif = async (req, res, next) => {
 exports.getDashboardSettings = async (req, res, next) => {
 	try {
 		res.status(200).render('dashboard-settings', {
-			pageTitle: 'SirVana · تنظیمات داشبورد',
+			pageTitle: 'SirVana · تنظیمات اکانت',
+			user: req.user,
 		})
+	} catch (error) {
+		if (!error.statusCode) error.statusCode = 500
+		next(error)
+	}
+}
+
+exports.postEditEmail = async (req, res, next) => {
+	try {
+		const errors = validationResult(req).array()
+		if (errors.length > 0) {
+			return res.status(422).send({ status: '422', errors: errors })
+		}
+		const email = req.body.email
+		req.user.email = email
+		await req.user.save()
+		res.status(200).send({ status: '200', email: email })
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		next(error)

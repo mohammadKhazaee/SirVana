@@ -578,3 +578,155 @@ if (isNotif) {
 		}
 	})
 }
+
+// dashboard setting
+const isSetting = document.getElementsByClassName('password-edit__content').length > 0? true:false
+
+if(isSetting) {
+	// setting style
+	const emailEditt = document.querySelector("#email-editt");
+	const emailEdit = document.querySelector(".email-edit");
+	const emailEditcontent = document.querySelector(".email-edit__content");
+	const title = document.querySelector(".title");
+	const passwordEditt = document.querySelector("#password-editt");
+	const passwordEdit = document.querySelector(".password-edit");
+	const passwordEditcontent = document.querySelector(".password-edit__content");
+	const passtitle = document.querySelector(".pass-title");
+	const bgc = document.querySelector("#bgc");
+	const editBtn = document.querySelector(".edit-btn");
+	const passEditBtn = document.querySelector(".pass-edit-btn");
+
+	emailEditt.addEventListener("click", () => {
+		emailEdit.classList.toggle("active");
+		emailEditcontent.classList.toggle("active");
+		title.classList.toggle("active");
+	});
+
+	passwordEditt.addEventListener("click", () => {
+		passwordEdit.classList.toggle("active");
+		passwordEditcontent.classList.toggle("active");
+		passtitle.classList.toggle("active");
+	});
+
+	bgc.addEventListener("keyup", () => {
+		editBtn.style.backgroundColor = "aqua";
+		editBtn.style.color = "#000";
+		editBtn.style.cursor = "pointer";
+	})
+
+	const email = document.getElementsByName('email')[0]
+	const password = document.getElementsByName('pass')[0]
+	const confirmPassword = document.getElementsByName('confirmPass')[0]
+
+	password.addEventListener("keyup", () => {
+		if (confirmPassword.value !== '') {
+			passEditBtn.style.backgroundColor = "aqua";
+			passEditBtn.style.color = "#000";
+			passEditBtn.style.cursor = "pointer";
+		}
+	})
+	confirmPassword.addEventListener("keyup", () => {
+		if (password.value !== '') {
+			passEditBtn.style.backgroundColor = "aqua";
+			passEditBtn.style.color = "#000";
+			passEditBtn.style.cursor = "pointer";
+		}
+	})
+	
+	// setting requests
+	editBtn.addEventListener('click', function() {
+		if(this.style.backgroundColor === 'aqua') {
+			const formData = new FormData()
+			formData.append('email', email.value)
+			fetch('/dashboard/edit-email', {
+				method: 'POST',
+				headers: { 'csrf-token': csrf.value },
+				body: formData,
+			}).then(res => {
+				if (res.status === 200 || res.status === 422 || res.status === 500 ) return res.json()
+			}).then(data => {
+				const alertEle = document.querySelector('.alert')
+				alertEle.children[1].innerHTML = `
+				<div class="alert-box__top">
+					<p></p>
+				</div>`
+				alertEle.style.visibility = 'visible'
+				alertEle.style.backgroundColor = '#FF2F3D'
+				alertEle.children[0].style.backgroundColor = '#FF2F3D'
+				alertEle.children[1].children[0].children[0].innerHTML = 'عملیات انجام نشد. لطفا بعدا امتحان کنید !'
+				if(data.status === '422') {
+					alertEle.style.visibility = 'hidden'
+					const emailError = data.errors.find((error) => error.param === 'email')
+					if (emailError) {
+						email.nextElementSibling.style.visibility= 'visible'
+						email.nextElementSibling.innerHTML = '* '+ emailError.msg
+					}
+					return
+				}
+				if(data.status === '200') {
+					alertEle.children[1].children[0].children[0].innerHTML = 'ایمیل شما با موفقیت ویرایش شد !'
+					alertEle.style.backgroundColor = '#3DFF2F'
+					alertEle.children[0].style.backgroundColor = '#3DFF2F'
+					document.querySelector('.email-content').children[0].innerHTML = data.email
+					emailEdit.classList.toggle("active");
+					return
+				}
+			}).catch(err => console.log(err))
+		}
+	})
+
+	passEditBtn.addEventListener('click', function() {
+		if(this.style.backgroundColor === 'aqua') {
+			const formData = new FormData()
+			formData.append('password', password.value)
+			formData.append('confirmPass', confirmPassword.value)
+			fetch('/dashboard/edit-password', {
+				method: 'POST',
+				headers: { 'csrf-token': csrf.value },
+				body: formData,
+			}).then(res => {
+				if (res.status === 200 || res.status === 422 || res.status === 500 ) return res.json()
+			}).then(data => {
+				const alertEle = document.querySelector('.alert')
+				alertEle.children[1].innerHTML = `
+				<div class="alert-box__top">
+					<p></p>
+				</div>`
+				alertEle.style.visibility = 'visible'
+				alertEle.style.backgroundColor = '#FF2F3D'
+				alertEle.children[0].style.backgroundColor = '#FF2F3D'
+				alertEle.children[1].children[0].children[0].innerHTML = 'عملیات انجام نشد. لطفا بعدا امتحان کنید !'
+				if(data.status === '422') {
+					alertEle.style.visibility = 'hidden'
+					const passError = data.errors.find((error) => error.param === 'password')
+					if (passError) {
+						password.nextElementSibling.style.display= 'block'
+						password.nextElementSibling.innerHTML = passError.msg
+					}
+					const confirmPassError = data.errors.find((error) => error.param === 'confirmPass')
+					if (confirmPassError) {
+						confirmPassword.nextElementSibling.style.display= 'block'
+						confirmPassword.nextElementSibling.innerHTML = confirmPassError.msg
+					}
+					return
+				}
+				if(data.status === '200') {
+					alertEle.children[1].children[0].children[0].innerHTML = 'رمز شما با موفقیت ویرایش شد !'
+					alertEle.style.backgroundColor = '#3DFF2F'
+					alertEle.children[0].style.backgroundColor = '#3DFF2F'
+					passwordEdit.classList.toggle("active");
+					return
+				}
+			}).catch(err => console.log(err))
+		}
+	})
+}
+
+// Alert box close btn
+const alertDiv = document.getElementsByClassName('alert')[0]
+
+if(alertDiv) {
+    alertDiv.children[0].addEventListener('click', function() {
+        alertDiv.style.visibility = 'hidden'
+    })
+}

@@ -1,6 +1,7 @@
 const express = require('express')
 
 const dashboardController = require('../controllers/dashboard')
+const authController = require('../controllers/auth')
 const validator = require('../middlewares/validation')
 
 const Router = express.Router()
@@ -16,6 +17,12 @@ Router.get('/notif', dashboardController.getDashboardNotif)
 
 // /dashboard/settings => GET
 Router.get('/settings', dashboardController.getDashboardSettings)
+
+// /dashboard/edit-email => POST
+Router.post('/edit-email', validator.postEditEmail, dashboardController.postEditEmail)
+
+// /dashboard/edit-password => POST
+Router.post('/edit-password', validator.postEditPass, authController.postNewPass)
 
 // /dashboard/edit-profile => POST
 Router.post('/edit-profile', validator.postEditProfile, dashboardController.postEditProfile)

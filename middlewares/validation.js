@@ -392,3 +392,38 @@ exports.getPlayers = [
 	query('pos').trim().escape(),
 	query('filter').trim().escape(),
 ]
+
+exports.postEditEmail = [
+	body('email', 'ایمیلت یه مشکلی داره !')
+		.trim()
+		.escape()
+		.normalizeEmail({ gmail_remove_dots: false })
+		.notEmpty()
+		.withMessage('* ایمیل یادت رفت !')
+		.isEmail()
+		.custom(async (email, { req }) => {
+			const user = await User.findOne({ email: email })
+			if (user) throwError(`ایمیل وارد شده قبلا استفاده شده`, 422)
+			return true
+		}),
+]
+
+exports.postEditPass = [
+	body('password')
+		.trim()
+		.escape()
+		.notEmpty()
+		.withMessage('* الو ؟ رمزت کو ؟')
+		.isLength({ min: 8, max: 32 })
+		.withMessage('* رمزت باید بین 8 تا 32 کاراکتر باشه!'),
+	body('confirmPass')
+		.trim()
+		.escape()
+		.notEmpty()
+		.withMessage('* رمزو زدی . تکرارشم بزن !')
+		.custom((confirmPass, { req }) => {
+			const password = req.body.password
+			if (password !== confirmPass) throwError(`* رمزهات یکی نیستن !`, 422)
+			return true
+		}),
+]

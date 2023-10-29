@@ -101,7 +101,6 @@
 
     opacity: 0;
 	visibility: hidden;
-
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -169,7 +168,8 @@
     font: 1.3rem "Tanha";
     color: #fff;
 }
-.password-edit__content span {
+.password-edit__content span,
+.email-edit__content span {
     font: 1.2rem "Tanha";
     color: red;
 }

@@ -4,7 +4,7 @@
 	"description": "an administration panel",
 	"main": "app.js",
 	"scripts": {
-		"start": "nodemon app.js",
+		"start": "node app.js",
 		"compile:sass": "node-sass sass/style.scss public/css/style.css -w",
 		"start-dev": "nodemon app.js"
 	},

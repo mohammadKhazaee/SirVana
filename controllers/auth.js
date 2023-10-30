@@ -130,6 +130,7 @@ exports.postSignup = async (req, res, next) => {
 			discordId: discordId,
 		})
 		await user.save()
+		req.flash('success', 'اکانتت ساخته شد. حالا میتونی همینجا وارد اکانت بشی .')
 		res.status(201).redirect('/auth/')
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500

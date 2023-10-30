@@ -9,3 +9,4 @@ temp.js
 *.orig
 images/*
 !.gitkeep
+*.txt

@@ -314,13 +314,9 @@ userSchema.methods.sendMail = async function (responsor, mailContent, inChat) {
 
 userSchema.methods.joinToTeam = function (team, role) {
 	if (role) {
-		let updatedRoles
-		if (this.roles.includes(role)) {
-			updatedRoles = [...this.roles]
-		} else {
-			updatedRoles = [...this.roles, role]
+		if (!this.roles.includes(role)) {
+			this.roles = [...this.roles, role]
 		}
-		this.roles = updatedRoles
 		this.ownedTeam = {
 			teamId: team._id,
 			name: team.name,
@@ -352,13 +348,18 @@ userSchema.methods.joinToTeam = function (team, role) {
 	return this.save()
 }
 
-userSchema.methods.joinToTour = function (tournament) {
+userSchema.methods.joinToTour = function (tournament, role) {
 	const owned = tournament.organizer.userId.toString() === this._id.toString()
+	if (role && !this.roles.includes(role)) {
+		this.roles = [...this.roles, role]
+	}
+
 	let updatedTournaments
 	const newTour = {
 		tournamentId: tournament._id,
 		name: tournament.name,
 		imageUrl: tournament.imageUrl,
+		startDate: tournament.startDate,
 		owned: owned,
 	}
 	if (this.tournaments) {
@@ -375,29 +376,6 @@ userSchema.methods.leaveTour = function (tournamentId) {
 	this.tournaments = this.tournaments.filter(
 		(tour) => tour.tournamentId.toString() !== tournamentId.toString()
 	)
-	return this.save()
-}
-
-userSchema.methods.createTour = function (tournament, role) {
-	let updatedRoles
-	if (this.roles.includes(role)) {
-		updatedRoles = [...this.roles]
-	} else {
-		updatedRoles = [...this.roles, role]
-	}
-	this.roles = updatedRoles
-
-	let updatedTournaments
-	if (this.tournaments) {
-		updatedTournaments = [
-			...this.tournaments,
-			{ tournamentId: tournament._id, name: tournament.name, joined: false },
-		]
-	} else {
-		updatedTournaments = [{ tournamentId: tournament._id, name: tournament.name, joined: false }]
-	}
-	this.tournaments = updatedTournaments
-
 	return this.save()
 }
 

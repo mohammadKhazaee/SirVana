@@ -97,7 +97,6 @@ const teamSchema = new Schema(
 
 teamSchema.methods.recruitMember = function (user) {
 	const updatedAvgMMR = (this.avgMMR * this.memberCount + user.mmr) / (this.memberCount + 1)
-	console.log(this.avgMMR, updatedAvgMMR)
 	this.avgMMR = updatedAvgMMR
 	this.memberCount = this.memberCount + 1
 	let updatedMembers
@@ -127,7 +126,7 @@ teamSchema.methods.leaveTournament = function (tournamentId) {
 	return this.save()
 }
 
-teamSchema.methods.joinToTournament = function (tournament) {
+teamSchema.methods.joinToTournament = function (tournament, organizerId) {
 	const updatedTournaments = [
 		...this.tournaments,
 		{
@@ -139,8 +138,10 @@ teamSchema.methods.joinToTournament = function (tournament) {
 	this.tournaments = updatedTournaments
 
 	this.members.forEach(async (player) => {
-		const playerDoc = await User.findById(player.userId)
-		await playerDoc.joinToTour(tournament)
+		if (!organizerId || (organizerId && organizerId !== player.userId.toString())) {
+			const playerDoc = await User.findById(player.userId)
+			await playerDoc.joinToTour(tournament)
+		}
 	})
 
 	return this.save()

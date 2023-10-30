@@ -212,6 +212,8 @@ exports.postTeam = async (req, res, next) => {
 				{
 					userId: req.user._id,
 					name: req.user.name,
+					imageUrl: req.user.imageUrl,
+					pos: posUtil.toString(req.user.pos),
 					isLead: true,
 				},
 			],
@@ -256,21 +258,20 @@ exports.postEditTeam = async (req, res, next) => {
 		team.description = description
 		team.members = team.members.map((member, i) => ({ ...member._doc, pos: membersPos[2 * i] }))
 
-		let updateOwnedTeam = { 'teams.$.name': name, 'ownedTeam.name': name },
+		let updateOwnedTeam = { 'ownedTeam.name': name },
+			updateTeam = { 'teams.$.name': name },
 			updateObj = { 'teams.$[docX].name': name }
 		if (imageUrl) {
 			const fileError = fileHelper.deleteFile(team.imageUrl)
 			if (fileError) throw fileError
 			team.imageUrl = imageUrl
 			updateObj = { ...updateObj, 'teams.$[docX].imageUrl': imageUrl }
-			updateOwnedTeam = {
-				...updateOwnedTeam,
-				'ownedTeam.imageUrl': imageUrl,
-				'teams.$.imageUrl': imageUrl,
-			}
+			updateTeam = { ...updateTeam, 'teams.$.imageUrl': imageUrl }
+			updateOwnedTeam = { ...updateOwnedTeam, 'ownedTeam.imageUrl': imageUrl }
 		}
 		await team.save()
-		await User.updateMany({ 'teams.teamId': req.body.teamId }, { $set: updateOwnedTeam })
+		await User.updateMany({ 'ownedTeam.teamId': req.body.teamId }, { $set: updateOwnedTeam })
+		await User.updateMany({ 'teams.teamId': req.body.teamId }, { $set: updateTeam })
 		await Tournament.updateMany(
 			{ 'teams.teamId': req.body.teamId },
 			{
@@ -290,6 +291,7 @@ exports.postEditTeam = async (req, res, next) => {
 		)
 		res.status(200).send({ status: '200', imageUrl: team.imageUrl })
 	} catch (error) {
+		console.log(error)
 		if (!error.statusCode) error.statusCode = 500
 		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })
 	}
@@ -430,11 +432,16 @@ exports.getTournament = async (req, res, next) => {
 		const isOrganizer =
 			req.user && renderTournament.organizer.userId._id.toString() === req.user._id.toString()
 		const isLeader = !(!req.user || !req.user.ownedTeam.teamId)
+		const isParticipant =
+			renderTournament.teams.findIndex(
+				(team) => team.teamId._id.toString() === req.user.ownedTeam.teamId.toString()
+			) !== -1
 		res.status(200).render('tournament-info', {
 			pageTitle: 'SirVana · ' + tournament.name,
 			tournament: renderTournament,
 			isOrganizer: isOrganizer,
 			isLeader: isLeader,
+			isParticipant: isParticipant,
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -546,7 +553,7 @@ exports.postTournament = async (req, res, next) => {
 			},
 		})
 		const createdTournament = await tournament.save()
-		await req.user.createTour(tournament, 'Organizer')
+		await req.user.joinToTour(tournament, 'Organizer')
 		res.status(201).redirect('/tournament/' + createdTournament._id)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -654,7 +661,6 @@ exports.getPlayers = async (req, res, next) => {
 				pos: renderPos,
 			}
 		})
-		console.log(query)
 		res.status(200).render('players', {
 			pageTitle: 'SirVana · بازیکنان',
 			users: modifiedUsers,

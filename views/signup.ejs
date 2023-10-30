@@ -16,6 +16,18 @@
 		<title><%= pageTitle %></title>
 	</head>
 	<body>
+		<% if(errorMessage || successMessage) { %>
+			<div style="background-color: <%= errorMessage? '#FF2F3D':'#3DFF2F' %>;" class="alert">
+				<svg style="background-color: <%= errorMessage? '#FF2F3D':'#3DFF2F' %>;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+				</svg>
+				<div class="alert-box">
+					<div class="alert-box__top">
+						<p><%= errorMessage || successMessage %></p>
+					</div>
+				</div>
+			</div>
+		<% } %>
 		<div class="main">
 			<div class="shadow-box">
 				<!-- SignUp ---------------------------------------------------------->
@@ -99,7 +111,7 @@
 						</div>
 						<div class="email-box">
 							<label for="email">ایمیل :</label>
-							<input type="text" <% if(oldInput){ %> value="<%= oldInput.email %>"<% } %>
+							<input type="email" <% if(oldInput){ %> value="<%= oldInput.email %>"<% } %>
 							name="email" id="email" /> <% if (!isEmailValid) { %>
 								<span class="wrong-input-alrt"><%= emailMessage %></span>
 							<!-- <span class="wrong-input-alrt">* ایمیل یادت رفت !</span> -->

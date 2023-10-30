@@ -282,7 +282,7 @@ exports.postTournament = [
 				throw 'حداقل رنکت از حداکثر رنکت بیشتره !'
 			} else return true
 		}),
-	body('bo3').custom((bo3, { req }) => {
+	body('boRadio').custom((bo3, { req }) => {
 		if (bo3 === 'true' || bo3 === 'false') return true
 		throw 'unexpected value!'
 	}),

@@ -504,6 +504,7 @@ if (isNotif) {
 			}).then((res) => res.json())
 			.then((message) => {
 				chatInput.value = ''
+				if(message.isDupe) return
 				mailBox.insertAdjacentHTML(
 					'afterbegin',`
 						<div class="${message.inComming? 'recieve':'send'}">

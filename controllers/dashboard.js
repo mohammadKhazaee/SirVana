@@ -9,6 +9,8 @@ const rank = require('../utils/rank')
 const posUtil = require('../utils/pos')
 const fileHelper = require('../utils/file')
 const io = require('../socket')
+const { format } = require('date-fns-tz')
+const { compareAsc, add } = require('date-fns')
 
 exports.getDashboard = async (req, res, next) => {
 	try {
@@ -31,7 +33,8 @@ exports.getDashboard = async (req, res, next) => {
 		renderUser.pos = posUtil.toString(renderUser.pos)
 		renderUser.mmr = { number: renderUser.mmr, medal: rank.numberToMedal(renderUser.mmr) }
 		renderUser.createdAt = renderUser.createdAt.toISOString().split('T')[0].replaceAll('-', '/')
-		if (!isOwner)
+		let isMember = false
+		if (!isOwner) {
 			renderUser.feeds = renderUser.feeds.map((feed) => ({
 				...feed._doc,
 				comments: feed.comments.map((cm) => ({
@@ -39,12 +42,18 @@ exports.getDashboard = async (req, res, next) => {
 					yours: cm.sender.userId.toString() === req.user._id.toString(),
 				})),
 			}))
+			isMember =
+				user.teams.findIndex(
+					(team) => team.teamId.toString() === req.user.ownedTeam.teamId.toString()
+				) !== -1
+		}
 		if (req.originalUrl !== '/dashboard' && isOwner) return res.redirect('/dashboard')
 		res.status(200).render('dashboard', {
 			pageTitle: `SirVana · ${req.originalUrl === '/dashboard' ? 'داشبورد' : renderUser.name}`,
 			user: renderUser,
 			isOwner: isOwner,
 			isLeader: req.user && req.user.ownedTeam,
+			isMember: isMember,
 			path: isOwner ? '' : '../',
 		})
 	} catch (error) {
@@ -148,6 +157,18 @@ exports.postEditProfile = async (req, res, next) => {
 		const lft = req.body.lft
 		const imageUrl = req.file ? req.file.path.replace('\\', '/') : null
 
+		if (req.user.mmr !== inputRank) {
+			await Team.updateMany({ 'members.userId': req.user._id }, [
+				{
+					$set: {
+						avgMMR: {
+							$subtract: ['$avgMMR', { $divide: [req.user.mmr - inputRank, '$memberCount'] }],
+						},
+					},
+				},
+			])
+		}
+
 		req.user.name = name
 		req.user.pos = pos
 		req.user.mmr = inputRank
@@ -190,6 +211,7 @@ exports.postEditProfile = async (req, res, next) => {
 			.status(200)
 			.send({ status: '200', medal: rank.numberToMedal(inputRank), imageUrl: req.user.imageUrl })
 	} catch (error) {
+		console.log(error)
 		if (!error.statusCode) error.statusCode = 500
 		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })
 	}
@@ -445,6 +467,12 @@ exports.postJoinTourReq = async (req, res, next) => {
 			error.statusCode = 403
 			throw error
 		}
+		if (req.user._id.toString() === tournament.organizer.userId._id.toString()) {
+			const team = await Team.findById(req.user.ownedTeam.teamId)
+			await tournament.addNewTeam(team)
+			await team.joinToTournament(tournament, req.user._id.toString())
+			return res.sendStatus(200)
+		}
 		const organizer = tournament.organizer.userId
 		const reqId = await req.user.exchangeReq('joinTour', tournament, undefined, {
 			userId: tournament.organizer.userId._id.toString(),
@@ -576,9 +604,9 @@ exports.postDeleteReq = async (req, res, next) => {
 exports.getPvMail = async (req, res, next) => {
 	try {
 		const friendId = req.params.friendId
-		const friendChats = req.user.mails.filter(
-			(mail) => mail.responsor.userId.toString() === friendId
-		)
+		const friendChats = req.user.mails
+			.filter((mail) => mail.responsor.userId.toString() === friendId)
+			.map((pm) => ({ ...pm._doc, sentAt: format(pm.sentAt, 'd.M.yyyy - HH:mm') }))
 		const updatedChatFriends = req.user.chatFriends.map((friend) => {
 			if (friend.userId.toString() === friendId) friend.seen = true
 			return friend
@@ -602,16 +630,25 @@ exports.postPvMail = async (req, res, next) => {
 			error.statusCode = 403
 			throw error
 		}
+		const lastMail = req.user.mails
+			.filter((mail) => mail.responsor.userId.toString() === responsorId)
+			.pop()
+		const isDupe =
+			lastMail.content === mailContent &&
+			compareAsc(
+				add(lastMail.sentAt, { seconds: 1 }),
+				add(new Date(), { hours: 3, minutes: 30 })
+			) === 1
 		const sockets = await Socket.find({ type: 'pvChat', userId: responsorId })
 		const inChat =
 			sockets.findIndex((socket) => socket.friendId.toString() === req.user._id.toString()) !== -1
-		const message = await req.user.sendMail(responsor, mailContent, inChat)
+		const message = isDupe ? {} : await req.user.sendMail(responsor, mailContent, inChat, isDupe)
 		if (sockets.length > 0) {
 			io.getIO()
 				.to(sockets[0].socketId)
-				.emit('sendPvMail', { ...message, inComming: true, senderId: req.user._id })
+				.emit('sendPvMail', { ...message, inComming: true, senderId: req.user._id, isDupe: isDupe })
 		}
-		res.status(201).send(message)
+		res.status(201).send({ ...message, isDupe: isDupe })
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
 		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })

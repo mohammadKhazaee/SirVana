@@ -96,6 +96,7 @@ const posEles = document.getElementsByClassName('role')
 if(editTeam) {
   editTeam.addEventListener('click', () => {
     if (!nameInput.classList.contains('editable')) {
+      editTeam.innerHTML = 'ثبت اطلاعات'
       nameInput.classList.toggle('editable')
       nameTagInput.classList.toggle('editable')
       bioText.classList.toggle('editable')
@@ -156,6 +157,7 @@ if(editTeam) {
           alertEle.style.backgroundColor = '#3DFF2F'
           alertEle.children[0].style.backgroundColor = '#3DFF2F'
 
+          editTeam.innerHTML = 'تغییر اطلاعات'
           nameInput.classList.toggle('editable')
           nameTagInput.classList.toggle('editable')
           bioText.classList.toggle('editable')

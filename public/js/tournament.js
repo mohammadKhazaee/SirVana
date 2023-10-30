@@ -199,6 +199,8 @@ if(editTour) {
       })
     if (!nameInput.classList.contains('editable')) {
       // Edit mode here
+      console.log(editTour);
+      editTour.innerHTML = 'ثبت اطلاعات'
       mmrdrops.style.display = 'flex'
       mmrMedals.style.display = 'none'
       boRadios[0].nextElementSibling.style.cursor = 'pointer'
@@ -303,6 +305,7 @@ if(editTour) {
           alertEle.style.backgroundColor = '#3DFF2F'
           alertEle.children[0].style.backgroundColor = '#3DFF2F'
 
+          editTour.innerHTML = 'تغییر اطلاعات'
           mmrdrops.style.display = 'none'
           mmrMedals.style.display = 'flex'
           boRadios[0].nextElementSibling.style.cursor = 'default'

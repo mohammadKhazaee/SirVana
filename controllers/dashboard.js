@@ -43,6 +43,7 @@ exports.getDashboard = async (req, res, next) => {
 				})),
 			}))
 			isMember =
+				req.user &&
 				user.teams.findIndex(
 					(team) => team.teamId.toString() === req.user.ownedTeam.teamId.toString()
 				) !== -1
@@ -54,6 +55,7 @@ exports.getDashboard = async (req, res, next) => {
 			isOwner: isOwner,
 			isLeader: req.user && req.user.ownedTeam,
 			isMember: isMember,
+			isUser: req.user,
 			path: isOwner ? '' : '../',
 		})
 	} catch (error) {
@@ -100,11 +102,10 @@ exports.getDashboardNotif = async (req, res, next) => {
 			else inReqs = [...inReqs, request]
 		})
 		req.user.save()
-		// console.log(req.user.chatFriends[0])
 		res.status(200).render('dashboard-notif', {
 			pageTitle: 'SirVana · داشبورد',
 			userId: req.user._id,
-			chatFriends: req.user.chatFriends,
+			chatFriends: req.user.chatFriends.reverse(),
 			inReqs: inReqs,
 			outReqs: outReqs,
 		})
@@ -575,7 +576,7 @@ exports.postRemoveTeam = async (req, res, next) => {
 		}
 		await teamLeader.exchangeReq('teamRemoved', teamLeader, tournament)
 		await tournament.removeTeam(team._id)
-		await team.leaveTournament(tournament._id)
+		await team.leaveTournament(tournament._id, req.user._id)
 		res.sendStatus(200)
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -615,6 +616,7 @@ exports.getPvMail = async (req, res, next) => {
 		req.user.save()
 		res.status(200).send(friendChats)
 	} catch (error) {
+		console.log(error)
 		if (!error.statusCode) error.statusCode = 500
 		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })
 	}
@@ -634,6 +636,7 @@ exports.postPvMail = async (req, res, next) => {
 			.filter((mail) => mail.responsor.userId.toString() === responsorId)
 			.pop()
 		const isDupe =
+			lastMail &&
 			lastMail.content === mailContent &&
 			compareAsc(
 				add(lastMail.sentAt, { seconds: 1 }),
@@ -650,6 +653,7 @@ exports.postPvMail = async (req, res, next) => {
 		}
 		res.status(201).send({ ...message, isDupe: isDupe })
 	} catch (error) {
+		console.log(error)
 		if (!error.statusCode) error.statusCode = 500
 		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })
 	}

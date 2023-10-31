@@ -454,6 +454,11 @@ if (isNotif) {
 						prevSocket.disconnect()
 					}
 					prevSocket = socket
+					window.addEventListener('beforeunload', async (e) => {
+						socket.emit('pvDisconnect', socket.id, () => {
+							socket.disconnect()
+						})
+					})
 					socket.on('sendPvMail', message => {
 						mailBox.insertAdjacentHTML(
 							'afterbegin',`
@@ -484,12 +489,12 @@ if (isNotif) {
 			})
 		})
 	}
-	window.addEventListener('beforeunload', (e) => {
-		if (prevSocket){
-			prevSocket.emit('pvDisconnect', prevSocketId)
-			prevSocket.disconnect()
-		}
-	})
+	// window.addEventListener('beforeunload', (e) => {
+	// 	if (prevSocket){
+	// 		prevSocket.emit('pvDisconnect', prevSocketId)
+	// 		prevSocket.disconnect()
+	// 	}
+	// })
 	setFriendsListener()
 
 	sendChatBtn.addEventListener('click', () => {

@@ -132,11 +132,13 @@
 													</div>
 												</div>
 											<% }) %>
-											<div class="comments__box--reply">
-												<input name="commentInput" type="text" placeholder="پاسخ به این پست ..." />
-												<a name="sendCommentBtn">ارسال</a>
-												<input type="hidden" value="<%= feed._id %>">
-											</div>
+											<% if(isUser) { %>
+												<div class="comments__box--reply">
+													<input name="commentInput" type="text" placeholder="پاسخ به این پست ..." />
+													<a name="sendCommentBtn">ارسال</a>
+													<input type="hidden" value="<%= feed._id %>">
+												</div>
+											<% } %>
 										</div>
 									<% }) %>
 								</div>

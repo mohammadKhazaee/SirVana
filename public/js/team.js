@@ -3,7 +3,7 @@ const createButton = document.querySelector("#create-button");
 const triggers = document.querySelector(".trigger");
 const closeButton = document.querySelector(".close-button");
 
-if(createTeam){
+if(createButton){
   function toggleModal() {
     createTeam.classList.toggle("show-modal");
   }

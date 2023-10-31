@@ -349,6 +349,7 @@ userSchema.methods.joinToTeam = function (team, role) {
 }
 
 userSchema.methods.joinToTour = function (tournament, role) {
+	if (this.tournaments.find((tour) => tour.tournamentId === tournament._id)) return
 	const owned = tournament.organizer.userId.toString() === this._id.toString()
 	if (role && !this.roles.includes(role)) {
 		this.roles = [...this.roles, role]

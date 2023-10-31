@@ -57,7 +57,4 @@ Router.get('/lf-messages', mainController.getLfMessages)
 // /lfMessage => POST
 Router.post('/lf-message', isAuth, mainController.postLfMessages)
 
-// /rahimi-ai => GET
-Router.get('/rahimi-ai', mainController.getRahimi)
-
 module.exports = Router

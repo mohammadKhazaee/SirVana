@@ -113,14 +113,16 @@ teamSchema.methods.recruitMember = function (user) {
 	return this.save()
 }
 
-teamSchema.methods.leaveTournament = function (tournamentId) {
+teamSchema.methods.leaveTournament = function (tournamentId, organizerId) {
 	this.tournaments = this.tournaments.filter(
 		(tour) => tour.tournamentId.toString() !== tournamentId.toString()
 	)
 
 	this.members.forEach(async (player) => {
-		const playerDoc = await User.findById(player.userId)
-		await playerDoc.leaveTour(tournamentId)
+		if (player.userId.toString() !== organizerId.toString()) {
+			const playerDoc = await User.findById(player.userId)
+			await playerDoc.leaveTour(tournamentId)
+		}
 	})
 
 	return this.save()
@@ -132,7 +134,7 @@ teamSchema.methods.joinToTournament = function (tournament, organizerId) {
 		{
 			tournamentId: tournament._id,
 			name: tournament.name,
-			image: tournament.imageUrl,
+			imageUrl: tournament.imageUrl,
 		},
 	]
 	this.tournaments = updatedTournaments

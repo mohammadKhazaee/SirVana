@@ -99,7 +99,7 @@ exports.getTeams = async (req, res, next) => {
 				hasNext: page < Math.ceil(teamsCount / TEAM_PER_PAGE),
 				next: page + 1,
 			},
-			hasTeam: req.user && req.user.ownedTeam.teamId,
+			cantCreate: !req.user || (req.user && req.user.ownedTeam.teamId),
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -384,12 +384,13 @@ exports.getTournaments = async (req, res, next) => {
 				next: page + 1,
 			},
 			hasTour:
-				req.user &&
-				req.user.tournaments.find(
-					(tour) =>
-						tour.owned &&
-						compareAsc(add(new Date(), { hours: 3, minutes: 30 }), tour.startDate) === -1
-				),
+				!req.user ||
+				(req.user &&
+					req.user.tournaments.find(
+						(tour) =>
+							tour.owned &&
+							compareAsc(add(new Date(), { hours: 3, minutes: 30 }), tour.startDate) === -1
+					)),
 		})
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -600,26 +601,29 @@ exports.postEditTournament = async (req, res, next) => {
 		tournament.maxMMR = maxMMR
 		tournament.games = games
 
-		let updateTeamObj = { 'teams.$.name': name },
-			updateTourObj = { 'tournaments.$.name': name }
+		let updateTeamObj = { 'tournaments.$.name': name },
+			updateUserObj = { 'tournaments.$.name': name }
 		if (imageUrl) {
 			const fileError = fileHelper.deleteFile(tournament.imageUrl)
 			if (fileError) throw fileError
 			tournament.imageUrl = imageUrl
-			updateTeamObj = { ...updateTeamObj, 'teams.$.imageUrl': imageUrl }
-			updateTourObj = { ...updateTourObj, 'tournaments.$.imageUrl': imageUrl }
+			updateTeamObj = { ...updateTeamObj, 'tournaments.$.imageUrl': imageUrl }
+			updateUserObj = { ...updateUserObj, 'tournaments.$.imageUrl': imageUrl }
 		}
 		if (startDate) {
 			tournament.startDate = add(new Date(startDate), { hours: 3, minutes: 30 })
-			updateTourObj = { ...updateTourObj, 'tournaments.$.startDate': startDate }
+			updateUserObj = { ...updateUserObj, 'tournaments.$.startDate': startDate }
 		}
 		// console.log(updatedTournament)
 		await tournament.save()
 		await User.updateMany(
 			{ 'tournaments.tournamentId': req.body.tournamentId },
-			{ $set: updateTourObj }
+			{ $set: updateUserObj }
 		)
-		await Team.updateMany({ 'teams.tournamentId': req.body.tournamentId }, { $set: updateTeamObj })
+		await Team.updateMany(
+			{ 'tournaments.tournamentId': req.body.tournamentId },
+			{ $set: updateTeamObj }
+		)
 		res.status(200).send({ status: '200', imageUrl: tournament.imageUrl })
 	} catch (error) {
 		if (!error.statusCode) error.statusCode = 500
@@ -764,10 +768,4 @@ exports.postLfMessages = async (req, res, next) => {
 		if (!error.statusCode) error.statusCode = 500
 		res.status(error.statusCode).send({ status: '' + error.statusCode, errors: error })
 	}
-}
-
-exports.getRahimi = (req, res, next) => {
-	res.status(200).render('rahimi', {
-		pageTitle: 'SirVana · هوش مصنوعی',
-	})
 }

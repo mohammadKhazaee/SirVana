@@ -2,7 +2,7 @@ const createTour = document.querySelector(".create-tour");
 const createButton = document.querySelector("#create-button");
 const closeButton = document.querySelector(".close-button");
 
-if (createTour) {
+if (createButton) {
   function toggleModal() {
     createTour.classList.toggle("show-modal");
   }

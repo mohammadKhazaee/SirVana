@@ -19,7 +19,8 @@ const Team = require('./models/team')
 const Socket = require('./models/socket')
 
 const PORT = process.env.PORT
-const DATABASE_URI = process.env.DATABASE_URI
+const DATABASE_URI = process.env.DATABASE_URI || 'mongodb://localhost:27017/SirVana'
+const MONGO_CONNECT_SECRET = process.env.MONGO_CONNECT_SECRET || 'test secret'
 
 const app = express()
 // The store that sessions will be store there
@@ -88,7 +89,7 @@ app.use('/images', express.static(path.join(__dirname, 'images')))
 //  Initialize session for users authentication
 app.use(
 	session({
-		secret: process.env.MONGO_CONNECT_SECRET,
+		secret: MONGO_CONNECT_SECRET,
 		resave: false,
 		saveUninitialized: false,
 		cookie: { maxAge: 1000 * 60 * 60 * 24 * 30 },

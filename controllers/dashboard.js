@@ -39,11 +39,12 @@ exports.getDashboard = async (req, res, next) => {
 				...feed._doc,
 				comments: feed.comments.map((cm) => ({
 					...cm._doc,
-					yours: cm.sender.userId.toString() === req.user._id.toString(),
+					yours: req.user && cm.sender.userId.toString() === req.user._id.toString(),
 				})),
 			}))
 			isMember =
 				req.user &&
+				req.user.ownedTeam.teamId &&
 				user.teams.findIndex(
 					(team) => team.teamId.toString() === req.user.ownedTeam.teamId.toString()
 				) !== -1
@@ -53,7 +54,7 @@ exports.getDashboard = async (req, res, next) => {
 			pageTitle: `SirVana · ${req.originalUrl === '/dashboard' ? 'داشبورد' : renderUser.name}`,
 			user: renderUser,
 			isOwner: isOwner,
-			isLeader: req.user && req.user.ownedTeam,
+			isLeader: req.user && req.user.ownedTeam.teamId,
 			isMember: isMember,
 			isUser: req.user,
 			path: isOwner ? '' : '../',

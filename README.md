@@ -37,10 +37,6 @@ $ npm install
 
 > _For more info about accessing to OAuth credentials go [here](https://masashi-k.blogspot.com/2013/06/sending-mail-with-gmail-using-xoauth2.html)_
 
-```bash
-$ code .env
-```
-
 #### `Step 5` - run application
 
 ```bash
@@ -51,18 +47,18 @@ In browser, open [http://localhost:3000](http://localhost:3000)
 
 ## Main Features
 
-- [x] - Looking For Team or Player Message Box (using socket.io)
-    ![Sample App Image](./readme/lf-message-view.jpg)
-- [x] - Live AJAX Search for teams, players & tournament
+- Looking For Team or Player Message Box (using socket.io)
+  ![Sample App Image](./readme/lf-message-view.jpg)
+- Live AJAX Search for teams, players & tournament
 
-- [x] - Managing Incomming Requests, Keep Track of Sent Requests & Real Time Private Chat
-    ![Sample App Image](./readme/notif-view.jpg)
+- Managing Incomming Requests, Keep Track of Sent Requests & Real Time Private Chat
+  ![Sample App Image](./readme/notif-view.jpg)
 
-- [x] - Tournament Organizers Can Schedule Games
-    ![Sample App Image](./readme/tour-info-page.jpg)
+- Tournament Organizers Can Schedule Games
+  ![Sample App Image](./readme/tour-info-page.jpg)
 
-- [x] - Share Feeds With Other Users In Profile
-    ![Sample App Image](./readme/profile-feed.jpg)
+- Share Feeds With Other Users In Profile
+  ![Sample App Image](./readme/profile-feed.jpg)
 
 #### License
 
@@ -70,8 +66,8 @@ MIT © [mohammadKhazaee](https://github.com/mohammadKhazaee)
 
 ## Contributors
 
-- Back-End Developer @mohammadKhazaee
-- Front-End Developer @fshd1-front
+- Back-End Developer [@mohammadKhazaee](https://github.com/mohammadKhazaee)
+- Front-End Developer [@fshd1-front](https://github.com/fshd1-front)
 
 <div align="center">
   <sub>If you found a bug or some improvments, feel free to raise an issue and send a PR!</sub>

@@ -29,9 +29,10 @@ exports.getIndex = async (req, res, next) => {
 		.limit(3)
 	const modifiedTournaments = tournaments.map((tournament) => {
 		const dateTime = tournament.startDate.toISOString().slice(0, 16).replaceAll('-', '/').split('T')
-		const { name, minMMR, maxMMR, imageUrl } = tournament
+		const { _id, name, minMMR, maxMMR, imageUrl } = tournament
 		return {
-			name,
+			_id: _id,
+			name: name,
 			startDate: `${dateTime[1]} - ${dateTime[0]}`,
 			minMMR: minMMR.split('.')[1],
 			maxMMR: maxMMR.split('.')[1],
@@ -434,6 +435,8 @@ exports.getTournament = async (req, res, next) => {
 			req.user && renderTournament.organizer.userId._id.toString() === req.user._id.toString()
 		const isLeader = !(!req.user || !req.user.ownedTeam.teamId)
 		const isParticipant =
+			req.user &&
+			req.user.ownedTeam.teamId &&
 			renderTournament.teams.findIndex(
 				(team) => team.teamId._id.toString() === req.user.ownedTeam.teamId.toString()
 			) !== -1
